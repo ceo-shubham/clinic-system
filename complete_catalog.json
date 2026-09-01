@@ -1,0 +1,1068 @@
+{
+  "categories": [
+    {
+      "label": "Fever Related",
+      "items": [
+        [
+          "CBC (Hb%, TLC, DLC, Platelets) 5 Part",
+          200
+        ],
+        [
+          "Malaria (Antigen, Antibody)",
+          100
+        ],
+        [
+          "Dengue (NS1Ag, IgG & IgM)",
+          600
+        ],
+        [
+          "Widal",
+          50
+        ],
+        [
+          "Typhidot",
+          300
+        ],
+        [
+          "Eosinophilia",
+          100
+        ],
+        [
+          "MX TEST",
+          50
+        ]
+      ]
+    },
+    {
+      "label": "Joint Pain Related",
+      "items": [
+        [
+          "Vit D3",
+          1000
+        ],
+        [
+          "Uric Acid",
+          100
+        ],
+        [
+          "R.A. Factor Quantative",
+          400
+        ],
+        [
+          "HLAB-27",
+          700
+        ],
+        [
+          "S.Ca",
+          100
+        ]
+      ]
+    },
+    {
+      "label": "Diabetes Related",
+      "items": [
+        [
+          "HBA1C",
+          400
+        ],
+        [
+          "FBS",
+          50
+        ],
+        [
+          "RBS",
+          50
+        ],
+        [
+          "PPBS",
+          50
+        ]
+      ]
+    },
+    {
+      "label": "Female Related",
+      "items": [
+        [
+          "VDRL",
+          100
+        ],
+        [
+          "Torch IgG",
+          950
+        ],
+        [
+          "Torch IgM",
+          950
+        ],
+        [
+          "Serum Prolaction",
+          300
+        ],
+        [
+          "LH",
+          300
+        ],
+        [
+          "FSH",
+          300
+        ],
+        [
+          "Pragnency Profile",
+          550
+        ],
+        [
+          "Pragnency Test",
+          50
+        ]
+      ]
+    },
+    {
+      "label": "Infection Related",
+      "items": [
+        [
+          "CRP",
+          400
+        ],
+        [
+          "AFB",
+          300
+        ],
+        [
+          "ESR",
+          50
+        ],
+        [
+          "T.B. Platinum",
+          2500
+        ],
+        [
+          "HIV (I, II)",
+          400
+        ],
+        [
+          "Manloux Test",
+          50
+        ]
+      ]
+    },
+    {
+      "label": "Male Related",
+      "items": [
+        [
+          "PSA",
+          1000
+        ],
+        [
+          "Semen Test",
+          350
+        ]
+      ]
+    },
+    {
+      "label": "Heart Related",
+      "items": [
+        [
+          "Cholestrol",
+          100
+        ],
+        [
+          "Lipid Profile",
+          400
+        ],
+        [
+          "ECG",
+          400
+        ],
+        [
+          "TropT",
+          500
+        ],
+        [
+          "TropI",
+          500
+        ]
+      ]
+    },
+    {
+      "label": "Kidney Related",
+      "items": [
+        [
+          "KFT",
+          750
+        ],
+        [
+          "S.Cretanine",
+          100
+        ],
+        [
+          "Alpo4",
+          100
+        ],
+        [
+          "Urine - R/M",
+          50
+        ],
+        [
+          "Blood Urea",
+          100
+        ],
+        [
+          "GFR",
+          350
+        ],
+        [
+          "S.ELECTROLYTES",
+          450
+        ]
+      ]
+    },
+    {
+      "label": "Thyroid Related",
+      "items": [
+        [
+          "T3, T4, TSH",
+          350
+        ],
+        [
+          "TSH",
+          200
+        ],
+        [
+          "FT3, FT4, FTSH",
+          950
+        ]
+      ]
+    },
+    {
+      "label": "Ultrasound",
+      "items": [
+        [
+          "Abdomen",
+          850
+        ],
+        [
+          "Pregnancy",
+          850
+        ],
+        [
+          "Abdomen + Pregnancy",
+          1400
+        ],
+        [
+          "Scrotal (Testis)",
+          1200
+        ],
+        [
+          "Thyroid",
+          1200
+        ],
+        [
+          "Anti N.B. Scan",
+          1200
+        ],
+        [
+          "LEVEL 2",
+          2000
+        ]
+      ]
+    },
+    {
+      "label": "X-Ray",
+      "items": [
+        [
+          "Chest",
+          400
+        ],
+        [
+          "Soulder",
+          400
+        ],
+        [
+          "Elbow",
+          400
+        ],
+        [
+          "Wrist",
+          400
+        ],
+        [
+          "Hand",
+          400
+        ],
+        [
+          "Hip",
+          400
+        ],
+        [
+          "Thigh",
+          400
+        ],
+        [
+          "Knee",
+          400
+        ],
+        [
+          "Ankle",
+          400
+        ],
+        [
+          "Lower Leg",
+          400
+        ],
+        [
+          "Foot",
+          400
+        ],
+        [
+          "P.N.S.",
+          400
+        ],
+        [
+          "Skull",
+          800
+        ],
+        [
+          "Cervical",
+          800
+        ],
+        [
+          "D.L. Spine",
+          800
+        ],
+        [
+          "L.S. Spine",
+          400
+        ],
+        [
+          "K.U.B. Abdomen",
+          400
+        ],
+        [
+          "Dental",
+          200
+        ],
+        [
+          "Chest PA",
+          400
+        ],
+        [
+          "Knee AP/LAT",
+          400
+        ],
+        [
+          "Ankle AP/LAT",
+          400
+        ],
+        [
+          "Lower Leg (TIBIA FIBULA)",
+          400
+        ],
+        [
+          "Foot AP/LAT",
+          400
+        ],
+        [
+          "Skull AP/LAT",
+          800
+        ],
+        [
+          "CervicalAP/LAT",
+          800
+        ],
+        [
+          "D.L. SpineAP/LAT",
+          800
+        ],
+        [
+          "L.S. Spine AP/LAT",
+          800
+        ],
+        [
+          "CEST AP",
+          400
+        ],
+        [
+          "KNEE STANDING  AP",
+          500
+        ],
+        [
+          "SKULL SINGLE VIEW",
+          400
+        ],
+        [
+          "SPINE  SINGLE VIEW",
+          400
+        ],
+        [
+          "Soulder AP",
+          400
+        ],
+        [
+          "Elbow AP/LAT",
+          400
+        ],
+        [
+          "Wrist AP/LAT",
+          400
+        ],
+        [
+          "Hand AP/LAT",
+          400
+        ],
+        [
+          "FACE AP",
+          0
+        ],
+        [
+          "NeFACE AP /LAT",
+          0
+        ]
+      ]
+    },
+    {
+      "label": "Other",
+      "items": [
+        [
+          "S.Amytlase",
+          500
+        ],
+        [
+          "S.Lipase",
+          500
+        ],
+        [
+          "B.Group",
+          50
+        ],
+        [
+          "Complete Health Check Up",
+          2400
+        ],
+        [
+          "Mini Health Check Up",
+          1700
+        ],
+        [
+          "CST OT",
+          550
+        ],
+        [
+          "TROP T",
+          600
+        ],
+        [
+          "blood group",
+          50
+        ]
+      ]
+    },
+    {
+      "label": "LIVER Related",
+      "items": [
+        [
+          "S-Bilirubin",
+          100
+        ],
+        [
+          "SGPT",
+          100
+        ],
+        [
+          "SGOT",
+          100
+        ],
+        [
+          "LFT",
+          400
+        ],
+        [
+          "HBsAg",
+          100
+        ],
+        [
+          "HCV",
+          450
+        ]
+      ]
+    },
+    {
+      "label": "Special Blood Tests",
+      "items": [
+        [
+          "Ferritin Serum",
+          450
+        ],
+        [
+          "D-Dimer",
+          800
+        ]
+      ]
+    },
+    {
+      "label": "General Radiology",
+      "items": [
+        [
+          "Chest PA View",
+          350
+        ],
+        [
+          "Spine AP/LAT",
+          700
+        ]
+      ]
+    },
+    {
+      "label": "New Category",
+      "items": [
+        [
+          "New Test",
+          0
+        ]
+      ]
+    }
+  ],
+  "referrals": [
+    "AKIF IQBAL",
+    "ARSHAD ALI",
+    "BILAL KHAN",
+    "CHATURVEDI",
+    "CHATURWEDI",
+    "City Care Hospital",
+    "City Hospital",
+    "D.K. YADAV",
+    "DEVENDRA SINGH",
+    "DR. S.S. Bharadwaj",
+    "DR.DILEEP AGARWAL /RADHA AGARWAL",
+    "Dr. ARPIT . Rana (BAMS)",
+    "Dr. Aash Mohammad (BAMS)",
+    "Dr. Abhilasha Srivastav (BAMS)",
+    "Dr. AbhilashaSrivastav (BAMS)",
+    "Dr. Ashok Dwivedi",
+    "Dr. Atif Iqbal (BEMS)",
+    "Dr. Atif Iqbal (BUMS)",
+    "Dr. D. K. Yadav (BAMS)",
+    "Dr. J. V. S. Rana (BAMS)",
+    "Dr. K. V. S. Rana (BAMS)",
+    "Dr. M. R.Kushwah(BAMS)",
+    "Dr. MAYANK RANA",
+    "Dr. Pramod Yadav (MBBS)",
+    "Dr. Pramod Yadav JASRANA",
+    "Dr. Pramod Yadav SKB",
+    "Dr. Pravin Kumar Agarwal",
+    "Dr. Pravinkumaragarwal",
+    "Dr. Priyanka Yadav (BHMS)",
+    "Dr. Rakesh Yadav",
+    "Dr. Ramesh Chandra",
+    "Dr. S. K. Agarwal (MBBS)",
+    "Dr. S. K. Sharma (MD)",
+    "Dr. Sanjeev Mathur (MBBS)",
+    "Dr. Shiv Kumar (BAMS)",
+    "Dr. VikramBhadhur(BAMS)",
+    "Dr. Vimla Sharma (MBBS, )",
+    "Dr. Vimla Sharma (MBBS, MS)",
+    "F. S. Hospital",
+    "GULABSINGH",
+    "Government Hospital (SKB)",
+    "Government Hospital (SRD)",
+    "IMRAN",
+    "KAILASH SHARMA",
+    "KRISHNA HOMEOPATHIC CLINIC",
+    "LADO AASHA",
+    "Life Care Hospital",
+    "MAHENDRA  SINGH",
+    "MAMTA AUNTY",
+    "MATAR DAIRY WALE",
+    "MAYA  AUNTY",
+    "MAYA ASHA",
+    "MEERA DEVI ASHA",
+    "MEWARAM",
+    "MITHLESH AASHA",
+    "MR KUSHWAH",
+    "N CHANDRA",
+    "N.P SINGH",
+    "NARAYAN HOSPITAL",
+    "NARENDRA",
+    "NARYAN POLY CLINIC",
+    "NITEAH SHARMA",
+    "PRABAN PRATAP",
+    "PRADEEP",
+    "PRAVEEN SINGH",
+    "PUPPY ASHA",
+    "PUSHPA ASHA",
+    "Patient don't want to disclose DR.'s name",
+    "Purvi Hospital (Jasrana)",
+    "R.M. BAGHEL",
+    "RAHUL",
+    "RAM MOHAN",
+    "RAVI",
+    "S.S YADAV",
+    "SANGEETA MATHUR",
+    "SANGEETA VANSAL",
+    "SANJAY",
+    "SANJAY KUMAR",
+    "SELF",
+    "SELF.",
+    "SELFX",
+    "SHAILENDRA",
+    "SHELENDRA",
+    "SHELESH ASHA",
+    "SHIV KUMAR",
+    "SNEHLATA ASHA",
+    "SONI YADAV",
+    "SUNEEL KUMAR",
+    "Self",
+    "Self / Walk-in",
+    "Shree Shyam Hospital",
+    "VAISHNAVI CLINIC NASIRPUR",
+    "VEEREN AGGARVAL",
+    "VINEETA ASHA",
+    "VivekPriyaHospital",
+    "akif iqbal",
+    "jitendra ghiror",
+    "self",
+    "vinod"
+  ],
+  "medicines": [
+    [
+      "ALBIFLAM -FAST",
+      16.8
+    ],
+    [
+      "ALVOCIN 500",
+      10
+    ],
+    [
+      "Amoxicillin 500mg",
+      12
+    ],
+    [
+      "BUAMIT (BUDACORT)RESPULE)",
+      27
+    ],
+    [
+      "CANNULA N.24",
+      20
+    ],
+    [
+      "CAP. BRONCOMED",
+      9
+    ],
+    [
+      "CAP. DR. DIABET",
+      6.8
+    ],
+    [
+      "CAP. ELKALYNE",
+      8
+    ],
+    [
+      "CAP. FILLREB - LSR",
+      20
+    ],
+    [
+      "CAP. LEUCO-EX",
+      330
+    ],
+    [
+      "CAP. LYFINE 9G",
+      42
+    ],
+    [
+      "CAP. MAXILYF",
+      16
+    ],
+    [
+      "CAP. PERFECT SHE",
+      9
+    ],
+    [
+      "CAP. PREFORD",
+      15.6
+    ],
+    [
+      "CAP. PROSTARITE",
+      305
+    ],
+    [
+      "CAP. REBOLTIN - OD",
+      16.5
+    ],
+    [
+      "CP.LYNOFOLL - Q 10",
+      21
+    ],
+    [
+      "D3 NANO SHOTS",
+      65
+    ],
+    [
+      "DISPOVAN",
+      10
+    ],
+    [
+      "FIXER",
+      10
+    ],
+    [
+      "INJ. ALBIFLAM - FAST",
+      16
+    ],
+    [
+      "INJ. ALVOCIN-500",
+      115
+    ],
+    [
+      "INJ. DROTAMED",
+      26
+    ],
+    [
+      "INJ. FALCIDAC -120",
+      475
+    ],
+    [
+      "INJ. GENODEC-50",
+      185
+    ],
+    [
+      "INJ. PDVAC 500",
+      285
+    ],
+    [
+      "INJ. PHEN- TZ 4.5",
+      425
+    ],
+    [
+      "INJ. PULMIKA- 500",
+      90
+    ],
+    [
+      "INJ. REBOLTIN- 1500",
+      45
+    ],
+    [
+      "INJ. REBOLTIN-PLUS",
+      160
+    ],
+    [
+      "INJ. SPASMOMED+PLUS",
+      25
+    ],
+    [
+      "INJ.ONDENCETRON",
+      25
+    ],
+    [
+      "INJ.PULCID",
+      50
+    ],
+    [
+      "L ARGININE PULS LP9 (PULS E)",
+      60
+    ],
+    [
+      "LEVOLIN (RESPULE)",
+      8
+    ],
+    [
+      "LYNOFOLL - Q 10",
+      21
+    ],
+    [
+      "New Medicine",
+      0
+    ],
+    [
+      "OIL ALONFLAM",
+      95
+    ],
+    [
+      "Pantoprazole 40mg",
+      8
+    ],
+    [
+      "Paracetamol 650mg",
+      3
+    ],
+    [
+      "PNTOFILL - LS",
+      20
+    ],
+    [
+      "PROTIWAR POWDER",
+      499
+    ],
+    [
+      "SACHET ARGIVON",
+      40
+    ],
+    [
+      "SOFT GEL OSTIRIDE CT",
+      10
+    ],
+    [
+      "SPRAY FLUTIREX AZ",
+      425
+    ],
+    [
+      "SUCRA RICH 0",
+      271
+    ],
+    [
+      "SYP. FILLRED - XT",
+      160
+    ],
+    [
+      "SYP. FYNKOF - LS",
+      118
+    ],
+    [
+      "SYP. HPTOFILL DS",
+      140
+    ],
+    [
+      "SYP. HPTOFILL PLUS",
+      225
+    ],
+    [
+      "SYP. LRITLAX PLUS (LAXIMUM)",
+      165
+    ],
+    [
+      "SYP. LYCOFILL (MULTIVITAMIN)",
+      210
+    ],
+    [
+      "SYP. NARI LATA",
+      190
+    ],
+    [
+      "SYP. PERA Q 240",
+      90
+    ],
+    [
+      "SYP. ZYM-ZEM PLUS",
+      185
+    ],
+    [
+      "SYP.BRONCOMED",
+      110
+    ],
+    [
+      "Syrup Cough Care",
+      "Based on MRP"
+    ],
+    [
+      "TAB . ACEFYN-SP",
+      12.5
+    ],
+    [
+      "TAB . CALCIRUSH",
+      225
+    ],
+    [
+      "TAB AEROCORT - B",
+      15.5
+    ],
+    [
+      "TAB. ACEVNO PLUS",
+      5.5
+    ],
+    [
+      "TAB. ACYPROVE 400 (ACICLOVER",
+      15
+    ],
+    [
+      "TAB. AKT3",
+      22.15
+    ],
+    [
+      "TAB. AKURIT 4",
+      11
+    ],
+    [
+      "TAB. ATREST 25",
+      5
+    ],
+    [
+      "TAB. BENADON",
+      3
+    ],
+    [
+      "TAB. CROCIN ADVANCE",
+      1
+    ],
+    [
+      "TAB. DEZAPHEN 6 (DEFLAZACORT)",
+      13
+    ],
+    [
+      "TAB. DIMETAS 1 MG",
+      5
+    ],
+    [
+      "TAB. DOXYNOL PLUS",
+      7
+    ],
+    [
+      "TAB. DROFILL - P",
+      6.5
+    ],
+    [
+      "TAB. DROFILL - SPAS",
+      1720
+    ],
+    [
+      "TAB. DROFILL M",
+      6.5
+    ],
+    [
+      "TAB. ENZOFINE D",
+      20
+    ],
+    [
+      "TAB. FAROMAP 200",
+      130
+    ],
+    [
+      "TAB. FEXOFINE- M PULSE",
+      18
+    ],
+    [
+      "TAB. FEXOWAR 180",
+      24.5
+    ],
+    [
+      "TAB. FILLROX -500",
+      55
+    ],
+    [
+      "TAB. FLOXFILL OZ",
+      9
+    ],
+    [
+      "TAB. HYDROVON 25",
+      5.5
+    ],
+    [
+      "TAB. LINZOPHEN 600",
+      37
+    ],
+    [
+      "TAB. MEBASTAR",
+      135
+    ],
+    [
+      "TAB. NEOCEF-O PLUS",
+      23
+    ],
+    [
+      "TAB. OVOFYN",
+      450
+    ],
+    [
+      "TAB. PODOWAL-100 DT",
+      17
+    ],
+    [
+      "TAB. PULZIME CS",
+      10.5
+    ],
+    [
+      "TAB. PZA",
+      7
+    ],
+    [
+      "TAB. RIFVON -200",
+      20
+    ],
+    [
+      "TAB. SEDOXIM - 200 (CEFPOBOXIME)",
+      21
+    ],
+    [
+      "TAB. SICLOFILL SP",
+      12
+    ],
+    [
+      "TAB. SPASMO PROXIVON",
+      10
+    ],
+    [
+      "TAB. STILCOX 90 (ETORICOXIB )",
+      11
+    ],
+    [
+      "TAB. SYFFO -200 LB",
+      14.5
+    ],
+    [
+      "TAB. THOROMOX LB 625",
+      48
+    ],
+    [
+      "TAB. TRYBOPHEN-AP",
+      16
+    ],
+    [
+      "TAB. UDIFILL 300",
+      40
+    ],
+    [
+      "TAB. VASOGRAIN",
+      11
+    ],
+    [
+      "TAB.AZIFIL.500",
+      25
+    ],
+    [
+      "TAB.CINADRON PLUS (STUGERON PLUS)",
+      13
+    ],
+    [
+      "TAB.CROMIDE FOTE(CLIDINUM)",
+      3
+    ],
+    [
+      "TAB.FILLRED -XT",
+      14
+    ],
+    [
+      "TAB.FLUGYL 150",
+      13
+    ],
+    [
+      "TAB.GLIMPEX M2",
+      14
+    ],
+    [
+      "TAB.MIRABRON 25 XL",
+      29
+    ],
+    [
+      "TAB.MUCORIST AB",
+      27
+    ],
+    [
+      "TAB.TELVAS-CT 40",
+      10
+    ],
+    [
+      "TAB.TEMSUJOHN -D",
+      22
+    ],
+    [
+      "TAB.THEOMOX LB 625",
+      48
+    ],
+    [
+      "TAB.VETIGO 16 MG",
+      21
+    ],
+    [
+      "TAB.VIDAMET -M",
+      15
+    ]
+  ],
+  "updatedAt": "2026-09-01T17:22:32.621Z"
+}
