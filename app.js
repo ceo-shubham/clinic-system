@@ -399,8 +399,34 @@ function getArchive() {
 }
 function saveArchive(arr) { localStorage.setItem(ARCHIVE_KEY,JSON.stringify(arr)); }
 function archiveUpsert(patient) {
-  const a=getArchive(), idx=a.findIndex(p=>getRecordKey(p)===getRecordKey(patient));
-  if(idx===-1) a.push(patient); else a[idx]=patient; saveArchive(a);
+  archiveUpsertMany([patient]);
+}
+function archiveUpsertMany(patients) {
+  if (!Array.isArray(patients) || !patients.length) return;
+  const current = getArchive();
+  const delSet = new Set(getDeletedUids());
+  const map = new Map();
+  current.forEach(p => map.set(getRecordKey(p), p));
+  let modified = false;
+  patients.forEach(p => {
+    const k = getRecordKey(p);
+    if (!k || delSet.has(k)) return;
+    const existing = map.get(k);
+    if (!existing) {
+      map.set(k, p);
+      modified = true;
+    } else {
+      const eTs = new Date(existing.updatedAt || existing.createdAt || 0).getTime();
+      const pTs = new Date(p.updatedAt || p.createdAt || 0).getTime();
+      if (pTs > eTs) {
+        map.set(k, p);
+        modified = true;
+      }
+    }
+  });
+  if (modified) {
+    saveArchive([...map.values()]);
+  }
 }
 function searchArchive(query) {
   const q=(query||'').toLowerCase().trim(); if(!q) return [];
@@ -703,10 +729,9 @@ function mergeSharedPatients(remotePatients) {
     autoSaveDailyBackup(next);
     window.dispatchEvent(new Event('mxray_remote_sync'));
   }
-  // Sync non-today patients into archive (without duplicating today's active ones)
-  remotePatients.forEach(p => {
-    if (p.date !== today && !delSet.has(getRecordKey(p))) archiveUpsert(p);
-  });
+  // Sync non-today patients into archive in single batch (without duplicating today's active ones)
+  const nonToday = remotePatients.filter(p => p.date !== today && !delSet.has(getRecordKey(p)));
+  if (nonToday.length) archiveUpsertMany(nonToday);
   return before !== after;
 }
 
@@ -807,7 +832,7 @@ function getPreviousDaysPending() {
 function checkDayEnd() { return getPreviousDaysPending(); }
 function closeDayAndArchive(dateKey) {
   const patients=getAllPatients(), dayPats=patients.filter(p=>p.date===dateKey);
-  dayPats.forEach(p=>archiveUpsert(p));
+  archiveUpsertMany(dayPats);
   saveAllPatients(patients.filter(p=>p.date!==dateKey));
   localStorage.setItem(LAST_DAY_KEY,dateKey);
   logActivity(ACT.CLOSE_DAY, { detail: 'Day closed: ' + formatDateKey(dateKey) });

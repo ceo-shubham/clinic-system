@@ -1381,16 +1381,20 @@ function initRecordsTab() {
 // ── Calendar quick-pick (last 30 days) ──
 function buildCalendar() {
   const cal = document.getElementById('rec-calendar');
+  if (!cal) return;
   const today = new Date();
   const allPats = getAllPatientsDeduped();
-  const datesWithData = new Set(allPats.map(p=>p.date));
+  const dateCounts = new Map();
+  allPats.forEach(p => {
+    if (p.date) dateCounts.set(p.date, (dateCounts.get(p.date) || 0) + 1);
+  });
   let html = '';
   for (let i = 0; i < 30; i++) {
     const d   = new Date(today); d.setDate(today.getDate() - i);
     const dk  = String(d.getDate()).padStart(2,'0')+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+d.getFullYear();
     const dv  = d.toISOString().split('T')[0];
-    const has = datesWithData.has(dk);
-    const cnt = allPats.filter(p=>p.date===dk).length;
+    const cnt = dateCounts.get(dk) || 0;
+    const has = cnt > 0;
     html += `<div onclick="pickCalendarDate('${dv}')"
       style="cursor:pointer;padding:6px 10px;border-radius:8px;text-align:center;min-width:52px;
              background:${has?'var(--blue)':'var(--gray-100)'};
@@ -1713,7 +1717,7 @@ function loadMgrHistory() {
       headers:{'X-Site-Pass':'89238350030','X-Gate-Token':getGateToken()}
     }).then(r=>r.ok?r.json():null).then(res=>{
       if (res && Array.isArray(res.patients)) {
-        res.patients.forEach(p => archiveUpsert(p));
+        archiveUpsertMany(res.patients);
       }
       doFilter();
     }).catch(()=>doFilter());
