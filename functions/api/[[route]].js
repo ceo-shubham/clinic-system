@@ -66028,9 +66028,9 @@ export async function onRequest(context) {
       const dateKey = url.searchParams.get('date') || '';
       let logs = state.activity;
       if (dateKey) {
-        logs = logs.filter(l => l.dateKey === dateKey);
+        logs = logs.filter(l => (l.dateKey === dateKey || l.date === dateKey));
       }
-      return json({ ok: true, logs: logs.slice(0, 1000) });
+      return json({ ok: true, entries: logs, logs: logs });
     }
 
     // 11. Handovers GET & POST

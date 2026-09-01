@@ -3070,18 +3070,19 @@ function initActivityLog() {
 // Fetch activity log entries from server for a date and merge into localStorage
 function fetchActivityFromServer(dateKey) {
   if (!SERVER_URL) return Promise.resolve();
-  return fetch(SERVER_URL + '/api/activity?date=' + encodeURIComponent(dateKey), {
+  return fetch(SERVER_URL + '/api/activity' + (dateKey ? '?date=' + encodeURIComponent(dateKey) : ''), {
     headers: { 'X-Site-Pass': '89238350030', 'X-Gate-Token': getGateToken() }
   }).then(r => r.ok ? r.json() : null).then(result => {
-    if (!result || !Array.isArray(result.entries) || !result.entries.length) return;
+    const entries = (result && (Array.isArray(result.entries) ? result.entries : Array.isArray(result.logs) ? result.logs : Array.isArray(result) ? result : [])) || [];
+    if (!entries.length) return;
     const log     = getActivityLog();
     const existIds = new Set(log.map(e => e.id));
     let added = 0;
-    result.entries.forEach(e => {
+    entries.forEach(e => {
       if (!existIds.has(e.id)) { log.push(e); added++; }
     });
     if (added > 0) {
-      log.sort((a,b) => new Date(b.ts) - new Date(a.ts));
+      log.sort((a,b) => new Date(b.ts || 0) - new Date(a.ts || 0));
       saveActivityLog(log);
     }
   }).catch(() => {});
