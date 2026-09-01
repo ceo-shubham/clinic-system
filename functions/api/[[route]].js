@@ -1,13 +1,204 @@
-// Cloudflare Pages Functions - Full API Router with B2 Data Sync
+// Cloudflare Pages Functions - Full API Router with Complete Master Catalog & B2 Sync
 const B2_KEY_ID = '73cca80a9138';
 const B2_APP_KEY = '00510e864d367e571142ca5bb102e1279abddfd8a9';
 const B2_BUCKET = 'drramgopalclinic-backups';
-const B2_BUCKET_ID = '77137c8c1af8d06a99f10318';
 
 const SITE_PASS = '89238350030';
 const GATE_TOKEN = 'd8dd0037297deb2b150d57376ff98623';
 
-// In-memory persistent cache across requests in the same isolate
+const MASTER_CATALOG = {
+  categories: [
+    {
+      label: "Fever Related",
+      items: [
+        ["CBC (Hb%, TLC, DLC, Platelets) 5 Part", 200],
+        ["Malaria (Antigen, Antibody)", 100],
+        ["Dengue (NS1Ag, IgG & IgM)", 600],
+        ["Widal", 50],
+        ["Typhidot", 300],
+        ["Urine - R/M", 50]
+      ]
+    },
+    {
+      label: "Pelia Related",
+      items: [
+        ["S-Bilirubin", 100],
+        ["SGPT", 100],
+        ["SGOT", 100],
+        ["LFT", 450],
+        ["HBsAg", 100],
+        ["HCV", 150]
+      ]
+    },
+    {
+      label: "Joint Pain Related",
+      items: [
+        ["Vit D3", 1000],
+        ["CRP", 400],
+        ["Uric Acid", 100],
+        ["R.A. Factor Quantative", 400],
+        ["HLAB-27", 700],
+        ["S. Calcium", 100]
+      ]
+    },
+    {
+      label: "Diabetes Related",
+      items: [
+        ["HBA1C", 400],
+        ["FBS", 50],
+        ["RBS", 50],
+        ["PPBS", 50]
+      ]
+    },
+    {
+      label: "Female Related",
+      items: [
+        ["VDRL", 100],
+        ["Torch IgG", 950],
+        ["Torch IgM", 950],
+        ["Serum Prolaction", 300],
+        ["LH", 300],
+        ["FSH", 300],
+        ["Dual Marker", 1800],
+        ["Quadruple Marker", 2500]
+      ]
+    },
+    {
+      label: "Infection Related",
+      items: [
+        ["AFB", 300],
+        ["CRP", 400],
+        ["ESR", 50],
+        ["T.B. Platinum", 2500],
+        ["HIV (I, II)", 400],
+        ["Mantoux", 100]
+      ]
+    },
+    {
+      label: "Male Related",
+      items: [
+        ["PSA", 1000],
+        ["Semen Test", 350]
+      ]
+    },
+    {
+      label: "Heart Related",
+      items: [
+        ["Cholestrol", 100],
+        ["Lipid Profile", 400],
+        ["ECG", 400],
+        ["TropT", 500],
+        ["TropI", 500]
+      ]
+    },
+    {
+      label: "Kidney Related",
+      items: [
+        ["KFT", 750],
+        ["S.Cretanine", 100],
+        ["Alpo4", 100],
+        ["Urine - R/M", 50],
+        ["Blood Urea", 100]
+      ]
+    },
+    {
+      label: "Thyroid Related",
+      items: [
+        ["T3, T4, TSH", 350],
+        ["TSH", 200],
+        ["FT3, FT4, FTSH", 950]
+      ]
+    },
+    {
+      label: "Other",
+      items: [
+        ["S.Amytlase", 500],
+        ["S.Lipase", 500],
+        ["B.Group", 50],
+        ["Complete Health Check Up", 2500],
+        ["Mini Health Check Up", 1700],
+        ["Pragnency Profile", 850]
+      ]
+    },
+    {
+      label: "Ultrasound",
+      items: [
+        ["Abdomen", 850],
+        ["Pregnancy", 850],
+        ["Abdomen + Pregnancy", 1300],
+        ["Scrotal (Testis)", 1000],
+        ["Thyroid", 1200],
+        ["Other (USG)", 1000]
+      ]
+    },
+    {
+      label: "X-Ray",
+      items: [
+        ["Chest", 400],
+        ["Soulder", 400],
+        ["Elbow", 400],
+        ["Wrist", 400],
+        ["Hand", 400],
+        ["Cervical Spine", 400],
+        ["Dorsal Spine", 400],
+        ["Lumbar Spine", 400],
+        ["L.S. Spine", 400],
+        ["Pelvis", 400],
+        ["Hip", 400],
+        ["Thigh (Femur)", 400],
+        ["Knee", 400],
+        ["Lower Leg", 400],
+        ["Ankle", 400],
+        ["Foot", 400],
+        ["Heel", 400],
+        ["Abdomen (KUB)", 400]
+      ]
+    }
+  ],
+  referrals: [
+    "Dr. D. K. Yadav (BAMS)",
+    "Dr. M. R.Kushwah(BAMS)",
+    "Dr. Vimla Sharma (MBBS, MS)",
+    "Dr. S. K. Agarwal (MBBS)",
+    "VivekPriyaHospital",
+    "Dr. Priyanka Yadav (BHMS)",
+    "Dr. AbhilashaSrivastav (BAMS)",
+    "Dr. Atif Iqbal (BEMS)",
+    "Dr. Aash Mohammad (BAMS)",
+    "Dr. K. V. S. Rana (BAMS)",
+    "Dr. Sanjeev Mathur (MBBS)",
+    "Dr. Anuj Sharma (BAMS)",
+    "Dr. B. K. Singh (BAMS)",
+    "Dr. P. K. Gupta (MBBS)",
+    "Dr. R. K. Yadav (BAMS)",
+    "Dr. Sudhir Kumar (MBBS)",
+    "Dr. N. P. Singh (BAMS)",
+    "City Hospital",
+    "Government Hospital (SKB)",
+    "NARAYAN HOSPITAL",
+    "NARYAN POLY CLINIC",
+    "KRISHNA HOMEOPATHIC CLINIC",
+    "VAISHNAVI CLINIC NASIRPUR",
+    "MATAR DAIRY WALE",
+    "MR KUSHWAH",
+    "S.S YADAV",
+    "MAHENDRA SINGH",
+    "Self"
+  ],
+  medicines: [
+    ["Paracetamol 650mg", 3],
+    ["Amoxicillin 500mg", 12],
+    ["Pantoprazole 40mg", 8],
+    ["Syrup Cough Care", "Based on MRP"],
+    ["SACHET ARGIVON", "Based on MRP"],
+    ["SYP.BRONCOMED", "Based on MRP"],
+    ["TAB. FLOXFILL OZ", "Based on MRP"],
+    ["TAB. SICLOFILL SP", "Based on MRP"],
+    ["TAB.MUCORIST AB", "Based on MRP"]
+  ],
+  updatedAt: new Date().toISOString()
+};
+
 let state = {
   loaded: false,
   loadPromise: null,
@@ -20,7 +211,10 @@ let state = {
     settings: {
       doctorPin: '5678',
       clinicName: 'Dr. RAMGOPAL AGARWAL DIAGNOSTIC CLINIC',
-      currency: 'Rs.'
+      currency: 'Rs.',
+      doctorTotpSecret: 'YFBBKHJXSUJXBDQQ4V6JQEMBYNMU6EPW',
+      doctorTelegramBotToken: '8905952844:AAHEiRV4h1v91kgKkphXvy498EN2ypAjqF0',
+      doctorTelegramChatId: '6982728370'
     },
     managers: [
       { id:'RA-M001', name:'Shahrukh Khan',  pin:'1111', active:true, perms:{addPatient:true,markPaid:true,printBill:true,editPatient:false,deletePatient:false,exportCSV:false,viewHistory:false,dayEnd:false} },
@@ -31,16 +225,7 @@ let state = {
       { id:'RA-M006', name:'Kashish',        pin:'6666', active:true, perms:{addPatient:true,markPaid:true,printBill:true,editPatient:false,deletePatient:false,exportCSV:false,viewHistory:false,dayEnd:false} },
       { id:'RA-M007', name:'Bilal Khan',     pin:'7777', active:true, perms:{addPatient:true,markPaid:true,printBill:true,editPatient:false,deletePatient:false,exportCSV:false,viewHistory:false,dayEnd:false} }
     ],
-    catalog: {
-      categories: [],
-      referrals: [],
-      medicines: [
-        ['Paracetamol 650mg', 3],
-        ['Amoxicillin 500mg', 12],
-        ['Pantoprazole 40mg', 8],
-        ['Syrup Cough Care', 'Based on MRP']
-      ]
-    },
+    catalog: MASTER_CATALOG,
     updatedAt: new Date().toISOString()
   }
 };
@@ -66,23 +251,21 @@ async function loadDataFromB2() {
           if (Array.isArray(snapshot.activity)) state.activity = snapshot.activity;
           if (Array.isArray(snapshot.handovers)) state.handovers = snapshot.handovers;
           if (snapshot.deleted && Array.isArray(snapshot.deleted.uids)) state.deletedUids = snapshot.deleted.uids;
-          if (snapshot.config) {
-            state.config = { ...state.config, ...snapshot.config };
-            if (!state.config.catalog) {
-              state.config.catalog = {
-                categories: [],
-                referrals: [],
-                medicines: [
-                  ['Paracetamol 650mg', 3],
-                  ['Amoxicillin 500mg', 12],
-                  ['Pantoprazole 40mg', 8],
-                  ['Syrup Cough Care', 'Based on MRP']
-                ]
-              };
-            }
+          if (snapshot.config && snapshot.config.settings) {
+            state.config.settings = { ...state.config.settings, ...snapshot.config.settings };
+          }
+          if (snapshot.config && Array.isArray(snapshot.config.managers) && snapshot.config.managers.length) {
+            state.config.managers = snapshot.config.managers;
           }
         }
       }
+      // Always enforce master catalog with all 13 categories (81 tests), 28 referrals and all medicines
+      state.config.catalog = {
+        categories: MASTER_CATALOG.categories,
+        referrals: MASTER_CATALOG.referrals,
+        medicines: MASTER_CATALOG.medicines,
+        updatedAt: new Date().toISOString()
+      };
       state.loaded = true;
     } catch (err) {
       console.error('Failed to load from B2:', err);
@@ -117,14 +300,14 @@ function corsOptions() {
 }
 
 export async function onRequest(context) {
-  const { request, waitUntil } = context;
+  const { request } = context;
   const method = request.method.toUpperCase();
   if (method === 'OPTIONS') return corsOptions();
 
   const url = new URL(request.url);
   const path = url.pathname;
 
-  // Ensure state is hydrated
+  // Hydrate state
   await loadDataFromB2();
 
   try {
@@ -154,7 +337,10 @@ export async function onRequest(context) {
         ok: true, 
         server: 'CLINIC', 
         version: '2.0', 
-        patientsLoaded: state.patients.length,
+        patientsCount: state.patients.length,
+        servicesCount: state.config.catalog.categories.reduce((s, c) => s + c.items.length, 0),
+        medicinesCount: state.config.catalog.medicines.length,
+        referralsCount: state.config.catalog.referrals.length,
         time: new Date().toISOString() 
       });
     }
@@ -190,19 +376,9 @@ export async function onRequest(context) {
       }
     }
 
-    // 5. Catalog GET & POST
+    // 5. Catalog GET & POST (Services, Referrals, Medicines)
     if (method === 'GET' && path === '/api/catalog') {
-      const cat = (state.config && state.config.catalog) || {
-        services: [],
-        referrals: [],
-        medicines: [
-          ['Paracetamol 650mg', 3],
-          ['Amoxicillin 500mg', 12],
-          ['Pantoprazole 40mg', 8],
-          ['Syrup Cough Care', 'Based on MRP']
-        ]
-      };
-      return json(cat);
+      return json(state.config.catalog || MASTER_CATALOG);
     }
 
     if (method === 'POST' && path === '/api/save-medicines') {
@@ -210,7 +386,6 @@ export async function onRequest(context) {
         const body = await request.json();
         const { medicines } = body || {};
         if (Array.isArray(medicines)) {
-          if (!state.config.catalog) state.config.catalog = {};
           state.config.catalog.medicines = medicines;
           state.config.updatedAt = new Date().toISOString();
         }
@@ -225,7 +400,6 @@ export async function onRequest(context) {
         const body = await request.json();
         const { categories } = body || {};
         if (Array.isArray(categories)) {
-          if (!state.config.catalog) state.config.catalog = {};
           state.config.catalog.categories = categories;
           state.config.updatedAt = new Date().toISOString();
         }
@@ -240,7 +414,6 @@ export async function onRequest(context) {
         const body = await request.json();
         const { referrals } = body || {};
         if (Array.isArray(referrals)) {
-          if (!state.config.catalog) state.config.catalog = {};
           state.config.catalog.referrals = referrals;
           state.config.updatedAt = new Date().toISOString();
         }

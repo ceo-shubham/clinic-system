@@ -1,0 +1,462 @@
+{
+  "categories": [
+    {
+      "label": "Fever Related",
+      "items": [
+        [
+          "CBC (Hb%, TLC, DLC, Platelets) 5 Part",
+          200
+        ],
+        [
+          "Malaria (Antigen, Antibody)",
+          100
+        ],
+        [
+          "Dengue (NS1Ag, IgG & IgM)",
+          600
+        ],
+        [
+          "Widal",
+          50
+        ],
+        [
+          "Typhidot",
+          300
+        ],
+        [
+          "Eosinophilia",
+          100
+        ]
+      ]
+    },
+    {
+      "label": "Pelia Related",
+      "items": [
+        [
+          "S-Bilirubin",
+          100
+        ],
+        [
+          "SGPT",
+          100
+        ],
+        [
+          "SGOT",
+          100
+        ],
+        [
+          "LFT",
+          450
+        ],
+        [
+          "HBsAg",
+          100
+        ],
+        [
+          "HCV",
+          450
+        ]
+      ]
+    },
+    {
+      "label": "Joint Pain Related",
+      "items": [
+        [
+          "Vit D3",
+          1000
+        ],
+        [
+          "CRP",
+          400
+        ],
+        [
+          "Uric Acid",
+          100
+        ],
+        [
+          "R.A. Factor Quantative",
+          400
+        ],
+        [
+          "HLAB-27",
+          700
+        ],
+        [
+          "S.Ca",
+          100
+        ]
+      ]
+    },
+    {
+      "label": "Diabetes Related",
+      "items": [
+        [
+          "HBA1C",
+          400
+        ],
+        [
+          "FBS",
+          50
+        ],
+        [
+          "RBS",
+          50
+        ],
+        [
+          "PPBS",
+          50
+        ]
+      ]
+    },
+    {
+      "label": "Female Related",
+      "items": [
+        [
+          "VDRL",
+          100
+        ],
+        [
+          "Torch IgG",
+          950
+        ],
+        [
+          "Torch IgM",
+          950
+        ],
+        [
+          "Serum Prolaction",
+          300
+        ],
+        [
+          "LH",
+          300
+        ],
+        [
+          "FSH",
+          300
+        ],
+        [
+          "Pragnency Profile",
+          550
+        ],
+        [
+          "Pragnency Test",
+          50
+        ]
+      ]
+    },
+    {
+      "label": "Infection Related",
+      "items": [
+        [
+          "AFB",
+          300
+        ],
+        [
+          "CRP",
+          400
+        ],
+        [
+          "ESR",
+          50
+        ],
+        [
+          "T.B. Platinum",
+          2500
+        ],
+        [
+          "HIV (I, II)",
+          400
+        ],
+        [
+          "Manloux Test",
+          50
+        ]
+      ]
+    },
+    {
+      "label": "Male Related",
+      "items": [
+        [
+          "PSA",
+          1000
+        ],
+        [
+          "Semen Test",
+          350
+        ]
+      ]
+    },
+    {
+      "label": "Heart Related",
+      "items": [
+        [
+          "Cholestrol",
+          100
+        ],
+        [
+          "Lipid Profile",
+          400
+        ],
+        [
+          "ECG",
+          400
+        ],
+        [
+          "TropT",
+          500
+        ],
+        [
+          "TropI",
+          500
+        ]
+      ]
+    },
+    {
+      "label": "Kidney Related",
+      "items": [
+        [
+          "KFT",
+          750
+        ],
+        [
+          "S.Cretanine",
+          100
+        ],
+        [
+          "Alpo4",
+          100
+        ],
+        [
+          "Urine - R/M",
+          50
+        ],
+        [
+          "Blood Urea",
+          100
+        ]
+      ]
+    },
+    {
+      "label": "Thyroid Related",
+      "items": [
+        [
+          "T3, T4, TSH",
+          350
+        ],
+        [
+          "TSH",
+          200
+        ],
+        [
+          "FT3, FT4, FTSH",
+          950
+        ]
+      ]
+    },
+    {
+      "label": "Other",
+      "items": [
+        [
+          "S.Amytlase",
+          500
+        ],
+        [
+          "S.Lipase",
+          500
+        ],
+        [
+          "B.Group",
+          50
+        ],
+        [
+          "Complete Health Check Up",
+          2500
+        ],
+        [
+          "Mini Health Check Up",
+          1700
+        ],
+        [
+          "CST OT",
+          550
+        ]
+      ]
+    },
+    {
+      "label": "Ultrasound",
+      "items": [
+        [
+          "Abdomen",
+          850
+        ],
+        [
+          "Pregnancy",
+          850
+        ],
+        [
+          "Abdomen + Pregnancy",
+          1300
+        ],
+        [
+          "Scrotal (Testis)",
+          1000
+        ],
+        [
+          "Thyroid",
+          1200
+        ],
+        [
+          "Anti N.B. Scan",
+          1200
+        ]
+      ]
+    },
+    {
+      "label": "X-Ray",
+      "items": [
+        [
+          "Chest",
+          400
+        ],
+        [
+          "Soulder",
+          400
+        ],
+        [
+          "Elbow",
+          400
+        ],
+        [
+          "Wrist",
+          400
+        ],
+        [
+          "Hand",
+          400
+        ],
+        [
+          "Hip",
+          400
+        ],
+        [
+          "Thigh",
+          400
+        ],
+        [
+          "Knee",
+          400
+        ],
+        [
+          "Ankle",
+          400
+        ],
+        [
+          "Lower Leg",
+          400
+        ],
+        [
+          "Foot",
+          400
+        ],
+        [
+          "P.N.S.",
+          400
+        ],
+        [
+          "Skull",
+          800
+        ],
+        [
+          "Cervical",
+          800
+        ],
+        [
+          "D.L. Spine",
+          800
+        ],
+        [
+          "L.S. Spine",
+          400
+        ],
+        [
+          "K.U.B. Abdomen",
+          400
+        ],
+        [
+          "Dental",
+          200
+        ]
+      ]
+    }
+  ],
+  "referrals": [
+    "Dr. D. K. Yadav (BAMS)",
+    "Dr. M. R.Kushwah(BAMS)",
+    "Dr. Vimla Sharma (MBBS, MS)",
+    "Dr. S. K. Agarwal (MBBS)",
+    "VivekPriyaHospital",
+    "Dr. Priyanka Yadav (BHMS)",
+    "Dr. AbhilashaSrivastav (BAMS)",
+    "Dr. Atif Iqbal (BEMS)",
+    "Dr. Aash Mohammad (BAMS)",
+    "Dr. K. V. S. Rana (BAMS)",
+    "Dr. J. V. S. Rana (BAMS)",
+    "Dr. Pramod Yadav (MBBS)",
+    "Government Hospital (SRD)",
+    "Dr. Sanjeev Mathur (MBBS)",
+    "Dr. VikramBhadhur(BAMS)",
+    "City Hospital",
+    "Dr. Rakesh Yadav",
+    "Dr. Ramesh Chandra",
+    "Shree Shyam Hospital",
+    "DR. S.S. Bharadwaj",
+    "Dr. Ashok Dwivedi",
+    "Life Care Hospital",
+    "F. S. Hospital",
+    "Purvi Hospital (Jasrana)",
+    "Dr. Shiv Kumar (BAMS)",
+    "Self",
+    "Dr. Pravinkumaragarwal",
+    "Patient don't want to disclose DR.'s name"
+  ],
+  "medicines": [
+    [
+      "Paracetamol 650mg",
+      3
+    ],
+    [
+      "Amoxicillin 500mg",
+      12
+    ],
+    [
+      "Pantoprazole 40mg",
+      8
+    ],
+    [
+      "Syrup Cough Care",
+      "Based on MRP"
+    ],
+    [
+      "SACHET ARGIVON",
+      "Based on MRP"
+    ],
+    [
+      "SYP.BRONCOMED",
+      "Based on MRP"
+    ],
+    [
+      "TAB. FLOXFILL OZ",
+      "Based on MRP"
+    ],
+    [
+      "TAB. SICLOFILL SP",
+      "Based on MRP"
+    ],
+    [
+      "TAB.MUCORIST AB",
+      "Based on MRP"
+    ]
+  ],
+  "updatedAt": "2026-09-01T16:48:23.351Z"
+}
