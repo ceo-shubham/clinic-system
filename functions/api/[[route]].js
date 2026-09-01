@@ -27,9 +27,9 @@ const MASTER_UNIVERSE = {
         "printBill": true,
         "editPatient": true,
         "deletePatient": false,
-        "exportCSV": false,
-        "viewHistory": false,
-        "dayEnd": false
+        "exportCSV": true,
+        "viewHistory": true,
+        "dayEnd": true
       }
     },
     {
@@ -43,9 +43,9 @@ const MASTER_UNIVERSE = {
         "printBill": true,
         "editPatient": true,
         "deletePatient": false,
-        "exportCSV": false,
-        "viewHistory": false,
-        "dayEnd": false
+        "exportCSV": true,
+        "viewHistory": true,
+        "dayEnd": true
       }
     },
     {
@@ -59,9 +59,9 @@ const MASTER_UNIVERSE = {
         "printBill": true,
         "editPatient": true,
         "deletePatient": false,
-        "exportCSV": false,
-        "viewHistory": false,
-        "dayEnd": false
+        "exportCSV": true,
+        "viewHistory": true,
+        "dayEnd": true
       }
     },
     {
@@ -75,9 +75,9 @@ const MASTER_UNIVERSE = {
         "printBill": true,
         "editPatient": true,
         "deletePatient": false,
-        "exportCSV": false,
-        "viewHistory": false,
-        "dayEnd": false
+        "exportCSV": true,
+        "viewHistory": true,
+        "dayEnd": true
       }
     },
     {
@@ -91,9 +91,9 @@ const MASTER_UNIVERSE = {
         "printBill": true,
         "editPatient": true,
         "deletePatient": false,
-        "exportCSV": false,
-        "viewHistory": false,
-        "dayEnd": false
+        "exportCSV": true,
+        "viewHistory": true,
+        "dayEnd": true
       }
     },
     {
@@ -107,9 +107,9 @@ const MASTER_UNIVERSE = {
         "printBill": true,
         "editPatient": true,
         "deletePatient": false,
-        "exportCSV": false,
-        "viewHistory": false,
-        "dayEnd": false
+        "exportCSV": true,
+        "viewHistory": true,
+        "dayEnd": true
       }
     },
     {
@@ -123,9 +123,9 @@ const MASTER_UNIVERSE = {
         "printBill": true,
         "editPatient": true,
         "deletePatient": false,
-        "exportCSV": false,
-        "viewHistory": false,
-        "dayEnd": false
+        "exportCSV": true,
+        "viewHistory": true,
+        "dayEnd": true
       }
     }
   ],
@@ -65964,18 +65964,13 @@ export async function onRequest(context) {
       }
     }
 
-    // 6. Patients GET
+    // 6. Patients GET (All historical records by default or filtered by specific date)
     if (method === 'GET' && path === '/api/patients') {
       const dateParam = url.searchParams.get('date') || '';
       const allParam  = url.searchParams.get('all') || '';
       let filtered = state.patients;
-      if (!allParam) {
-        const today = new Date();
-        const dd = String(today.getDate()).padStart(2, '0');
-        const mm = String(today.getMonth() + 1).padStart(2, '0');
-        const yyyy = today.getFullYear();
-        const dateKey = dateParam || `${dd}-${mm}-${yyyy}`;
-        filtered = state.patients.filter(p => p.date === dateKey);
+      if (dateParam && !allParam) {
+        filtered = state.patients.filter(p => p.date === dateParam);
       }
       return json({ patients: filtered, deletedUids: state.deletedUids });
     }
@@ -66035,7 +66030,7 @@ export async function onRequest(context) {
       if (dateKey) {
         logs = logs.filter(l => l.dateKey === dateKey);
       }
-      return json({ ok: true, logs: logs.slice(0, 500) });
+      return json({ ok: true, logs: logs.slice(0, 1000) });
     }
 
     // 11. Handovers GET & POST

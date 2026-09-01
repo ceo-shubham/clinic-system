@@ -634,7 +634,7 @@ function bootstrapSharedConfig() {
 }
 function syncPatientsFromServer() {
   if (!SERVER_URL) return Promise.resolve(false);
-  return fetch(SERVER_URL + '/api/patients', {headers:{'X-Site-Pass':'89238350030'}}).then(r=>r.ok?r.json():null)
+  return fetch(SERVER_URL + '/api/patients?all=1', {headers:{'X-Site-Pass':'89238350030','X-Gate-Token':getGateToken()}}).then(r=>r.ok?r.json():null)
     .then(result=>{
       // Apply remote tombstones first so a just-deleted patient (on any device)
       // is filtered out of this merge.

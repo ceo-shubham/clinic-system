@@ -19,9 +19,9 @@
         "printBill": true,
         "editPatient": true,
         "deletePatient": false,
-        "exportCSV": false,
-        "viewHistory": false,
-        "dayEnd": false
+        "exportCSV": true,
+        "viewHistory": true,
+        "dayEnd": true
       }
     },
     {
@@ -35,9 +35,9 @@
         "printBill": true,
         "editPatient": true,
         "deletePatient": false,
-        "exportCSV": false,
-        "viewHistory": false,
-        "dayEnd": false
+        "exportCSV": true,
+        "viewHistory": true,
+        "dayEnd": true
       }
     },
     {
@@ -51,9 +51,9 @@
         "printBill": true,
         "editPatient": true,
         "deletePatient": false,
-        "exportCSV": false,
-        "viewHistory": false,
-        "dayEnd": false
+        "exportCSV": true,
+        "viewHistory": true,
+        "dayEnd": true
       }
     },
     {
@@ -67,9 +67,9 @@
         "printBill": true,
         "editPatient": true,
         "deletePatient": false,
-        "exportCSV": false,
-        "viewHistory": false,
-        "dayEnd": false
+        "exportCSV": true,
+        "viewHistory": true,
+        "dayEnd": true
       }
     },
     {
@@ -83,9 +83,9 @@
         "printBill": true,
         "editPatient": true,
         "deletePatient": false,
-        "exportCSV": false,
-        "viewHistory": false,
-        "dayEnd": false
+        "exportCSV": true,
+        "viewHistory": true,
+        "dayEnd": true
       }
     },
     {
@@ -99,9 +99,9 @@
         "printBill": true,
         "editPatient": true,
         "deletePatient": false,
-        "exportCSV": false,
-        "viewHistory": false,
-        "dayEnd": false
+        "exportCSV": true,
+        "viewHistory": true,
+        "dayEnd": true
       }
     },
     {
@@ -115,9 +115,9 @@
         "printBill": true,
         "editPatient": true,
         "deletePatient": false,
-        "exportCSV": false,
-        "viewHistory": false,
-        "dayEnd": false
+        "exportCSV": true,
+        "viewHistory": true,
+        "dayEnd": true
       }
     }
   ],
