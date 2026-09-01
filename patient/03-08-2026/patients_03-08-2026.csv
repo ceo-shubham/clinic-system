@@ -1,0 +1,2 @@
+﻿Patient No,Patient ID,Name,Age,Gender,Father Name,Husband Name,Referred By,Mobile,Address,Service / Test,Details,Amount Charged (Rs.),Amount Paid (Rs.),Payment Status,Payment Method,Status,Notes,Time,Date,Attended By (Manager),Manager ID
+1,RA-P0001,"PRAVIN",42,Male,"","RAM GOPAL","",8923835003,"","Abdomen","",850,850,Paid,Cash,Pending,"",05:20:08 PM,03-08-2026,"Shahrukh Khan",RA-M001

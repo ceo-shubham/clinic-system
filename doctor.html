@@ -1,0 +1,3251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script src="gate.js?v=8"></script>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Dr. RAMGOPAL AGARWAL Diagnostic Clinic — Doctor</title>
+  <link rel="icon" type="image/png" href="logo.png"/>
+  <link rel="shortcut icon" type="image/png" href="logo.png"/>
+  <link rel="stylesheet" href="style.css?v=8"/>
+  <style>
+    /* ── Queue card amounts ── */
+    .q-card .q-right .amt-charged{font-size:11.5px;color:var(--gray-400);}
+    .q-card .q-right .amt-paid{font-size:13px;font-weight:700;color:var(--green);}
+
+    /* ── Tabs ── */
+    .tabs{display:flex;gap:0;margin-bottom:16px;border-bottom:2px solid var(--gray-200);}
+    .tab{padding:9px 22px;font-size:13px;font-weight:600;color:var(--gray-500);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s;}
+    .tab:hover{color:var(--blue);}
+    .tab.active{color:var(--blue);border-bottom-color:var(--blue);}
+    .tab-pane{display:none;}
+    .tab-pane.active{display:block;}
+
+    /* ── Manager Profile Cards ── */
+    .mgr-card-big{background:var(--white);border:1.5px solid var(--gray-200);border-radius:var(--radius-lg);padding:20px;margin-bottom:14px;transition:box-shadow .15s;}
+    .mgr-card-big:hover{box-shadow:var(--shadow);}
+    .mgr-card-big.inactive{opacity:.6;border-style:dashed;}
+    .mgr-head{display:flex;align-items:center;gap:14px;margin-bottom:14px;}
+    .mgr-avatar-big{width:48px;height:48px;border-radius:50%;background:var(--blue-md);color:var(--blue);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;flex-shrink:0;}
+    .mgr-avatar-big.inactive{background:var(--gray-100);color:var(--gray-400);}
+    .mgr-full-name{font-size:16px;font-weight:800;color:var(--gray-900);}
+    .mgr-id-text{font-size:11px;color:var(--gray-400);font-family:monospace;margin-top:2px;}
+    .mgr-badge{font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;margin-left:auto;}
+    .mgr-badge.on{background:var(--green-lt);color:var(--green);border:1px solid #bbf7d0;}
+    .mgr-badge.off{background:var(--red-lt);color:var(--red);border:1px solid #fecaca;}
+
+    /* ── PIN row ── */
+    .pin-row{display:flex;align-items:center;gap:8px;margin-bottom:12px;}
+    .pin-field{width:110px;font-family:monospace;letter-spacing:4px;font-size:16px;font-weight:800;text-align:center;padding:6px 10px;border:1.5px solid var(--gray-200);border-radius:var(--radius-sm);outline:none;background:var(--gray-50);}
+    .pin-field:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,86,219,.1);background:#fff;}
+    .pin-eye{cursor:pointer;font-size:14px;color:var(--gray-500);padding:4px;}
+
+    /* ── Permission toggles ── */
+    .perm-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:7px;margin-bottom:14px;}
+    .perm-item{display:flex;align-items:center;gap:8px;padding:8px 11px;border:1.5px solid var(--gray-200);border-radius:var(--radius-sm);font-size:12.5px;font-weight:600;cursor:pointer;transition:all .15s;user-select:none;}
+    .perm-item:hover{border-color:var(--blue);background:var(--blue-lt);}
+    .perm-item.on{border-color:var(--green);background:var(--green-lt);color:var(--green);}
+    .perm-item.off{color:var(--gray-500);}
+    .perm-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;transition:background .15s;}
+    .perm-dot.on{background:var(--green);}
+    .perm-dot.off{background:var(--gray-300);}
+
+    /* ── Activity log ── */
+    .act-row { display:flex; align-items:center; gap:12px; padding:10px 18px; border-bottom:1px solid var(--gray-100); transition:background .1s; }
+    .act-row:last-child { border-bottom:none; }
+    .act-row:hover { background:var(--gray-50); }
+    .act-icon { width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0; }
+    .act-icon.add    { background:#eff6ff; }
+    .act-icon.edit   { background:#fffbeb; }
+    .act-icon.del    { background:#fef2f2; }
+    .act-icon.paid   { background:#f0fdf4; }
+    .act-icon.print  { background:#f5f3ff; }
+    .act-icon.done   { background:#f0fdf4; }
+    .act-icon.cancel { background:#fef2f2; }
+    .act-icon.login  { background:#ecfdf5; }
+    .act-who   { font-size:12px; font-weight:700; color:var(--blue); min-width:110px; }
+    .act-what  { font-size:13px; font-weight:600; color:var(--gray-800); flex:1; }
+    .act-meta  { font-size:11px; color:var(--gray-400); }
+    .act-time  { font-size:11.5px; color:var(--gray-400); white-space:nowrap; font-family:monospace; }
+    .act-amt   { font-size:12px; font-weight:700; color:var(--green); white-space:nowrap; }
+    .sum-card  { background:var(--white); border:1.5px solid var(--gray-200); border-radius:var(--radius-lg); padding:14px 16px; }
+    .sum-card:hover { box-shadow:var(--shadow); }
+    .sum-name  { font-size:13px; font-weight:800; color:var(--gray-900); margin-bottom:8px; display:flex; align-items:center; gap:7px; }
+    .sum-stat  { display:flex; justify-content:space-between; font-size:12px; margin-bottom:3px; color:var(--gray-600); }
+    .sum-stat span:last-child { font-weight:700; color:var(--gray-800); }
+    .settings-block{background:var(--white);border:1.5px solid var(--gray-200);border-radius:var(--radius-lg);padding:22px;margin-bottom:16px;}
+    .settings-block .card-title{margin-bottom:16px;}
+
+    /* Compact dashboard cards, especially on a doctor's mobile screen. */
+    .stats-grid{gap:10px;margin-bottom:14px;}
+    .stats-grid .stat-card{padding:12px 14px;min-height:76px;}
+    .stats-grid .stat-icon{width:38px;height:38px;font-size:18px;}
+    .stats-grid .stat-label{font-size:10px;}
+    .stats-grid .stat-value{font-size:22px;}
+    @media(max-width:640px){
+      .stats-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;}
+      .stats-grid .stat-card{padding:10px;min-height:64px;gap:8px;}
+      .stats-grid .stat-icon{width:32px;height:32px;font-size:15px;}
+      .stats-grid .stat-label{font-size:9px;}
+      .stats-grid .stat-value{font-size:18px;}
+      .tabs{overflow-x:auto;white-space:nowrap;}
+      .tab{padding:8px 12px;font-size:11px;}
+    }
+
+    /* ── Section divider ── */
+    .section-label{font-size:11px;font-weight:700;color:var(--gray-500);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;}
+
+    /* ── Bill print styles (same as manager panel) ── */
+    @media print {
+      @page { size:A4 portrait; margin:0; }
+      body > * { display:none !important; }
+      #print-area { display:block !important; width:210mm; font-family:'Segoe UI',Arial,sans-serif; background:#fff; color:#000; }
+      .print-page { width:210mm; page-break-after:always; }
+
+      /* Each slip = half A4. Content is top-packed (no stretched middle gap)
+         and the middle section shrinks/clips first, so the patient header,
+         amounts and footer always print and the bill stays half A4. */
+      .bill-slip  { width:210mm; height:148.5mm; box-sizing:border-box; padding:5mm 12mm 5mm 12mm; display:flex; flex-direction:column; font-size:11pt; color:#000; border-bottom:1.5px dashed #000; overflow:hidden; }
+      .bill-slip:last-child { border-bottom:none; }
+      .bs-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:2mm; flex-shrink:0; }
+      .bs-lw   { display:flex; align-items:center; gap:9px; min-width:0; }
+      .bs-logo { height:44px; border-radius:3px; filter:grayscale(100%); }
+      .bs-clinic-block { display:flex; flex-direction:column; justify-content:center; }
+      .bs-clin   { font-size:12pt; font-weight:800; color:#000; letter-spacing:.2px; line-height:1.2; }
+      .bs-doctor { font-size:9pt; color:#000; margin-top:2px; font-style:italic; }
+      .bs-bill-label { font-size:16pt; font-weight:900; color:#000; border:1.5px solid #000; border-radius:5px; padding:3px 12px; letter-spacing:3px; flex-shrink:0; }
+      .bs-sep  { border:none; border-top:1.5px solid #000; margin:1.6mm 0; flex-shrink:0; }
+      .bs-dash { border:none; border-top:1px dashed #555; margin:1.2mm 0; flex-shrink:0; }
+      .bs-row  { display:flex; justify-content:space-between; align-items:baseline; padding:1.5px 0; line-height:1.4; }
+      .bl { color:#000; font-size:10pt; font-weight:600; white-space:nowrap; padding-right:10px; flex-shrink:0; min-width:26mm; }
+      .bv { font-size:12pt; font-weight:600; color:#000; text-align:right; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:128mm; }
+      .bs-row .bv.blue { white-space:normal; overflow:visible; text-overflow:clip; color:#000; }
+      .bs-info .bv { white-space:normal; overflow:visible; text-overflow:clip; }
+      .bv.mono { font-family:'Courier New',monospace; font-size:11pt; }
+      .bv.blue { color:#000; } .bv.grn { color:#000; } .bv.red { color:#000; font-weight:800; }
+      .bs-mid { flex:0 1 auto; min-height:0; overflow:hidden; }
+      .bs-meds { display:grid; grid-template-columns:1fr 1fr; gap:0 10px; }
+      .bs-med-item { font-size:10pt; line-height:1.35; padding:.5px 0; }
+      .bs-amt-block { margin:2mm 0 1mm; flex-shrink:0; }
+      .bs-amt-block .bs-row { padding:1px 0; }
+      .bs-amt-block .bl { font-size:10pt; }
+      .bs-amt-block .bv { font-size:11.5pt; }
+      .bs-tot { display:flex; justify-content:space-between; align-items:center; padding:2px 0 1px; margin-top:1mm; border-top:1px solid #000; padding-top:1.5mm; }
+      .bt-l   { font-size:12pt; font-weight:800; color:#000; }
+      .bt-v   { font-size:15pt; font-weight:900; color:#000; }
+      .bs-stmp { display:block; margin-top:1.6mm; flex-shrink:0; font-size:11pt; font-weight:700; color:#000; border:none; background:none; padding:0; }
+      .st-p { color:#000; } .st-d { color:#000; }
+      .bs-ft  { padding-top:1.6mm; border-top:1px solid #000; display:flex; justify-content:space-between; align-items:center; flex-shrink:0; }
+      .bf-b   { font-size:8.5pt; font-weight:800; color:#000; }
+      .bf-t   { font-size:8pt; color:#333; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="nav-left">
+    <img src="logo.png" class="nav-logo" alt="Clinic Logo" onerror="this.style.display='none'"/>
+    <span class="nav-title" style="font-size:15px;">Dr. RAMGOPAL AGARWAL DIAGNOSTIC CLINIC</span>
+    <div class="nav-divider"></div>
+    <span class="role-pill doctor">Doctor</span>
+    <span class="live-dot" title="Live sync active" style="margin-left:6px;"></span>
+  </div>
+  <div class="nav-right">
+    <div class="clock-box" id="main-clock"></div>
+    <span id="srv-dot" title="Server status" style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;background:var(--gray-100);color:var(--gray-400);">⬤ checking…</span>
+    <button class="btn btn-danger btn-sm" onclick="logout()">Logout</button>
+  </div>
+</nav>
+
+<div class="main">
+
+  <!-- STATS -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon si-blue">📋</div>
+      <div><div class="stat-label">Today Queue</div><div class="stat-value" id="st-q">0</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon si-amber">⏳</div>
+      <div><div class="stat-label">Pending</div><div class="stat-value" id="st-pend">0</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon si-green">✓</div>
+      <div><div class="stat-label">Done</div><div class="stat-value" id="st-done">0</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon si-blue" style="font-size:13px;font-weight:800;">NEXT</div>
+      <div><div class="stat-label">Next Patient</div><div class="stat-value" id="st-next" style="font-size:15px;">—</div></div>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs" style="overflow-x:auto;white-space:nowrap;">
+    <div class="tab active" id="tab-queue"      onclick="switchDTab('queue')">🔬 Queue</div>
+    <div class="tab"        id="tab-mgrmgt"     onclick="switchDTab('mgrmgt')">👥 Managers</div>
+    <div class="tab"        id="tab-mgrsum"     onclick="switchDTab('mgrsum')">📁 Summary</div>
+    <div class="tab"        id="tab-actlog"     onclick="switchDTab('actlog')">📊 Activity</div>
+    <div class="tab"        id="tab-profit"     onclick="switchDTab('profit')">💰 Collection</div>
+    <div class="tab"        id="tab-records"    onclick="switchDTab('records')">🗂 Records</div>
+    <div class="tab"        id="tab-catalog"    onclick="switchDTab('catalog')">📋 Catalog</div>
+    <div class="tab"        id="tab-dsettings"  onclick="switchDTab('dsettings')">⚙ Settings</div>
+  </div>
+
+  <!-- ═══════════════════ TAB: QUEUE ═══════════════════ -->
+  <div class="tab-pane active" id="pane-queue">
+    <div class="toolbar">
+      <div class="search-wrap">
+        <span class="search-ico">⌕</span>
+        <input class="form-control" id="srch" placeholder="Search patients…" oninput="render()"/>
+      </div>
+      <select class="form-control" id="f-st" style="width:148px;" onchange="render()">
+        <option value="">All Today</option>
+        <option value="Pending">Pending Only</option>
+        <option value="Done">Done Only</option>
+      </select>
+      <button class="btn btn-ghost btn-sm" onclick="render()">↻ Refresh</button>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Today's Queue — <span id="q-date"></span></div>
+        <span id="q-count" style="font-size:12px;color:var(--gray-400);"></span>
+      </div>
+      <div id="queue-list"></div>
+      <div id="empty" class="empty-state" style="display:none;">
+        <div class="empty-icon">📋</div>
+        <div class="empty-text">Queue is empty</div>
+        <div class="empty-sub">Waiting for Manager to register patients</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ TAB: MANAGER CONTROL ═══════════════════ -->
+  <div class="tab-pane" id="pane-mgrmgt">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px;">
+      <div style="background:var(--blue-lt);border:1.5px solid var(--blue-md);border-radius:var(--radius);padding:10px 14px;font-size:12.5px;color:var(--blue-dk);flex:1;">
+        <strong>👨‍⚕️ Doctor-only panel.</strong> Add/remove managers, change PINs, permissions, and view full profiles.
+      </div>
+      <button class="btn btn-success" onclick="openAddManagerModal()">+ Add Manager</button>
+    </div>
+    <div id="mgr-control-list"></div>
+  </div>
+
+  <!-- ═══════════════════ TAB: MANAGER SUMMARY ═══════════════════ -->
+  <div class="tab-pane" id="pane-mgrsum">
+    <div class="toolbar" style="margin-bottom:14px;">
+      <div>
+        <label class="form-label" style="margin-bottom:4px;">Date</label>
+        <input type="date" class="form-control" id="mgrsum-date" style="width:160px;" onchange="renderMgrSummary()"/>
+      </div>
+      <div style="margin-left:auto;display:flex;gap:8px;">
+        <button class="btn btn-ghost btn-sm" onclick="renderMgrSummary()">↻ Refresh</button>
+        <button class="btn btn-danger btn-sm" onclick="confirmClearLogs()">🗑 Clear All Logs</button>
+      </div>
+    </div>
+    <div id="mgrsum-list"></div>
+  </div>
+
+  <!-- ═══════════════════ TAB: ACTIVITY LOG ═══════════════════ -->
+  <div class="tab-pane" id="pane-actlog">
+
+    <!-- date picker + filter -->
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
+      <div>
+        <label class="form-label" style="margin-bottom:4px;">Date</label>
+        <input type="date" class="form-control" id="act-date" style="width:160px;" onchange="renderActivityLog()"/>
+      </div>
+      <div>
+        <label class="form-label" style="margin-bottom:4px;">Manager</label>
+        <select class="form-control" id="act-mgr-filter" style="width:180px;" onchange="renderActivityLog()">
+          <option value="">All Managers</option>
+        </select>
+      </div>
+      <div style="margin-left:auto;display:flex;gap:8px;">
+        <button class="btn btn-ghost btn-sm" onclick="renderActivityLog()">↻ Refresh</button>
+        <button class="btn btn-primary btn-sm" onclick="exportActivityCSV()">⬇ Export Log CSV</button>
+      </div>
+    </div>
+
+    <!-- summary strip -->
+    <div id="act-summary-grid" style="margin-bottom:12px;"></div>
+
+    <!-- detailed log -->
+    <div class="card" style="padding:0;overflow:hidden;">
+      <div class="card-header" style="padding:14px 18px;">
+        <div class="card-title">📋 Detailed Activity — <span id="act-date-label"></span></div>
+        <span id="act-total-count" style="font-size:12px;color:var(--gray-400);"></span>
+      </div>
+      <div id="act-log-body"></div>
+      <div id="act-empty" class="empty-state" style="display:none;">
+        <div class="empty-icon">📊</div>
+        <div class="empty-text">No activity found</div>
+        <div class="empty-sub">Select a date or manager to see their activity</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DAILY COLLECTION / PROFIT -->
+  <div class="tab-pane" id="pane-profit">
+
+    <!-- Sub-tabs -->
+    <div style="display:flex;gap:0;margin-bottom:14px;border-bottom:2px solid var(--gray-200);">
+      <div class="tab active" id="ptab-day"   onclick="switchProfitTab('day')"   style="font-size:12px;padding:8px 18px;">📅 Single Day</div>
+      <div class="tab"        id="ptab-range" onclick="switchProfitTab('range')" style="font-size:12px;padding:8px 18px;">📆 Date Range</div>
+    </div>
+
+    <!-- ── Single Day ── -->
+    <div id="ppane-day">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <label class="form-label" style="margin:0;white-space:nowrap;">Date</label>
+          <input type="date" class="form-control" id="profit-date" style="width:155px;" onchange="renderProfit()"/>
+        </div>
+        <span style="font-size:11.5px;color:var(--gray-400);">Collection = profit (costs not tracked)</span>
+      </div>
+
+      <!-- Single compact stats row: 5 cards -->
+      <div class="resp-grid" style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:12px;">
+        <div style="background:var(--gray-50);border:1.5px solid var(--gray-200);border-radius:var(--radius);padding:10px 12px;text-align:center;">
+          <div style="font-size:9px;font-weight:700;color:var(--gray-500);text-transform:uppercase;margin-bottom:4px;">Charged</div>
+          <div style="font-size:14px;font-weight:800;color:var(--gray-800);" id="profit-charged">0</div>
+        </div>
+        <div style="background:var(--green-lt);border:1.5px solid #bbf7d0;border-radius:var(--radius);padding:10px 12px;text-align:center;">
+          <div style="font-size:9px;font-weight:700;color:var(--gray-500);text-transform:uppercase;margin-bottom:4px;">Collected</div>
+          <div style="font-size:14px;font-weight:800;color:var(--green);" id="profit-paid">0</div>
+        </div>
+        <div style="background:var(--amber-lt);border:1.5px solid #fde68a;border-radius:var(--radius);padding:10px 12px;text-align:center;">
+          <div style="font-size:9px;font-weight:700;color:var(--gray-500);text-transform:uppercase;margin-bottom:4px;">Outstanding</div>
+          <div style="font-size:14px;font-weight:800;color:var(--amber);" id="profit-due">0</div>
+        </div>
+        <div style="background:var(--green-lt);border:1.5px solid #bbf7d0;border-radius:var(--radius);padding:10px 12px;text-align:center;">
+          <div style="font-size:9px;font-weight:700;color:var(--gray-500);text-transform:uppercase;margin-bottom:4px;">💵 Cash</div>
+          <div style="font-size:14px;font-weight:800;color:var(--green);" id="profit-cash">0</div>
+        </div>
+        <div style="background:var(--blue-lt);border:1.5px solid var(--blue-md);border-radius:var(--radius);padding:10px 12px;text-align:center;">
+          <div style="font-size:9px;font-weight:700;color:var(--gray-500);text-transform:uppercase;margin-bottom:4px;">📲 Online</div>
+          <div style="font-size:14px;font-weight:800;color:var(--blue);" id="profit-online">0</div>
+        </div>
+      </div>
+
+      <!-- Handover strip (only when data exists) — cash only; online goes to the doctor's own account -->
+      <div id="profit-handover-strip" class="resp-grid" style="display:none;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;">
+        <div style="background:var(--green-lt);border:1.5px solid #bbf7d0;border-radius:var(--radius);padding:9px 12px;text-align:center;">
+          <div style="font-size:9px;font-weight:700;color:var(--gray-500);text-transform:uppercase;margin-bottom:3px;">Cash Collected</div>
+          <div style="font-size:13px;font-weight:800;color:var(--green);" id="phs-collected">0</div>
+        </div>
+        <div style="background:var(--blue-lt);border:1.5px solid var(--blue-md);border-radius:var(--radius);padding:9px 12px;text-align:center;">
+          <div style="font-size:9px;font-weight:700;color:var(--gray-500);text-transform:uppercase;margin-bottom:3px;">Handed to Doctor</div>
+          <div style="font-size:13px;font-weight:800;color:var(--blue);" id="phs-handedover">0</div>
+        </div>
+        <div style="background:var(--amber-lt);border:1.5px solid #fde68a;border-radius:var(--radius);padding:9px 12px;text-align:center;">
+          <div style="font-size:9px;font-weight:700;color:var(--gray-500);text-transform:uppercase;margin-bottom:3px;">Still With Managers</div>
+          <div style="font-size:13px;font-weight:800;" id="phs-holding">0</div>
+        </div>
+      </div>
+
+      <div class="card" style="padding:0;overflow:hidden;">
+        <div class="card-header" style="padding:12px 16px;">
+          <div class="card-title">Patient-wise Collection</div>
+          <span id="profit-count" style="font-size:12px;color:var(--gray-400);"></span>
+        </div>
+        <div id="profit-list"></div>
+      </div>
+    </div>
+
+    <!-- ── Date Range ── -->
+    <div id="ppane-range" style="display:none;">
+      <div style="display:flex;align-items:flex-end;gap:10px;margin-bottom:14px;flex-wrap:wrap;">
+        <div>
+          <label class="form-label" style="margin-bottom:4px;">From</label>
+          <input type="date" class="form-control" id="range-from" style="width:150px;" onchange="renderRangeProfit()"/>
+        </div>
+        <div>
+          <label class="form-label" style="margin-bottom:4px;">To</label>
+          <input type="date" class="form-control" id="range-to" style="width:150px;" onchange="renderRangeProfit()"/>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="setRangePreset(7)">Last 7d</button>
+        <button class="btn btn-ghost btn-sm" onclick="setRangePreset(30)">Last 30d</button>
+        <button class="btn btn-primary btn-sm" onclick="renderRangeProfit()">↻ Load</button>
+      </div>
+
+      <!-- Range stats — same 5-column layout -->
+      <div class="resp-grid" style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:12px;">
+        <div style="background:var(--gray-50);border:1.5px solid var(--gray-200);border-radius:var(--radius);padding:10px 12px;text-align:center;">
+          <div style="font-size:9px;font-weight:700;color:var(--gray-500);text-transform:uppercase;margin-bottom:4px;">Patients</div>
+          <div style="font-size:14px;font-weight:800;color:var(--gray-800);" id="rng-patients">0</div>
+        </div>
+        <div style="background:var(--gray-50);border:1.5px solid var(--gray-200);border-radius:var(--radius);padding:10px 12px;text-align:center;">
+          <div style="font-size:9px;font-weight:700;color:var(--gray-500);text-transform:uppercase;margin-bottom:4px;">Charged</div>
+          <div style="font-size:14px;font-weight:800;color:var(--gray-800);" id="rng-charged">0</div>
+        </div>
+        <div style="background:var(--green-lt);border:1.5px solid #bbf7d0;border-radius:var(--radius);padding:10px 12px;text-align:center;">
+          <div style="font-size:9px;font-weight:700;color:var(--gray-500);text-transform:uppercase;margin-bottom:4px;">Collected</div>
+          <div style="font-size:14px;font-weight:800;color:var(--green);" id="rng-paid">0</div>
+        </div>
+        <div style="background:var(--green-lt);border:1.5px solid #bbf7d0;border-radius:var(--radius);padding:10px 12px;text-align:center;">
+          <div style="font-size:9px;font-weight:700;color:var(--gray-500);text-transform:uppercase;margin-bottom:4px;">💵 Cash</div>
+          <div style="font-size:14px;font-weight:800;color:var(--green);" id="rng-cash">0</div>
+        </div>
+        <div style="background:var(--blue-lt);border:1.5px solid var(--blue-md);border-radius:var(--radius);padding:10px 12px;text-align:center;">
+          <div style="font-size:9px;font-weight:700;color:var(--gray-500);text-transform:uppercase;margin-bottom:4px;">📲 Online</div>
+          <div style="font-size:14px;font-weight:800;color:var(--blue);" id="rng-online">0</div>
+        </div>
+      </div>
+
+      <div class="card" style="padding:0;overflow:hidden;">
+        <div class="card-header" style="padding:12px 16px;">
+          <div class="card-title">Day-wise Breakdown</div>
+          <span id="rng-count" style="font-size:12px;color:var(--gray-400);"></span>
+        </div>
+        <div id="rng-list"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ═══════════════════ TAB: RECORDS ═══════════════════ -->
+  <div class="tab-pane" id="pane-records">
+
+    <!-- Sub-tabs -->
+    <div style="display:flex;gap:0;margin-bottom:16px;border-bottom:2px solid var(--gray-200);">
+      <div class="tab active" id="rtab-date"    onclick="switchRecordsTab('date')"    style="font-size:12px;padding:8px 16px;">📅 By Date</div>
+      <div class="tab"        id="rtab-patient" onclick="switchRecordsTab('patient')" style="font-size:12px;padding:8px 16px;">🔍 Patient Search</div>
+      <div class="tab"        id="rtab-mgrhist" onclick="switchRecordsTab('mgrhist')" style="font-size:12px;padding:8px 16px;">👤 Manager History</div>
+      <div class="tab"        id="rtab-service" onclick="switchRecordsTab('service')" style="font-size:12px;padding:8px 16px;">🧪 By Service</div>
+    </div>
+
+    <!-- ── By Date ── -->
+    <div id="rpane-date">
+      <div class="toolbar" style="margin-bottom:14px;flex-wrap:wrap;gap:10px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <label class="form-label" style="margin:0;white-space:nowrap;">Select Date</label>
+          <input type="date" class="form-control" id="rec-date" style="width:160px;" onchange="loadRecordsByDate()"/>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="loadRecordsByDate()">↻ Load</button>
+        <button class="btn btn-primary btn-sm" id="rec-csv-btn" onclick="downloadRecordsCSV()" style="display:none;">⬇ Download CSV</button>
+        <button class="btn btn-outline btn-sm" id="rec-activity-btn" onclick="downloadActivityCSV()" style="display:none;">⬇ Activity Log CSV</button>
+      </div>
+
+      <!-- Calendar quick-pick removed — use date picker above -->
+
+      <!-- Stats for selected date -->
+      <div id="rec-date-stats" style="display:none;margin-bottom:14px;">
+        <div class="stats-grid resp-grid" style="grid-template-columns:repeat(4,minmax(0,1fr));">
+          <div class="stat-card"><div class="stat-icon si-blue">👥</div><div><div class="stat-label">Patients</div><div class="stat-value" id="rds-total">0</div></div></div>
+          <div class="stat-card"><div class="stat-icon si-green">₹</div><div><div class="stat-label">Collected</div><div class="stat-value" id="rds-paid" style="font-size:16px;">0</div></div></div>
+          <div class="stat-card"><div class="stat-icon si-amber">₹</div><div><div class="stat-label">Outstanding</div><div class="stat-value" id="rds-due" style="font-size:16px;">0</div></div></div>
+          <div class="stat-card"><div class="stat-icon si-blue">✓</div><div><div class="stat-label">Done</div><div class="stat-value" id="rds-done">0</div></div></div>
+        </div>
+      </div>
+
+      <!-- Patient table for selected date -->
+      <div class="card" style="padding:0;overflow:hidden;">
+        <div class="card-header" style="padding:12px 16px;">
+          <div class="card-title" id="rec-date-title">Select a date to view records</div>
+          <span id="rec-date-count" style="font-size:12px;color:var(--gray-400);"></span>
+        </div>
+        <div id="rec-date-list">
+          <div class="empty-state"><div class="empty-icon">📅</div><div class="empty-text">Pick a date above</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Patient Search ── -->
+    <div id="rpane-patient" style="display:none;">
+      <div class="toolbar" style="margin-bottom:14px;">
+        <div class="search-wrap" style="flex:1;">
+          <span class="search-ico">⌕</span>
+          <input class="form-control" id="rec-pat-search"
+                 placeholder="Search by Patient ID (RA-P0001), name, mobile, date…"
+                 oninput="searchRecordPatient()"/>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="document.getElementById('rec-pat-search').value='';searchRecordPatient()">Clear</button>
+      </div>
+      <div id="rec-pat-results">
+        <div class="empty-state"><div class="empty-icon">🔍</div><div class="empty-text">Type to search all patients</div></div>
+      </div>
+    </div>
+
+    <!-- ── Manager History ── -->
+    <div id="rpane-mgrhist" style="display:none;">
+      <div class="toolbar" style="margin-bottom:14px;flex-wrap:wrap;gap:10px;">
+        <div>
+          <label class="form-label" style="margin-bottom:4px;">Manager</label>
+          <select class="form-control" id="rec-mgr-sel" style="width:200px;" onchange="loadMgrHistory()">
+            <option value="">Select Manager</option>
+          </select>
+        </div>
+        <div>
+          <label class="form-label" style="margin-bottom:4px;">From Date</label>
+          <input type="date" class="form-control" id="rec-mgr-from" style="width:150px;" onchange="loadMgrHistory()"/>
+        </div>
+        <div>
+          <label class="form-label" style="margin-bottom:4px;">To Date</label>
+          <input type="date" class="form-control" id="rec-mgr-to" style="width:150px;" onchange="loadMgrHistory()"/>
+        </div>
+        <div style="align-self:flex-end;">
+          <button class="btn btn-primary btn-sm" id="rec-mgr-csv" onclick="downloadMgrHistoryCSV()" style="display:none;">⬇ Download CSV</button>
+        </div>
+      </div>
+      <!-- Summary cards -->
+      <div id="rec-mgr-summary" style="margin-bottom:14px;"></div>
+      <!-- Detail list -->
+      <div class="card" style="padding:0;overflow:hidden;">
+        <div class="card-header" style="padding:12px 16px;">
+          <div class="card-title" id="rec-mgr-title">Select a manager</div>
+          <span id="rec-mgr-count" style="font-size:12px;color:var(--gray-400);"></span>
+        </div>
+        <div id="rec-mgr-list">
+          <div class="empty-state"><div class="empty-icon">👤</div><div class="empty-text">Select a manager above</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── By Service ── -->
+    <div id="rpane-service" style="display:none;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <label class="form-label" style="margin:0;">Date</label>
+          <input type="date" class="form-control" id="svc-date" style="width:155px;" onchange="loadServiceReport()"/>
+        </div>
+        <select class="form-control" id="svc-view-toggle" style="width:170px;" onchange="loadServiceReport()">
+          <option value="service">By Service / Test</option>
+          <option value="category">By Category</option>
+        </select>
+        <button class="btn btn-ghost btn-sm" onclick="loadServiceReport()">↻ Load</button>
+        <button class="btn btn-primary btn-sm" id="svc-csv-btn" onclick="downloadServiceCSV()" style="display:none;">⬇ CSV</button>
+      </div>
+      <!-- Summary -->
+      <div class="resp-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px;" id="svc-stats" style="display:none;">
+        <div style="background:var(--gray-50);border:1.5px solid var(--gray-200);border-radius:var(--radius);padding:10px 12px;text-align:center;">
+          <div style="font-size:9px;font-weight:700;color:var(--gray-500);text-transform:uppercase;margin-bottom:4px;">Tests Done</div>
+          <div style="font-size:18px;font-weight:800;color:var(--gray-800);" id="svc-total">0</div>
+        </div>
+        <div style="background:var(--gray-50);border:1.5px solid var(--gray-200);border-radius:var(--radius);padding:10px 12px;text-align:center;">
+          <div style="font-size:9px;font-weight:700;color:var(--gray-500);text-transform:uppercase;margin-bottom:4px;">Total Charged</div>
+          <div style="font-size:14px;font-weight:800;color:var(--gray-800);" id="svc-charged">0</div>
+        </div>
+        <div style="background:var(--green-lt);border:1.5px solid #bbf7d0;border-radius:var(--radius);padding:10px 12px;text-align:center;">
+          <div style="font-size:9px;font-weight:700;color:var(--gray-500);text-transform:uppercase;margin-bottom:4px;">💵 Cash</div>
+          <div style="font-size:14px;font-weight:800;color:var(--green);" id="svc-cash">0</div>
+        </div>
+        <div style="background:var(--blue-lt);border:1.5px solid var(--blue-md);border-radius:var(--radius);padding:10px 12px;text-align:center;">
+          <div style="font-size:9px;font-weight:700;color:var(--gray-500);text-transform:uppercase;margin-bottom:4px;">📲 Online</div>
+          <div style="font-size:14px;font-weight:800;color:var(--blue);" id="svc-online">0</div>
+        </div>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden;">
+        <div class="card-header" style="padding:12px 16px;">
+          <div class="card-title" id="svc-title">Service-wise Report</div>
+          <span id="svc-count" style="font-size:12px;color:var(--gray-400);"></span>
+        </div>
+        <div id="svc-list">
+          <div class="empty-state"><div class="empty-icon">🧪</div><div class="empty-text">Select a date to view service breakdown</div></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /pane-records -->
+
+  <!-- ═══════════════════ TAB: SETTINGS ═══════════════════ -->
+  <div class="tab-pane" id="pane-dsettings">
+    <div class="settings-block">
+      <div class="card-title" style="margin-bottom:18px;">⚙ Clinic &amp; System Settings</div>
+
+      <div class="section-label">Clinic Info</div>
+      <div class="form-group">
+        <label class="form-label">Clinic Name</label>
+        <input class="form-control" id="ds-clinic" placeholder="Clinic name shown on bills"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Currency Symbol</label>
+        <input class="form-control" id="ds-curr" placeholder="Rs." style="max-width:120px;"/>
+      </div>
+
+      <div class="divider"></div>
+      <div class="section-label">Doctor Login PIN</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Current PIN</label>
+          <input type="password" class="form-control" id="ds-old-pin" placeholder="Enter current PIN"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">New PIN</label>
+          <input type="password" class="form-control" id="ds-new-pin" placeholder="New PIN (leave blank to keep)"/>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+      <div class="divider"></div>
+      <div class="section-label">Authenticator app (two-step verification)</div>
+      <div id="totp-status" style="font-size:13px;color:var(--gray-600);margin-bottom:12px;">Checking authenticator status…</div>
+      <div id="totp-setup" style="display:none;background:var(--blue-lt);border:1px solid var(--blue-md);border-radius:8px;padding:14px;margin-bottom:12px;">
+        <div style="font-size:13px;font-weight:700;margin-bottom:6px;">Add this setup key in Google Authenticator</div>
+        <div id="totp-secret" style="font-family:monospace;word-break:break-all;font-size:15px;font-weight:700;color:var(--blue);margin-bottom:8px;"></div>
+        <div style="font-size:12px;color:var(--gray-600);margin-bottom:10px;">In Google Authenticator: tap <strong>+</strong> → <strong>Enter a setup key</strong>, use account name “Doctor”, select time-based, then enter the current six-digit code below.</div>
+        <input class="form-control" id="totp-confirm-code" inputmode="numeric" maxlength="6" placeholder="6-digit authenticator code" style="max-width:220px;letter-spacing:4px;text-align:center;"/>
+        <button class="btn btn-success btn-sm" style="margin-top:8px;" onclick="confirmTotpSetup()">Verify &amp; Enable</button>
+      </div>
+      <div id="totp-actions"><button class="btn btn-outline" id="totp-enable-btn" onclick="beginTotpSetup()">Enable Google Authenticator OTP</button></div>
+      <div id="totp-disable" style="display:none;margin-top:12px;">
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Current Doctor PIN</label><input type="password" class="form-control" id="totp-disable-pin"/></div>
+          <div class="form-group"><label class="form-label">Authenticator code</label><input class="form-control" inputmode="numeric" maxlength="6" id="totp-disable-code"/></div>
+        </div>
+        <button class="btn btn-danger btn-sm" onclick="disableTotp()">Disable OTP</button>
+      </div>
+
+      <div class="divider"></div>
+      <div class="section-label">Telegram alerts for new patients</div>
+      <div id="telegram-alert-status" style="font-size:13px;color:var(--gray-600);margin-bottom:10px;">Checking Telegram-alert status…</div>
+      <div id="telegram-alert-setup" style="background:var(--blue-lt);border:1px solid var(--blue-md);border-radius:8px;padding:14px;margin-bottom:10px;">
+        <div style="font-size:13px;font-weight:700;margin-bottom:6px;">Free alerts even when Doctor panel is closed</div>
+        <div style="font-size:12px;color:var(--gray-600);margin-bottom:8px;">In Telegram, create a bot with <strong>@BotFather</strong>, open the bot and send <strong>/start</strong>, then paste the bot token below. The system will find your chat automatically and send a test message.</div>
+        <input class="form-control" type="password" id="telegram-bot-token" placeholder="Bot token from @BotFather" autocomplete="off"/>
+        <div style="display:flex;gap:8px;margin-top:9px;flex-wrap:wrap;"><button class="btn btn-outline btn-sm" onclick="enableTelegramAlerts()">Connect Telegram</button><button class="btn btn-success btn-sm" onclick="testTelegramAlert()">Send Test Message</button></div>
+      </div>
+
+      <div style="margin-top:12px;padding:12px;background:var(--gray-50);border:1px solid var(--gray-200);border-radius:8px;">
+        <div style="font-size:13px;font-weight:700;margin-bottom:4px;">Doctor panel alerts in Chrome</div>
+        <div id="browser-alert-status" style="font-size:12px;color:var(--gray-600);margin-bottom:8px;">Allow Chrome notifications to get an alert while this Doctor panel is open on mobile.</div>
+        <button class="btn btn-outline btn-sm" id="browser-alert-enable" onclick="enableBrowserAlerts()">Enable Chrome Alerts</button>
+      </div>
+
+      <div class="divider"></div>
+      <button class="btn btn-primary" onclick="saveDoctorSettings()">💾 Save Settings</button>
+
+      <div class="divider"></div>
+      <div class="section-label">🗂 Activity Logs</div>
+      <div style="font-size:12px;color:var(--gray-600);margin-bottom:10px;">
+        All manager &amp; doctor actions (patients added, paid, edited, tests/referrals changed, bills printed) are recorded here and saved as CSV. Choose a date to see what is stored, or clear logs for that date / all dates.
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Date (calendar)</label>
+          <input type="date" class="form-control" id="lg-date" style="width:170px;" onchange="renderLogInfo()"/>
+        </div>
+        <div class="form-group" style="align-self:flex-end;">
+          <button class="btn btn-outline btn-sm" onclick="renderLogInfo()">↻ Refresh</button>
+        </div>
+      </div>
+      <div id="lg-info" style="font-size:12.5px;margin-bottom:12px;">Select a date to see log info…</div>
+      <div class="form-row" style="gap:8px;">
+        <button class="btn btn-danger btn-sm" onclick="clearLogsForDate()">🗑 Clear Logs — Selected Date</button>
+        <button class="btn btn-danger btn-sm" onclick="clearAllLogs()">🗑 Clear ALL Logs</button>
+      </div>
+    </div>
+
+  </div><!-- /pane-dsettings -->
+
+  <!-- ═══════════════════ TAB: CATALOG & REFERRALS ═══════════════════ -->
+  <div class="tab-pane" id="pane-catalog">
+    <!-- Sub-tabs: Service/Test | Referred By -->
+    <div style="display:flex;gap:0;margin-bottom:14px;border-bottom:2px solid var(--gray-200);">
+      <div class="tab active" id="ctab-service"  onclick="switchCatalogTab('service')"  style="font-size:12px;padding:8px 18px;">🧪 Service / Test</div>
+      <div class="tab"        id="ctab-referral" onclick="switchCatalogTab('referral')" style="font-size:12px;padding:8px 18px;">📇 Referred By</div>
+      <div class="tab"        id="ctab-medicine" onclick="switchCatalogTab('medicine')" style="font-size:12px;padding:8px 18px;">💊 Medicine</div>
+    </div>
+
+    <!-- ── Service / Test catalog editor ── -->
+    <div id="cpane-service">
+      <div class="settings-block">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+          <div class="card-title">🧪 Service Catalog &amp; Pricing</div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-success btn-sm" onclick="saveCatalog()">💾 Save All Changes</button>
+            <button class="btn btn-ghost btn-sm" onclick="addCategory()">+ Add Category</button>
+          </div>
+        </div>
+        <div style="font-size:12px;color:var(--gray-500);margin-bottom:14px;">
+          Edit test names, prices, add/remove tests and categories. Changes save to server and apply immediately.
+        </div>
+        <div id="catalog-editor"></div>
+      </div>
+    </div>
+
+    <!-- ── Referral sources editor ── -->
+    <div id="cpane-referral" style="display:none;">
+      <div class="settings-block">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+          <div class="card-title">📇 Referral Sources</div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-success btn-sm" onclick="saveReferrals()">💾 Save Referrals</button>
+            <button class="btn btn-ghost btn-sm" onclick="addReferral()">+ Add Referral</button>
+          </div>
+        </div>
+        <div style="font-size:12px;color:var(--gray-500);margin-bottom:14px;">
+          List of doctors / hospitals / sources shown in the <strong>Referred By</strong> dropdown on every panel.
+          Changes save to the server and apply to all panels immediately — the same patient record, bills and reports pick them up too.
+        </div>
+        <div id="referral-editor"></div>
+      </div>
+    </div>
+
+    <!-- ── Medicine catalog editor ── -->
+    <div id="cpane-medicine" style="display:none;">
+      <div class="settings-block">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+          <div class="card-title">💊 Medicine Catalog &amp; Pricing</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn btn-success btn-sm" onclick="saveMedicines()">💾 Save Medicines</button>
+            <button class="btn btn-ghost btn-sm" onclick="addMedicine()">+ Add Medicine</button>
+            <button class="btn btn-outline btn-sm" onclick="document.getElementById('med-csv-input').click()">⬆ Bulk Upload CSV</button>
+            <input type="file" id="med-csv-input" accept=".csv,text/csv" style="display:none;" onchange="uploadMedicinesCsv(this)"/>
+          </div>
+        </div>
+        <div style="font-size:12px;color:var(--gray-500);margin-bottom:14px;">
+          Edit medicine names and prices — changes apply everywhere (patient entry, bills, reports) immediately.
+          For bulk upload, make a CSV file with columns <strong>medicine,price</strong> (one medicine per line).
+        </div>
+        <div id="medicine-editor"></div>
+      </div>
+    </div>
+  </div><!-- /pane-catalog -->
+
+</div><!-- /main -->
+
+<!-- ══════════ PATIENT DETAIL MODAL ══════════ -->
+<div class="modal-overlay" id="m-detail">
+  <div class="modal" style="max-width:760px;">
+    <div class="modal-header">
+      <div class="modal-title" id="d-title">Patient Details</div>
+      <button class="modal-close" onclick="closeM('m-detail')">✕</button>
+    </div>
+    <div id="d-info"></div>
+    <div class="section-box">
+      <div class="section-box-title">Update Service, Billing &amp; Status</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Service / Test</label>
+          <input class="form-control" id="d-service" placeholder="Service / test" onchange="autoDoctorServicePrice()"/>
+          <datalist id="doctor-service-options"></datalist>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Referred By</label>
+          <input class="form-control" id="d-ref" placeholder="Referral doctor / source"/>
+          <datalist id="ref-options"></datalist>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Amount Charged</label>
+          <input type="number" class="form-control" id="d-asked" min="0" step="1" placeholder="0" oninput="autoDocPayStatus()"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Extra Options (tick if applicable)</label>
+          <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-start;">
+            <label class="tick-opt" id="tick-d-guidance">
+              <input type="checkbox" id="d-guidance" onchange="syncDoctorTicks()"/>
+              <span class="tick-box">✓</span> Guidance
+            </label>
+            <label class="tick-opt" id="tick-d-medicine">
+              <input type="checkbox" id="d-medicine" onchange="syncDoctorTicks()"/>
+              <span class="tick-box">✓</span> Medicine
+            </label>
+            <div id="d-meds-wrap" style="display:none;flex:1;min-width:240px;align-items:center;gap:6px;flex-wrap:wrap;">
+              <input class="form-control" id="d-meds" placeholder="Type e.g. Paracetamol, then choose" style="flex:1;min-width:150px;"/>
+              <button type="button" class="btn btn-outline btn-sm" onclick="addDoctorMedicine()">Add</button>
+              <div id="d-med-qty-prompt" style="display:none;flex-basis:100%;background:var(--blue-lt);border:1.5px solid var(--blue-md);border-radius:var(--radius);padding:8px 12px;align-items:center;gap:8px;flex-wrap:wrap;">
+                <span style="font-size:12.5px;font-weight:700;color:var(--blue);" id="d-med-qty-name"></span>
+                <span style="font-size:12px;color:var(--gray-500);">Quantity (price is per tablet/unit) —</span>
+                <input type="number" class="form-control" id="d-med-qty" min="1" step="1" value="1" inputmode="numeric" style="width:88px;flex-shrink:0;"/>
+                <button type="button" class="btn btn-primary btn-sm" onclick="commitDoctorMedQty()">✓ Add</button>
+                <button type="button" class="btn btn-ghost btn-sm" onclick="cancelDoctorMedQty()" title="Choose a different medicine">✕</button>
+              </div>
+              <datalist id="doctor-medicine-options"></datalist>
+              <div id="d-selected-meds" style="display:flex;flex-wrap:wrap;gap:6px;flex-basis:100%;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="background:var(--blue-lt);border:1.5px solid var(--blue-md);border-radius:var(--radius);padding:9px 12px;font-size:12.5px;margin-bottom:12px;" id="d-paid-summary"></div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" id="d-paid-label">Amount Received</label>
+          <input type="number" class="form-control" id="d-paid" min="0" step="1" placeholder="0 — no payment now" oninput="onDocPaidInput()"/>
+        </div>
+        <div class="form-group" id="d-method-wrap" style="display:none;">
+          <label class="form-label">Paid As — Method</label>
+          <select class="form-control" id="d-method">
+            <option value="cash">💵 Cash</option>
+            <option value="online">📲 Online</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Payment Status</label>
+          <select class="form-control" id="d-pstatus">
+            <option value="Unpaid">Unpaid</option>
+            <option value="Partial">Partial</option>
+            <option value="Paid">Paid</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label">Doctor Notes</label>
+        <input class="form-control" id="d-notes" placeholder="Findings, observations…"/>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost"    onclick="closeM('m-detail')">Close</button>
+      <button class="btn btn-danger btn-sm" onclick="setStatus('Cancelled')">✕ Cancel Visit</button>
+      <button class="btn btn-primary"  onclick="saveUpdate()">Save</button>
+      <button class="btn btn-outline"  onclick="doPrintDoctor(currentUID)">🖨 Print Bill</button>
+      <button class="btn btn-success"  onclick="setStatus('Done')">✓ Mark Done</button>
+      <button class="btn btn-danger"   onclick="confirmDoctorDelete(currentUID)" title="Permanently delete this patient record">🗑 Delete Record</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ ADD MANAGER MODAL ══════════ -->
+<div class="modal-overlay" id="m-addmgr">
+  <div class="modal" style="max-width:500px;">
+    <div class="modal-header">
+      <div class="modal-title">+ Add New Manager</div>
+      <button class="modal-close" onclick="closeM('m-addmgr')">✕</button>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Full Name <span style="color:var(--red);">*</span></label>
+        <input class="form-control" id="add-mgr-name" placeholder="Manager's full name"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Login PIN <span style="color:var(--red);">*</span></label>
+        <input class="form-control" id="add-mgr-pin" placeholder="4–6 digit PIN" maxlength="10"/>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Mobile No.</label>
+        <input class="form-control" id="add-mgr-mobile" placeholder="9XXXXXXXXX"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input class="form-control" id="add-mgr-email" placeholder="email@example.com"/>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Shift</label>
+        <input class="form-control" id="add-mgr-shift" placeholder="e.g. Morning 9–5"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Salary</label>
+        <input class="form-control" id="add-mgr-salary" placeholder="Monthly amount"/>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Address</label>
+      <input class="form-control" id="add-mgr-address" placeholder="Home address"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Notes</label>
+      <input class="form-control" id="add-mgr-notes" placeholder="Any notes…"/>
+    </div>
+    <div class="divider"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;">
+      <button class="btn btn-ghost" onclick="closeM('m-addmgr')">Cancel</button>
+      <button class="btn btn-success" onclick="submitAddManager()">✓ Add Manager</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ DELETE MANAGER MODAL ══════════ -->
+<div class="modal-overlay" id="m-deletemgr">
+  <div class="modal" style="max-width:440px;">
+    <div class="modal-header">
+      <div class="modal-title" style="color:var(--red);">🗑 Delete Manager</div>
+      <button class="modal-close" onclick="closeM('m-deletemgr')">✕</button>
+    </div>
+    <div id="del-mgr-info"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;">
+      <button class="btn btn-ghost" onclick="closeM('m-deletemgr')">Cancel</button>
+      <button class="btn btn-danger" id="del-mgr-btn" onclick="confirmDeleteManager()" disabled>Delete Manager</button>
+    </div>
+  </div>
+</div>
+<div id="print-area" style="display:none;"></div>
+
+<!-- ══════════ CASH HANDOVER MODAL ══════════ -->
+<div class="modal-overlay" id="m-handover">
+  <div class="modal" style="max-width:420px;">
+    <div class="modal-header">
+      <div class="modal-title">💰 Collect Cash from Manager</div>
+      <button class="modal-close" onclick="closeM('m-handover')">✕</button>
+    </div>
+    <div style="margin-bottom:14px;">
+      <div style="font-size:13px;color:var(--gray-600);margin-bottom:16px;">
+        Record how much cash you are collecting from <strong id="ho-mgr-name">—</strong> right now.
+      </div>
+      <div class="form-group">
+        <label class="form-label">Amount Collecting <span style="color:var(--red);">*</span></label>
+        <div style="position:relative;">
+          <input type="number" class="form-control" id="ho-amount" min="0" step="1"
+                 placeholder="Enter amount" style="font-size:18px;font-weight:700;padding-right:80px;"/>
+          <button class="btn btn-ghost btn-sm" id="ho-full-btn"
+                  style="position:absolute;right:6px;top:50%;transform:translateY(-50%);font-size:11px;"
+                  onclick="setFullHandover()">Full Amount</button>
+        </div>
+        <div style="font-size:11.5px;color:var(--gray-500);margin-top:4px;">
+          Manager is holding: <strong id="ho-holding-display" style="color:var(--amber);">—</strong>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Note <span style="font-weight:400;color:var(--gray-400);">(optional)</span></label>
+        <input class="form-control" id="ho-note" placeholder="e.g. Morning collection, partial handover…"/>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;">
+      <button class="btn btn-ghost" onclick="closeM('m-handover')">Cancel</button>
+      <button class="btn btn-success" onclick="submitHandover()">✓ Confirm Collection</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container"></div>
+<script src="app.js?v=8"></script>
+<script>
+checkAuth('doctor');
+loadTotpStatus();
+document.getElementById('doctor-service-options').innerHTML = serviceOptions();
+document.getElementById('doctor-medicine-options').innerHTML = medicineOptions();
+// Payment keyboard flow — Amount Received → Enter → method dropdown (arrow keys
+// switch Cash/Online, Enter commits) → Enter → Doctor Notes.
+(function() {
+  const paidEl  = document.getElementById('d-paid');
+  const metEl   = document.getElementById('d-method');
+  const notesEl = document.getElementById('d-notes');
+  if (paidEl) paidEl.addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+    const wrap = document.getElementById('d-method-wrap');
+    (wrap && wrap.style.display !== 'none' ? metEl : notesEl).focus();
+  });
+  if (metEl) metEl.addEventListener('keydown', e => {
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      const idx = metEl.selectedIndex + (e.key === 'ArrowDown' ? 1 : -1);
+      metEl.selectedIndex = Math.max(0, Math.min(metEl.options.length - 1, idx));
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (notesEl) notesEl.focus();
+    }
+  });
+})();
+startClock('main-clock');
+let knownDoctorPatientIds = new Set(getAllPatients().map(patient => getRecordKey(patient)));
+initSync(handleDoctorPatientSync);
+
+let currentUID = null;
+
+function handleDoctorPatientSync() {
+  const newManagerPatients = getAllPatients().filter(patient => !knownDoctorPatientIds.has(getRecordKey(patient)) && patient.attendedById && patient.attendedById !== 'doctor');
+  getAllPatients().forEach(patient => knownDoctorPatientIds.add(getRecordKey(patient)));
+  newManagerPatients.forEach(patient => {
+    showToast(`New patient #${patient.patientNo}: ${patient.name} — added by ${patient.attendedByName}.`, 'info');
+    sendDoctorBrowserAlert(patient);
+  });
+  render();
+}
+function updateBrowserAlertStatus() {
+  const supported = 'Notification' in window;
+  const permission = supported ? Notification.permission : 'unsupported';
+  const status = document.getElementById('browser-alert-status'), button = document.getElementById('browser-alert-enable');
+  if (!status || !button) return;
+  status.textContent = permission === 'granted' ? '✓ Chrome alerts are enabled for this Doctor panel.' : permission === 'denied' ? 'Chrome notifications are blocked. Allow them in Chrome site settings for this ngrok address.' : supported ? 'Allow Chrome notifications to get an alert while this Doctor panel is open on mobile.' : 'This browser does not support notifications.';
+  button.style.display = permission === 'default' ? 'inline-flex' : 'none';
+}
+function enableBrowserAlerts() {
+  if (!('Notification' in window)) { showToast('This browser does not support notifications.','warning'); return; }
+  Notification.requestPermission().then(permission => {
+    updateBrowserAlertStatus();
+    showToast(permission === 'granted' ? 'Chrome alerts enabled.' : 'Please allow notifications in Chrome settings.', permission === 'granted' ? 'success' : 'warning');
+  });
+}
+function sendDoctorBrowserAlert(patient) {
+  if ('Notification' in window && Notification.permission === 'granted') {
+    new Notification(`New patient: Token #${patient.patientNo}`, { body:`${patient.name} — ${patient.xrayPart || 'Service pending'}\nAdded by ${patient.attendedByName}`, icon:'logo.png' });
+  }
+}
+
+// ════════════════════════════════════════════════════════════
+// TAB SWITCHING
+// ════════════════════════════════════════════════════════════
+function switchCatalogTab(name) {
+  ['service','referral','medicine'].forEach(t => {
+    document.getElementById('ctab-'+t).classList.toggle('active', t===name);
+    document.getElementById('cpane-'+t).style.display = t===name ? 'block' : 'none';
+  });
+  if (name === 'service')  setTimeout(renderCatalogEditor, 50);
+  else if (name === 'referral') setTimeout(renderReferralEditor, 50);
+  else                     setTimeout(renderMedicineEditor, 50);
+}
+
+function switchDTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  document.getElementById('pane-' + name).classList.add('active');
+  // While the Catalog editor tab is open, pause the background catalog sync so
+  // the server never overwrites the in-memory arrays mid-edit (unsaved new
+  // tests/referrals would silently vanish and the Save button would read the
+  // stale list). Resume when the doctor leaves the tab.
+  if (typeof window !== 'undefined') window.__pauseCatalogSync = (name === 'catalog');
+  if (name === 'mgrmgt')    renderManagerControl();
+  if (name === 'catalog')   switchCatalogTab('service');
+  if (name === 'dsettings') { loadDoctorSettings(); setTimeout(renderLogInfo, 100); }
+  if (name === 'actlog')    initActivityLog();
+  if (name === 'profit')    { renderProfit(); switchProfitTab('day'); }
+  if (name === 'mgrsum')    renderMgrSummary();
+  if (name === 'records')   initRecordsTab();
+}
+
+// ════════════════════════════════════════════════════════════
+// PATIENT QUEUE
+// ════════════════════════════════════════════════════════════
+function render() {
+  const all = getTodayPatients();
+  const q   = document.getElementById('srch').value.toLowerCase().trim();
+  const stf = document.getElementById('f-st').value;
+  const s   = getSettings();
+
+  document.getElementById('st-q').textContent    = all.length;
+  document.getElementById('st-pend').textContent = all.filter(p => p.status === 'Pending').length;
+  document.getElementById('st-done').textContent = all.filter(p => p.status === 'Done').length;
+  const nxt = all.filter(p => p.status === 'Pending').sort((a,b) => (a.patientNo||0) - (b.patientNo||0));
+  document.getElementById('st-next').textContent = nxt.length ? '#' + nxt[0].patientNo + ' ' + nxt[0].name.split(' ')[0] : '—';
+
+  const now = new Date();
+  document.getElementById('q-date').textContent = now.toLocaleDateString('en-US', {weekday:'short',day:'2-digit',month:'long',year:'numeric'});
+
+  let list = stf ? all.filter(p => p.status === stf) : all;
+  if (q) list = list.filter(p =>
+    p.name.toLowerCase().includes(q) || p.uid.toLowerCase().includes(q) ||
+    (p.xrayPart && p.xrayPart.toLowerCase().includes(q)) ||
+    (p.referredBy && p.referredBy.toLowerCase().includes(q))
+  );
+  list.sort((a,b) => (a.patientNo||0) - (b.patientNo||0));
+  document.getElementById('q-count').textContent = list.length + ' patient(s)';
+
+  if (!list.length) {
+    document.getElementById('queue-list').innerHTML = '';
+    document.getElementById('empty').style.display = 'block';
+    return;
+  }
+  document.getElementById('empty').style.display = 'none';
+  document.getElementById('queue-list').innerHTML = list.map(p => {
+    const isDone = p.status === 'Done', isCan = p.status === 'Cancelled';
+    const stBadge = isDone ? '<span class="badge b-done">Done</span>' : isCan ? '<span class="badge b-cancel">Cancelled</span>' : '<span class="badge b-pending">Pending</span>';
+    const payStatus = getPaymentStatus(p);
+    const payBadge = payStatus === 'Paid' ? '<span class="badge b-paid">Paid</span>' : payStatus === 'Partial' ? '<span class="badge b-partial">Partial</span>' : '<span class="badge b-unpaid">Unpaid</span>';
+    return `<div class="q-card ${isDone?'q-done':isCan?'q-cancelled':''}" onclick="openDetail('${getRecordKey(p)}')">
+      <div class="q-num ${isDone?'qn-done':isCan?'qn-cancel':''}">${p.patientNo||'?'}</div>
+      <div class="q-info">
+        <div class="q-name">${p.name} <span style="font-weight:400;font-size:12px;color:var(--gray-400);">${p.age}y${p.gender?' · '+p.gender:''}</span></div>
+        <div class="q-meta">📱 ${p.mobile||'N/A'} &nbsp;·&nbsp; Ref: ${p.referredBy||'N/A'} &nbsp;·&nbsp; ${p.time}</div>
+        <div class="q-xray">🧪 ${p.xrayPart}${p.xrayViews?' — '+p.xrayViews:''}</div>
+      </div>
+      <div class="q-right">
+        <div style="margin-bottom:5px;">${stBadge} ${payBadge}</div>
+        <div class="amt-charged">Charged: ${s.currency} ${(p.amountAsked||0).toLocaleString()}</div>
+        <div class="amt-paid">Paid: ${s.currency} ${(p.amountPaid||0).toLocaleString()}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function switchProfitTab(name) {
+  ['day','range'].forEach(t => {
+    document.getElementById('ptab-'+t).classList.toggle('active', t===name);
+    document.getElementById('ppane-'+t).style.display = t===name ? 'block' : 'none';
+  });
+  if (name === 'range') renderRangeProfit();
+}
+
+function renderProfit() {
+  const dateInput = document.getElementById('profit-date');
+  if (!dateInput.value) dateInput.value = new Date().toISOString().split('T')[0];
+  const dateKey  = dateKeyFromInput(dateInput.value);
+  const patients = getPatientsByDate(dateKey);
+  const currency = getSettings().currency || 'Rs.';
+
+  const charged  = patients.reduce((s,p)=>s+(Number(p.amountAsked)||0), 0);
+  const paid     = patients.reduce((s,p)=>s+(Number(p.amountPaid)||0),  0);
+  const due      = Math.max(0, charged - paid);
+
+  // Cash vs Online split — only count patients with amountPaid > 0
+  let cashAmt=0, onlineAmt=0, unsetAmt=0;
+  patients.forEach(p => {
+    const amt = Number(p.amountPaid)||0;
+    if (!amt) return;
+    const b = getPaymentBreakdown(p);
+    if (b.cash > 0 && b.online > 0) { cashAmt += b.cash; onlineAmt += b.online; return; }
+    if (b.online > 0) onlineAmt += amt;
+    else if (b.cash > 0) cashAmt += amt;
+    else unsetAmt += amt;
+  });
+
+  document.getElementById('profit-charged').textContent = currency+' '+charged.toLocaleString();
+  document.getElementById('profit-paid').textContent    = currency+' '+paid.toLocaleString();
+  document.getElementById('profit-due').textContent     = currency+' '+due.toLocaleString();
+  document.getElementById('profit-count').textContent   = patients.length+' patient(s)';
+  document.getElementById('profit-cash').textContent    = currency+' '+cashAmt.toLocaleString();
+  document.getElementById('profit-online').textContent  = currency+' '+onlineAmt.toLocaleString();
+
+  // Handover strip — ONLY cash counts here. Online payments go straight to
+  // the doctor's own account, so they are never part of what managers hand
+  // over. Cash collected = sum of amountPaidCash (via getPaymentBreakdown).
+  const handedOver   = getHandovers().filter(h=>h.dateKey===dateKey).reduce((s,h)=>s+(parseFloat(h.amount)||0),0);
+  const stillHolding = Math.max(0, cashAmt - handedOver);
+  const strip = document.getElementById('profit-handover-strip');
+  if (cashAmt > 0 || handedOver > 0) {
+    strip.style.display = 'grid';
+    document.getElementById('phs-collected').textContent  = currency+' '+cashAmt.toLocaleString();
+    document.getElementById('phs-handedover').textContent = currency+' '+handedOver.toLocaleString();
+    document.getElementById('phs-holding').textContent    = currency+' '+stillHolding.toLocaleString();
+    document.getElementById('phs-holding').style.color    = stillHolding>0?'var(--amber)':'var(--green)';
+  } else { strip.style.display = 'none'; }
+
+  const list = document.getElementById('profit-list');
+  if (!patients.length) {
+    list.innerHTML = '<div class="empty-state"><div class="empty-text">No patients for this date</div></div>';
+    return;
+  }
+  list.innerHTML = patients.sort((a,b)=>(a.patientNo||0)-(b.patientNo||0)).map(p => {
+    const ml = paymentMethodLabel(p);
+    const methodClr = ml==='Online' ? 'var(--blue)' : ml==='Cash' ? 'var(--green)' : ml==='Cash + Online' ? 'var(--amber)' : 'var(--gray-400)';
+    const methodIcon = ml==='Online' ? '📲' : ml==='Cash' ? '💵' : ml==='Cash + Online' ? '💵+📲' : '❓';
+    return `<div style="display:flex;justify-content:space-between;gap:12px;padding:11px 16px;border-bottom:1px solid var(--gray-100);">
+      <div>
+        <div style="font-weight:700;">#${p.patientNo||'—'} ${p.name}</div>
+        <div style="font-size:11px;color:var(--gray-500);">${p.xrayPart||'—'} · by ${p.attendedByName||'—'}</div>
+        <div style="font-size:11px;font-weight:700;color:${methodClr};">${methodIcon} ${ml||'Payment method not set'}</div>
+      </div>
+      <div style="text-align:right;white-space:nowrap;">
+        <div style="font-weight:800;color:var(--green);">${currency} ${(Number(p.amountPaid)||0).toLocaleString()}</div>
+        <div style="font-size:11px;color:var(--gray-500);">of ${currency} ${(Number(p.amountAsked)||0).toLocaleString()}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Handover log
+  const hdList = getHandovers().filter(h=>h.dateKey===dateKey);
+  if (hdList.length) {
+    list.innerHTML += `<div style="padding:12px 16px;background:var(--green-lt);border-top:2px solid #bbf7d0;">
+      <div style="font-size:11px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px;">💵 Cash Handover Records</div>
+      ${hdList.map(h=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;font-size:13px;border-bottom:1px solid #bbf7d0;">
+        <div><strong>${h.mgrName}</strong><span style="color:var(--gray-500);font-size:12px;"> · ${h.time}${h.note?' · '+h.note:''}</span></div>
+        <div style="font-weight:800;color:var(--green);">${currency} ${parseFloat(h.amount).toLocaleString()}</div>
+      </div>`).join('')}
+    </div>`;
+  }
+}
+
+// ── Date Range Profit ──
+function setRangePreset(days) {
+  const to   = new Date();
+  const from = new Date(); from.setDate(to.getDate() - (days-1));
+  document.getElementById('range-to').value   = to.toISOString().split('T')[0];
+  document.getElementById('range-from').value = from.toISOString().split('T')[0];
+  renderRangeProfit();
+}
+
+function renderRangeProfit() {
+  const fromDv = document.getElementById('range-from').value;
+  const toDv   = document.getElementById('range-to').value;
+  if (!fromDv || !toDv) return;
+  const currency = getSettings().currency || 'Rs.';
+
+  const fromMs = new Date(fromDv).getTime();
+  const toMs   = new Date(toDv+'T23:59:59').getTime();
+
+  const allPats = getAllPatientsDeduped().filter(p => {
+    const ts = new Date(p.createdAt||0).getTime();
+    return ts >= fromMs && ts <= toMs;
+  });
+
+  const charged  = allPats.reduce((s,p)=>s+(Number(p.amountAsked)||0),0);
+  const paid     = allPats.reduce((s,p)=>s+(Number(p.amountPaid)||0),0);
+  const due      = Math.max(0,charged-paid);
+
+  let cashAmt=0, onlineAmt=0, unsetAmt=0;
+  allPats.forEach(p => {
+    const amt = Number(p.amountPaid)||0; if (!amt) return;
+    const b = getPaymentBreakdown(p);
+    if (b.cash > 0 && b.online > 0) { cashAmt += b.cash; onlineAmt += b.online; return; }
+    if (b.online > 0) onlineAmt += amt;
+    else if (b.cash > 0) cashAmt += amt;
+    else unsetAmt += amt;
+  });
+
+  document.getElementById('rng-patients').textContent = allPats.length;
+  document.getElementById('rng-charged').textContent  = currency+' '+charged.toLocaleString();
+  document.getElementById('rng-paid').textContent     = currency+' '+paid.toLocaleString();
+  document.getElementById('rng-cash').textContent     = currency+' '+cashAmt.toLocaleString();
+  document.getElementById('rng-online').textContent   = currency+' '+onlineAmt.toLocaleString();
+  document.getElementById('rng-count').textContent    = allPats.length+' patient(s)';
+
+  // Build per-day breakdown
+  const byDate = {};
+  allPats.forEach(p => {
+    if (!byDate[p.date]) byDate[p.date]={date:p.date,patients:0,charged:0,paid:0,cash:0,online:0};
+    const d = byDate[p.date];
+    d.patients++;
+    d.charged += Number(p.amountAsked)||0;
+    d.paid    += Number(p.amountPaid)||0;
+    const b = getPaymentBreakdown(p);
+    if (b.total > 0) {
+      d.cash   += b.cash;
+      d.online += b.online;
+    }
+  });
+
+  const days = Object.values(byDate).sort((a,b)=>b.date.split('-').reverse().join('')-a.date.split('-').reverse().join(''));
+
+  if (!days.length) {
+    document.getElementById('rng-list').innerHTML = '<div class="empty-state"><div class="empty-text">No data in this range</div></div>';
+    return;
+  }
+
+  document.getElementById('rng-list').innerHTML = `
+    <div style="overflow-x:auto;">
+    <table style="width:100%;border-collapse:collapse;font-size:12.5px;">
+      <thead><tr style="background:var(--gray-50);border-bottom:2px solid var(--gray-200);">
+        <th style="padding:9px 14px;text-align:left;font-weight:700;">Date</th>
+        <th style="padding:9px 14px;text-align:center;font-weight:700;">Patients</th>
+        <th style="padding:9px 14px;text-align:right;font-weight:700;">Charged</th>
+        <th style="padding:9px 14px;text-align:right;font-weight:700;">Collected</th>
+        <th style="padding:9px 14px;text-align:right;font-weight:700;">💵 Cash</th>
+        <th style="padding:9px 14px;text-align:right;font-weight:700;">📲 Online</th>
+        <th style="padding:9px 14px;text-align:right;font-weight:700;">Outstanding</th>
+      </tr></thead>
+      <tbody>
+        ${days.map(d=>`<tr style="border-bottom:1px solid var(--gray-100);">
+          <td style="padding:8px 14px;font-weight:600;">${formatDateKey(d.date)}</td>
+          <td style="padding:8px 14px;text-align:center;">${d.patients}</td>
+          <td style="padding:8px 14px;text-align:right;">${currency} ${d.charged.toLocaleString()}</td>
+          <td style="padding:8px 14px;text-align:right;font-weight:700;color:var(--green);">${currency} ${d.paid.toLocaleString()}</td>
+          <td style="padding:8px 14px;text-align:right;color:var(--green);">${currency} ${d.cash.toLocaleString()}</td>
+          <td style="padding:8px 14px;text-align:right;color:var(--blue);">${currency} ${d.online.toLocaleString()}</td>
+          <td style="padding:8px 14px;text-align:right;color:var(--amber);">${currency} ${Math.max(0,d.charged-d.paid).toLocaleString()}</td>
+        </tr>`).join('')}
+      </tbody>
+      <tfoot><tr style="background:var(--gray-50);border-top:2px solid var(--gray-200);font-weight:800;">
+        <td style="padding:9px 14px;">TOTAL</td>
+        <td style="padding:9px 14px;text-align:center;">${allPats.length}</td>
+        <td style="padding:9px 14px;text-align:right;">${currency} ${charged.toLocaleString()}</td>
+        <td style="padding:9px 14px;text-align:right;color:var(--green);">${currency} ${paid.toLocaleString()}</td>
+        <td style="padding:9px 14px;text-align:right;color:var(--green);">${currency} ${cashAmt.toLocaleString()}</td>
+        <td style="padding:9px 14px;text-align:right;color:var(--blue);">${currency} ${onlineAmt.toLocaleString()}</td>
+        <td style="padding:9px 14px;text-align:right;color:var(--amber);">${currency} ${due.toLocaleString()}</td>
+      </tr></tfoot>
+    </table></div>`;
+}
+
+// ════════════════════════════════════════════════════════════
+// MANAGER SUMMARY
+// ════════════════════════════════════════════════════════════
+function renderMgrSummary() {
+  const dateInput = document.getElementById('mgrsum-date');
+  if (!dateInput.value) dateInput.value = new Date().toISOString().split('T')[0];
+  const dateKey  = dateKeyFromInput(dateInput.value);
+  const mgrs     = getManagers();
+  const allPats  = getAllPatientsDeduped();
+  const s        = getSettings();
+  const container = document.getElementById('mgrsum-list');
+
+  const html = mgrs.map(m => {
+    const myPats      = allPats.filter(p => p.attendedById === m.id && p.date === dateKey);
+    const allTimePats = allPats.filter(p => p.attendedById === m.id);
+    const charged     = myPats.reduce((t,p)=>t+(parseFloat(p.amountAsked)||0),0);
+    // Handover only tracks CASH — online payments go straight to the doctor's
+    // own account and are never collected from the manager.
+    const collected   = myPats.reduce((t,p)=>t+(getPaymentBreakdown(p).cash||0),0);
+    const onlinePaid  = myPats.reduce((t,p)=>t+(getPaymentBreakdown(p).online||0),0);
+    const handedOver  = getHandoverTotal(m.id, dateKey);
+    const stillHolding = Math.max(0, collected - handedOver);
+
+    const holdingColor = stillHolding > 0 ? 'var(--amber)' : 'var(--green)';
+    const holdingBg    = stillHolding > 0 ? 'var(--amber-lt)' : 'var(--green-lt)';
+
+    // Handover history for this manager+date
+    const hdList = getHandovers().filter(h => h.mgrId === m.id && h.dateKey === dateKey);
+
+    return `<div style="background:var(--white);border:1.5px solid var(--gray-200);border-radius:var(--radius-lg);padding:18px;margin-bottom:14px;">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+        <div style="width:44px;height:44px;border-radius:50%;background:var(--blue-md);color:var(--blue);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;flex-shrink:0;">${m.name.charAt(0)}</div>
+        <div style="flex:1;">
+          <div style="font-size:15px;font-weight:800;color:var(--gray-900);">${m.name}</div>
+          <div style="font-size:11px;color:var(--gray-400);font-family:monospace;">${m.id} &nbsp;·&nbsp; <span style="color:${m.active?'var(--green)':'var(--red)'};">${m.active?'Active':'Inactive'}</span></div>
+        </div>
+        <div style="text-align:right;"><div style="font-size:11px;color:var(--gray-500);">All-time</div><div style="font-size:22px;font-weight:800;color:var(--blue);">${allTimePats.length}</div></div>
+      </div>
+
+      <!-- Stats grid -->
+      <div class="resp-grid" style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:14px;">
+        <div style="background:var(--blue-lt);border-radius:var(--radius);padding:9px 10px;text-align:center;">
+          <div style="font-size:9px;font-weight:700;color:var(--gray-500);text-transform:uppercase;">Patients</div>
+          <div style="font-size:20px;font-weight:800;color:var(--blue);">${myPats.length}</div>
+        </div>
+        <div style="background:var(--green-lt);border-radius:var(--radius);padding:9px 10px;text-align:center;">
+          <div style="font-size:9px;font-weight:700;color:var(--gray-500);text-transform:uppercase;">Cash Collected</div>
+          <div style="font-size:14px;font-weight:800;color:var(--green);">${s.currency} ${collected.toLocaleString()}</div>
+        </div>
+        <div style="background:var(--blue-lt);border-radius:var(--radius);padding:9px 10px;text-align:center;">
+          <div style="font-size:9px;font-weight:700;color:var(--gray-500);text-transform:uppercase;">Online (to your acct)</div>
+          <div style="font-size:14px;font-weight:800;color:var(--blue);">${s.currency} ${onlinePaid.toLocaleString()}</div>
+        </div>
+        <div style="background:var(--blue-lt);border-radius:var(--radius);padding:9px 10px;text-align:center;">
+          <div style="font-size:9px;font-weight:700;color:var(--gray-500);text-transform:uppercase;">Handed Over</div>
+          <div style="font-size:14px;font-weight:800;color:var(--blue);">${s.currency} ${handedOver.toLocaleString()}</div>
+        </div>
+        <div style="background:${holdingBg};border-radius:var(--radius);padding:9px 10px;text-align:center;border:1.5px solid ${stillHolding>0?'#fde68a':'#bbf7d0'};">
+          <div style="font-size:9px;font-weight:700;color:var(--gray-500);text-transform:uppercase;">Still Holding</div>
+          <div style="font-size:14px;font-weight:800;color:${holdingColor};">${s.currency} ${stillHolding.toLocaleString()}</div>
+        </div>
+      </div>
+
+      <!-- Collect cash — always visible -->
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;padding:10px 12px;background:#fffbeb;border:1.5px solid #fde68a;border-radius:var(--radius);">
+        <div style="flex:1;font-size:13px;font-weight:600;color:#92400e;">
+          ${stillHolding > 0
+            ? `💰 ${m.name} is holding <strong>${s.currency} ${stillHolding.toLocaleString()}</strong>`
+            : collected > 0
+              ? `✅ All cash collected from ${m.name}`
+              : `💵 Record cash handover from ${m.name}`}
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="openHandoverModal('${m.id}','${m.name.replace(/'/g,"\\'")}',${stillHolding})">
+          💵 Collect Cash
+        </button>
+      </div>
+
+      <!-- Handover history for today -->
+      ${hdList.length ? `
+      <div style="margin-bottom:12px;">
+        <div style="font-size:11px;font-weight:700;color:var(--gray-500);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;">Handover History — ${formatDateKey(dateKey)}</div>
+        ${hdList.map(h=>`
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 10px;background:var(--gray-50);border-radius:6px;margin-bottom:4px;font-size:12px;">
+            <span style="color:var(--gray-600);">${h.time}${h.note?' — <em>'+h.note+'</em>':''}</span>
+            <span style="font-weight:800;color:var(--green);">${s.currency} ${parseFloat(h.amount).toLocaleString()}</span>
+          </div>`).join('')}
+      </div>` : ''}
+
+      <!-- Patient list -->
+      ${myPats.length ? `
+      <div style="font-size:11px;font-weight:700;color:var(--gray-500);text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px;">Patient IDs — ${formatDateKey(dateKey)}</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;">
+        ${myPats.sort((a,b)=>(a.patientNo||0)-(b.patientNo||0)).map(p=>`
+          <span style="background:var(--blue-lt);color:var(--blue);border:1px solid var(--blue-md);border-radius:6px;padding:3px 8px;font-size:11.5px;font-weight:700;font-family:monospace;" title="${p.name} — ${p.xrayPart||''}">#${p.patientNo}</span></span>`).join('')}
+      </div>` : `<div style="font-size:12px;color:var(--gray-400);text-align:center;padding:8px 0;">No patients on this date</div>`}
+    </div>`;
+  }).join('');
+
+  container.innerHTML = html || '<div class="empty-state"><div class="empty-text">No managers found</div></div>';
+
+  // Also show all-time total handover summary
+  const totalAllTime = getHandovers().reduce((s,h)=>s+(parseFloat(h.amount)||0),0);
+  if (totalAllTime > 0) {
+    const summary = `<div style="background:var(--green-lt);border:1.5px solid #bbf7d0;border-radius:var(--radius-lg);padding:14px 18px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;">
+      <div style="font-size:13px;font-weight:700;color:var(--green);">💵 Total Cash Collected from Managers (All Time)</div>
+      <div style="font-size:18px;font-weight:900;color:var(--green);">${s.currency} ${totalAllTime.toLocaleString()}</div>
+    </div>`;
+    container.innerHTML = summary + container.innerHTML;
+  }
+}
+
+// ════════════════════════════════════════════════════════════
+// RECORDS TAB
+// ════════════════════════════════════════════════════════════
+let _recCurrentPatients = [];
+let _recMgrPatients     = [];
+
+function switchRecordsTab(name) {
+  ['date','patient','mgrhist','service'].forEach(t => {
+    document.getElementById('rtab-'+t).classList.toggle('active', t===name);
+    document.getElementById('rpane-'+t).style.display = t===name ? 'block' : 'none';
+  });
+  if (name === 'patient')  searchRecordPatient();
+  if (name === 'mgrhist')  initMgrHistory();
+  if (name === 'service')  initServiceReport();
+}
+
+function initRecordsTab() {
+  if (!document.getElementById('rec-date').value)
+    document.getElementById('rec-date').value = new Date().toISOString().split('T')[0];
+  loadRecordsByDate();
+  switchRecordsTab('date');
+}
+
+// ── Calendar quick-pick (last 30 days) ──
+function buildCalendar() {
+  const cal = document.getElementById('rec-calendar');
+  const today = new Date();
+  const allPats = getAllPatientsDeduped();
+  const datesWithData = new Set(allPats.map(p=>p.date));
+  let html = '';
+  for (let i = 0; i < 30; i++) {
+    const d   = new Date(today); d.setDate(today.getDate() - i);
+    const dk  = String(d.getDate()).padStart(2,'0')+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+d.getFullYear();
+    const dv  = d.toISOString().split('T')[0];
+    const has = datesWithData.has(dk);
+    const cnt = allPats.filter(p=>p.date===dk).length;
+    html += `<div onclick="pickCalendarDate('${dv}')"
+      style="cursor:pointer;padding:6px 10px;border-radius:8px;text-align:center;min-width:52px;
+             background:${has?'var(--blue)':'var(--gray-100)'};
+             color:${has?'#fff':'var(--gray-400)'};
+             border:1.5px solid ${has?'var(--blue)':'var(--gray-200)'};
+             font-size:11px;font-weight:${has?'700':'400'};">
+      <div>${d.getDate()} ${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()]}</div>
+      ${has?`<div style="font-size:10px;opacity:.85;">${cnt}p</div>`:'<div style="font-size:10px;">—</div>'}
+    </div>`;
+  }
+  cal.innerHTML = html;
+}
+
+function pickCalendarDate(dateValue) {
+  document.getElementById('rec-date').value = dateValue;
+  loadRecordsByDate();
+}
+
+// ── By Date ──
+function loadRecordsByDate() {
+  const dv = document.getElementById('rec-date').value;
+  if (!dv) return;
+  const dk = dateKeyFromInput(dv);
+  const s  = getSettings();
+
+  // Deduplicate by visitUid — active patients take priority over archive
+  const seen = new Map();
+  getAllPatients().filter(p=>p.date===dk).forEach(p=>seen.set(getRecordKey(p),p));
+  getArchive().filter(p=>p.date===dk).forEach(p=>{ if(!seen.has(getRecordKey(p))) seen.set(getRecordKey(p),p); });
+  const patients = [...seen.values()].sort((a,b)=>(a.patientNo||0)-(b.patientNo||0));
+
+  _recCurrentPatients = patients;
+
+  document.getElementById('rec-date-title').textContent = formatDateKey(dk) + ' — Patient Records';
+  document.getElementById('rec-date-count').textContent = patients.length + ' patient(s)';
+  document.getElementById('rec-csv-btn').style.display     = patients.length ? 'inline-flex' : 'none';
+  document.getElementById('rec-activity-btn').style.display = patients.length ? 'inline-flex' : 'none';
+
+  if (!patients.length) {
+    document.getElementById('rec-date-stats').style.display = 'none';
+    document.getElementById('rec-date-list').innerHTML =
+      '<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-text">No patients on this date</div></div>';
+    return;
+  }
+
+  const charged = patients.reduce((s,p)=>s+(parseFloat(p.amountAsked)||0),0);
+  const paid    = patients.reduce((s,p)=>s+(parseFloat(p.amountPaid)||0),0);
+  const done    = patients.filter(p=>p.status==='Done').length;
+  document.getElementById('rec-date-stats').style.display = 'block';
+  document.getElementById('rds-total').textContent = patients.length;
+  document.getElementById('rds-paid').textContent  = s.currency+' '+paid.toLocaleString();
+  document.getElementById('rds-due').textContent   = s.currency+' '+Math.max(0,charged-paid).toLocaleString();
+  document.getElementById('rds-done').textContent  = done;
+
+  document.getElementById('rec-date-list').innerHTML = `
+    <div style="overflow-x:auto;">
+    <table style="width:100%;border-collapse:collapse;font-size:12.5px;">
+      <thead><tr style="background:var(--gray-50);border-bottom:2px solid var(--gray-200);">
+        <th style="padding:8px 12px;text-align:left;font-weight:700;">#</th>
+        <th style="padding:8px 12px;text-align:left;font-weight:700;">Token</th>
+        <th style="padding:8px 12px;text-align:left;font-weight:700;">Name</th>
+        <th style="padding:8px 12px;text-align:left;font-weight:700;">Age/Gender</th>
+        <th style="padding:8px 12px;text-align:left;font-weight:700;">Service</th>
+        <th style="padding:8px 12px;text-align:left;font-weight:700;">Manager</th>
+        <th style="padding:8px 12px;text-align:right;font-weight:700;">Charged</th>
+        <th style="padding:8px 12px;text-align:right;font-weight:700;">Paid</th>
+        <th style="padding:8px 12px;text-align:center;font-weight:700;">Status</th>
+        <th style="padding:8px 12px;text-align:center;font-weight:700;">Time</th>
+      </tr></thead>
+      <tbody>
+        ${patients.map(p => {
+          const ps = getPaymentStatus(p);
+          const pclr = ps==='Paid'?'var(--green)':ps==='Partial'?'var(--amber)':'var(--red)';
+          const sclr = p.status==='Done'?'var(--green)':p.status==='Cancelled'?'var(--red)':'var(--amber)';
+          return `<tr style="border-bottom:1px solid var(--gray-100);" onclick="openPatientRecordDetail('${getRecordKey(p)}')" style="cursor:pointer;">
+            <td style="padding:8px 12px;">${p.patientNo||'—'}</td>
+            <td style="padding:8px 12px;font-weight:700;color:var(--blue);">#${p.patientNo||''}</td>
+            <td style="padding:8px 12px;font-weight:600;">${p.name}</td>
+            <td style="padding:8px 12px;color:var(--gray-500);">${p.age||'—'}${p.gender?' / '+p.gender:''}</td>
+            <td style="padding:8px 12px;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.xrayPart||'—'}</td>
+            <td style="padding:8px 12px;color:var(--gray-600);">${p.attendedByName||'—'}</td>
+            <td style="padding:8px 12px;text-align:right;">${s.currency} ${(parseFloat(p.amountAsked)||0).toLocaleString()}</td>
+            <td style="padding:8px 12px;text-align:right;font-weight:700;color:var(--green);">${s.currency} ${(parseFloat(p.amountPaid)||0).toLocaleString()}</td>
+            <td style="padding:8px 12px;text-align:center;"><span style="color:${pclr};font-weight:700;font-size:11px;">${ps}</span></td>
+            <td style="padding:8px 12px;text-align:center;color:var(--gray-500);font-size:11px;">${p.time||'—'}</td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+      <tfoot><tr style="background:var(--gray-50);border-top:2px solid var(--gray-200);font-weight:800;">
+        <td colspan="6" style="padding:8px 12px;">TOTAL</td>
+        <td style="padding:8px 12px;text-align:right;">${s.currency} ${charged.toLocaleString()}</td>
+        <td style="padding:8px 12px;text-align:right;color:var(--green);">${s.currency} ${paid.toLocaleString()}</td>
+        <td colspan="2"></td>
+      </tr></tfoot>
+    </table></div>`;
+}
+
+function downloadRecordsCSV() {
+  if (!_recCurrentPatients.length) return;
+  const dv = document.getElementById('rec-date').value;
+  const dk = dateKeyFromInput(dv);
+  _triggerDownload(buildCSV(_recCurrentPatients), 'patients_'+dk+'.csv');
+  showToast('Downloaded: patients_'+dk+'.csv', 'success');
+}
+
+function downloadActivityCSV() {
+  const dv = document.getElementById('rec-date').value;
+  const dk = dateKeyFromInput(dv);
+  const entries = getLogByDate(dk);
+  if (!entries.length) { showToast('No activity for this date.','warning'); return; }
+  const headers = ['Manager','Action','Patient Name','Patient ID','Amount','Detail','Time','Date'];
+  const rows = entries.map(e=>[
+    '"'+(e.mgrName||'').replace(/"/g,'""')+'"',
+    '"'+(e.action||'').replace(/"/g,'""')+'"',
+    '"'+(e.patientName||'').replace(/"/g,'""')+'"',
+    e.patientUid||'', e.amount||0,
+    '"'+(e.detail||'').replace(/"/g,'""')+'"',
+    e.time||'', e.dateKey||''
+  ]);
+  const csv = [headers.join(','), ...rows.map(r=>r.join(','))].join('\n');
+  _triggerDownload(csv, 'activity_'+dk+'.csv');
+  showToast('Downloaded: activity_'+dk+'.csv', 'success');
+}
+
+// ── Patient Search ──
+function searchRecordPatient() {
+  const q = document.getElementById('rec-pat-search').value.trim().toLowerCase();
+  const s = getSettings();
+  const container = document.getElementById('rec-pat-results');
+  if (!q) {
+    container.innerHTML = '<div class="empty-state"><div class="empty-icon">🔍</div><div class="empty-text">Type to search all patients</div></div>';
+    return;
+  }
+  const allPats = getAllPatientsDeduped();
+  const results = allPats.filter(p =>
+    (p.uid||'').toLowerCase().includes(q) ||
+    (p.name||'').toLowerCase().includes(q) ||
+    (p.mobile||'').includes(q) ||
+    (p.date||'').includes(q) ||
+    (p.referredBy||'').toLowerCase().includes(q)
+  ).sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));
+
+  if (!results.length) {
+    container.innerHTML = '<div class="empty-state"><div class="empty-icon">😕</div><div class="empty-text">No patients found</div></div>';
+    return;
+  }
+
+  // Group by uid (person), show all visits
+  const byUid = {};
+  results.forEach(p => {
+    const uid = p.uid;
+    if (!byUid[uid]) byUid[uid] = { uid, name:p.name, mobile:p.mobile||'', visits:[] };
+    byUid[uid].visits.push(p);
+  });
+
+  container.innerHTML = Object.values(byUid).map(person => {
+    const visits = person.visits.sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));
+    const totalCharged = visits.reduce((s,p)=>s+(parseFloat(p.amountAsked)||0),0);
+    const totalPaid    = visits.reduce((s,p)=>s+(parseFloat(p.amountPaid)||0),0);
+    return `<div style="background:var(--white);border:1.5px solid var(--gray-200);border-radius:var(--radius-lg);margin-bottom:12px;overflow:hidden;">
+      <div style="padding:12px 16px;background:var(--blue-lt);border-bottom:1.5px solid var(--blue-md);display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <span style="font-family:monospace;font-weight:800;color:var(--blue);font-size:14px;">${person.uid}</span>
+          <span style="font-size:14px;font-weight:700;color:var(--gray-900);margin-left:10px;">${person.name}</span>
+          ${person.mobile?`<span style="font-size:12px;color:var(--gray-500);margin-left:8px;">📱 ${person.mobile}</span>`:''}
+        </div>
+        <div style="text-align:right;font-size:12px;">
+          <div style="font-weight:700;color:var(--blue);">${visits.length} visit${visits.length!==1?'s':''}</div>
+          <div style="color:var(--green);">Paid: ${s.currency} ${totalPaid.toLocaleString()} / ${s.currency} ${totalCharged.toLocaleString()}</div>
+        </div>
+      </div>
+      ${visits.map(v=>{
+        const ps = getPaymentStatus(v);
+        const pclr = ps==='Paid'?'var(--green)':ps==='Partial'?'var(--amber)':'var(--red)';
+        return `<div style="padding:10px 16px;border-bottom:1px solid var(--gray-100);display:flex;justify-content:space-between;align-items:center;gap:12px;">
+          <div style="flex:1;">
+            <div style="font-size:12.5px;font-weight:600;">${v.dateFormatted||v.date} &nbsp; <span style="color:var(--gray-400);">${v.time||''}</span></div>
+            <div style="font-size:12px;color:var(--gray-600);">${v.xrayPart||'—'}${v.xrayViews?' — '+v.xrayViews:''}</div>
+            <div style="font-size:11px;color:var(--gray-400);">by ${v.attendedByName||'—'}${v.referredBy?' · Ref: '+v.referredBy:''}</div>
+            ${v.notes?`<div style="font-size:11px;color:var(--gray-500);font-style:italic;">${v.notes}</div>`:''}
+          </div>
+          <div style="text-align:right;white-space:nowrap;">
+            <div style="font-weight:800;color:var(--green);">${s.currency} ${(parseFloat(v.amountPaid)||0).toLocaleString()}</div>
+            <div style="font-size:11px;color:var(--gray-500);">of ${s.currency} ${(parseFloat(v.amountAsked)||0).toLocaleString()}</div>
+            <div style="font-size:11px;font-weight:700;color:${pclr};">${ps}</div>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`;
+  }).join('');
+}
+
+function openPatientRecordDetail(uid) {
+  // Pre-fill search with UID and switch to patient tab
+  switchRecordsTab('patient');
+  document.getElementById('rec-pat-search').value = uid;
+  searchRecordPatient();
+}
+
+// ── Manager History ──
+function initMgrHistory() {
+  const sel = document.getElementById('rec-mgr-sel');
+  const mgrs = getManagers();
+  sel.innerHTML = '<option value="">Select Manager</option>' +
+    mgrs.map(m=>`<option value="${m.id}">${m.name}</option>`).join('');
+  // Default: last 30 days
+  const today = new Date();
+  const from  = new Date(today); from.setDate(today.getDate()-29);
+  if (!document.getElementById('rec-mgr-from').value)
+    document.getElementById('rec-mgr-from').value = from.toISOString().split('T')[0];
+  if (!document.getElementById('rec-mgr-to').value)
+    document.getElementById('rec-mgr-to').value = today.toISOString().split('T')[0];
+}
+
+function loadMgrHistory() {
+  const mgrId  = document.getElementById('rec-mgr-sel').value;
+  const fromDv = document.getElementById('rec-mgr-from').value;
+  const toDv   = document.getElementById('rec-mgr-to').value;
+  if (!mgrId) return;
+
+  const mgr  = getManagers().find(m=>m.id===mgrId);
+  const s    = getSettings();
+
+  // Fetch all patients from server first, then filter
+  const doFilter = () => {
+    const allPats = getAllPatientsDeduped();
+    const fromMs  = fromDv ? new Date(fromDv).getTime()            : 0;
+    const toMs    = toDv   ? new Date(toDv+'T23:59:59').getTime()  : Infinity;
+
+    const patients = allPats.filter(p => {
+      if (p.attendedById !== mgrId) return false;
+      // Use createdAt if available, otherwise parse p.date (DD-MM-YYYY)
+      let ts;
+      if (p.createdAt) {
+        ts = new Date(p.createdAt).getTime();
+      } else if (p.date) {
+        const [dd,mm,yyyy] = p.date.split('-');
+        ts = new Date(`${yyyy}-${mm}-${dd}`).getTime();
+      } else {
+        return true; // no date info — include
+      }
+      if (fromMs && ts < fromMs) return false;
+      if (toMs   && ts > toMs)   return false;
+      return true;
+    }).sort((a,b) => {
+      const ta = a.createdAt ? new Date(a.createdAt) : 0;
+      const tb = b.createdAt ? new Date(b.createdAt) : 0;
+      return tb - ta;
+    });
+
+    _recMgrPatients = patients;
+    document.getElementById('rec-mgr-csv').style.display = patients.length ? 'inline-flex' : 'none';
+    document.getElementById('rec-mgr-title').textContent  = (mgr?mgr.name:'Manager') + ' — Patient History';
+    document.getElementById('rec-mgr-count').textContent  = patients.length + ' patient(s)';
+
+    const charged = patients.reduce((s,p)=>s+(parseFloat(p.amountAsked)||0),0);
+    const paid    = patients.reduce((s,p)=>s+(parseFloat(p.amountPaid)||0),0);
+
+    document.getElementById('rec-mgr-summary').innerHTML = `
+      <div class="resp-grid" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:4px;">
+        <div style="background:var(--blue-lt);border-radius:var(--radius);padding:12px;text-align:center;">
+          <div style="font-size:10px;font-weight:700;color:var(--gray-500);text-transform:uppercase;">Total Patients</div>
+          <div style="font-size:22px;font-weight:800;color:var(--blue);">${patients.length}</div>
+        </div>
+        <div style="background:var(--green-lt);border-radius:var(--radius);padding:12px;text-align:center;">
+          <div style="font-size:10px;font-weight:700;color:var(--gray-500);text-transform:uppercase;">Collected</div>
+          <div style="font-size:16px;font-weight:800;color:var(--green);">${s.currency} ${paid.toLocaleString()}</div>
+        </div>
+        <div style="background:var(--amber-lt);border-radius:var(--radius);padding:12px;text-align:center;">
+          <div style="font-size:10px;font-weight:700;color:var(--gray-500);text-transform:uppercase;">Charged</div>
+          <div style="font-size:16px;font-weight:800;color:var(--amber);">${s.currency} ${charged.toLocaleString()}</div>
+        </div>
+        <div style="background:var(--gray-50);border-radius:var(--radius);padding:12px;text-align:center;">
+          <div style="font-size:10px;font-weight:700;color:var(--gray-500);text-transform:uppercase;">Outstanding</div>
+          <div style="font-size:16px;font-weight:800;color:var(--red);">${s.currency} ${Math.max(0,charged-paid).toLocaleString()}</div>
+        </div>
+      </div>`;
+
+    if (!patients.length) {
+      document.getElementById('rec-mgr-list').innerHTML =
+        '<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-text">No patients in this range</div></div>';
+      return;
+    }
+
+    document.getElementById('rec-mgr-list').innerHTML = `
+      <div style="overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;font-size:12.5px;">
+        <thead><tr style="background:var(--gray-50);border-bottom:2px solid var(--gray-200);">
+          <th style="padding:8px 12px;text-align:left;">Date</th>
+          <th style="padding:8px 12px;text-align:left;">Token</th>
+          <th style="padding:8px 12px;text-align:left;">Name</th>
+          <th style="padding:8px 12px;text-align:left;">Service</th>
+          <th style="padding:8px 12px;text-align:right;">Charged</th>
+          <th style="padding:8px 12px;text-align:right;">Paid</th>
+          <th style="padding:8px 12px;text-align:center;">Payment</th>
+          <th style="padding:8px 12px;text-align:center;">Status</th>
+        </tr></thead>
+        <tbody>
+          ${patients.map(p=>{
+            const ps   = getPaymentStatus(p);
+            const pclr = ps==='Paid'?'var(--green)':ps==='Partial'?'var(--amber)':'var(--red)';
+            return `<tr style="border-bottom:1px solid var(--gray-100);">
+              <td style="padding:7px 12px;color:var(--gray-600);">${p.date||'—'}</td>
+              <td style="padding:7px 12px;font-weight:700;color:var(--blue);">#${p.patientNo||''}</td>
+              <td style="padding:7px 12px;font-weight:600;">${p.name}</td>
+              <td style="padding:7px 12px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--gray-600);">${p.xrayPart||'—'}</td>
+              <td style="padding:7px 12px;text-align:right;">${s.currency} ${(parseFloat(p.amountAsked)||0).toLocaleString()}</td>
+              <td style="padding:7px 12px;text-align:right;font-weight:700;color:var(--green);">${s.currency} ${(parseFloat(p.amountPaid)||0).toLocaleString()}</td>
+              <td style="padding:7px 12px;text-align:center;font-size:11px;font-weight:700;color:${pclr};">${ps}</td>
+              <td style="padding:7px 12px;text-align:center;font-size:11px;color:var(--gray-500);">${p.status||'—'}</td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table></div>`;
+  };
+
+  // Fetch all patients from server to populate archive, then filter
+  if (SERVER_URL) {
+    fetch(SERVER_URL + '/api/patients?all=1', {
+      headers:{'X-Site-Pass':'89238350030','X-Gate-Token':getGateToken()}
+    }).then(r=>r.ok?r.json():null).then(res=>{
+      if (res && Array.isArray(res.patients)) {
+        res.patients.forEach(p => archiveUpsert(p));
+      }
+      doFilter();
+    }).catch(()=>doFilter());
+  } else {
+    doFilter();
+  }
+}
+
+function downloadMgrHistoryCSV() {
+  if (!_recMgrPatients.length) return;
+  const mgrId = document.getElementById('rec-mgr-sel').value;
+  const mgr   = getManagers().find(m=>m.id===mgrId);
+  const name  = (mgr?mgr.name:'manager').replace(/[^a-z0-9]/gi,'_');
+  _triggerDownload(buildCSV(_recMgrPatients), 'history_'+name+'.csv');
+  showToast('Downloaded history CSV', 'success');
+}
+
+function downloadMgrHistoryCSV() {
+  if (!_recMgrPatients.length) return;
+  const mgrId = document.getElementById('rec-mgr-sel').value;
+  const mgr   = getManagers().find(m=>m.id===mgrId);
+  const name  = (mgr?mgr.name:'manager').replace(/[^a-z0-9]/gi,'_');
+  _triggerDownload(buildCSV(_recMgrPatients), 'history_'+name+'.csv');
+  showToast('Downloaded history CSV', 'success');
+}
+
+// ════════════════════════════════════════════════════════════
+// SERVICE REPORT
+// ════════════════════════════════════════════════════════════
+let _svcPatients = [];
+
+function initServiceReport() {
+  if (!document.getElementById('svc-date').value)
+    document.getElementById('svc-date').value = new Date().toISOString().split('T')[0];
+  loadServiceReport();
+}
+
+function loadServiceReport() {
+  const dv = document.getElementById('svc-date').value;
+  if (!dv) return;
+  const dk       = dateKeyFromInput(dv);
+  const s        = getSettings();
+  const viewMode = document.getElementById('svc-view-toggle').value; // 'service' or 'category'
+
+  const allPats  = getAllPatientsDeduped();
+  const patients = allPats.filter(p => p.date === dk);
+  _svcPatients   = patients;
+
+  document.getElementById('svc-title').textContent  = 'Service Report — ' + formatDateKey(dk);
+  document.getElementById('svc-count').textContent  = patients.length + ' patient(s)';
+  document.getElementById('svc-csv-btn').style.display = patients.length ? 'inline-flex' : 'none';
+  document.getElementById('svc-stats').style.display   = patients.length ? 'grid' : 'none';
+
+  if (!patients.length) {
+    document.getElementById('svc-list').innerHTML =
+      '<div class="empty-state"><div class="empty-icon">🧪</div><div class="empty-text">No patients on this date</div></div>';
+    return;
+  }
+
+  // Totals
+  const totalCharged = patients.reduce((s,p)=>s+(parseFloat(p.amountAsked)||0),0);
+  let totalCash=0, totalOnline=0;
+  patients.forEach(p=>{
+    const b = getPaymentBreakdown(p);
+    if (b.total > 0) { totalCash += b.cash; totalOnline += b.online; }
+  });
+
+  document.getElementById('svc-total').textContent   = patients.length;
+  document.getElementById('svc-charged').textContent = s.currency+' '+totalCharged.toLocaleString();
+  document.getElementById('svc-cash').textContent    = s.currency+' '+totalCash.toLocaleString();
+  document.getElementById('svc-online').textContent  = s.currency+' '+totalOnline.toLocaleString();
+
+  // Build per-service map
+  const svcMap = {};
+  patients.forEach(p => {
+    const services = (p.xrayPart||'Unknown').split(' + ').map(x=>x.trim()).filter(Boolean);
+    const amtEach  = (parseFloat(p.amountAsked)||0) / (services.length||1);
+    const paidEach = (parseFloat(p.amountPaid) ||0) / (services.length||1);
+    const b        = getPaymentBreakdown(p);
+    const cashEach = b.cash / (services.length||1);
+    const onlEach  = b.online / (services.length||1);
+    services.forEach(svc => {
+      if (!svcMap[svc]) svcMap[svc] = {name:svc, category:getServiceCategory(svc)||'Other', count:0,charged:0,paid:0,cash:0,online:0};
+      svcMap[svc].count++;
+      svcMap[svc].charged += amtEach;
+      svcMap[svc].paid    += paidEach;
+      if (paidEach>0){ svcMap[svc].cash += cashEach; svcMap[svc].online += onlEach; }
+    });
+  });
+
+  // Group by category if needed
+  let rows;
+  if (viewMode === 'category') {
+    const catMap = {};
+    Object.values(svcMap).forEach(sv => {
+      const cat = sv.category || 'Other';
+      if (!catMap[cat]) catMap[cat]={name:cat,count:0,charged:0,paid:0,cash:0,online:0,services:[]};
+      catMap[cat].count   += sv.count;
+      catMap[cat].charged += sv.charged;
+      catMap[cat].paid    += sv.paid;
+      catMap[cat].cash    += sv.cash;
+      catMap[cat].online  += sv.online;
+      catMap[cat].services.push(sv.name);
+    });
+    rows = Object.values(catMap).sort((a,b)=>b.count-a.count);
+  } else {
+    rows = Object.values(svcMap).sort((a,b)=>b.count-a.count);
+  }
+
+  document.getElementById('svc-list').innerHTML = `
+    <div style="overflow-x:auto;">
+    <table style="width:100%;border-collapse:collapse;font-size:12.5px;">
+      <thead><tr style="background:var(--gray-50);border-bottom:2px solid var(--gray-200);">
+        <th style="padding:9px 14px;text-align:left;font-weight:700;">${viewMode==='category'?'Category':'Service / Test'}</th>
+        <th style="padding:9px 14px;text-align:center;font-weight:700;">Count</th>
+        <th style="padding:9px 14px;text-align:right;font-weight:700;">Charged</th>
+        <th style="padding:9px 14px;text-align:right;font-weight:700;">Collected</th>
+        <th style="padding:9px 14px;text-align:right;font-weight:700;">💵 Cash</th>
+        <th style="padding:9px 14px;text-align:right;font-weight:700;">📲 Online</th>
+      </tr></thead>
+      <tbody>
+        ${rows.map(r=>`<tr style="border-bottom:1px solid var(--gray-100);">
+          <td style="padding:8px 14px;font-weight:600;">${r.name}${r.services&&r.services.length?`<div style="font-size:10.5px;color:var(--gray-400);font-weight:400;margin-top:2px;">${r.services.join(', ')}</div>`:''}
+          </td>
+          <td style="padding:8px 14px;text-align:center;font-weight:800;color:var(--blue);">${r.count}</td>
+          <td style="padding:8px 14px;text-align:right;">${s.currency} ${Math.round(r.charged).toLocaleString()}</td>
+          <td style="padding:8px 14px;text-align:right;font-weight:700;color:var(--green);">${s.currency} ${Math.round(r.paid).toLocaleString()}</td>
+          <td style="padding:8px 14px;text-align:right;color:var(--green);">${s.currency} ${Math.round(r.cash).toLocaleString()}</td>
+          <td style="padding:8px 14px;text-align:right;color:var(--blue);">${s.currency} ${Math.round(r.online).toLocaleString()}</td>
+        </tr>`).join('')}
+      </tbody>
+      <tfoot><tr style="background:var(--gray-50);border-top:2px solid var(--gray-200);font-weight:800;">
+        <td style="padding:9px 14px;">TOTAL</td>
+        <td style="padding:9px 14px;text-align:center;">${patients.length}</td>
+        <td style="padding:9px 14px;text-align:right;">${s.currency} ${Math.round(totalCharged).toLocaleString()}</td>
+        <td style="padding:9px 14px;text-align:right;color:var(--green);">${s.currency} ${Math.round(totalCash+totalOnline).toLocaleString()}</td>
+        <td style="padding:9px 14px;text-align:right;color:var(--green);">${s.currency} ${Math.round(totalCash).toLocaleString()}</td>
+        <td style="padding:9px 14px;text-align:right;color:var(--blue);">${s.currency} ${Math.round(totalOnline).toLocaleString()}</td>
+      </tr></tfoot>
+    </table></div>`;
+}
+
+function downloadServiceCSV() {
+  if (!_svcPatients.length) return;
+  const dv  = document.getElementById('svc-date').value;
+  const dk  = dateKeyFromInput(dv);
+  _triggerDownload(buildCSV(_svcPatients), 'service_report_'+dk+'.csv');
+  showToast('Downloaded service report CSV', 'success');
+}
+
+function confirmClearLogs() {
+  if (!confirm('Clear all activity logs? This cannot be undone.')) return;
+  clearActivityLog();
+  showToast('Activity logs cleared.', 'success');
+}
+
+// ════════════════════════════════════════════════════════════
+// CASH HANDOVER
+// ════════════════════════════════════════════════════════════
+let _hoMgrId = '', _hoMgrName = '', _hoMaxAmount = 0;
+
+function openHandoverModal(mgrId, mgrName, holdingAmount) {
+  _hoMgrId      = mgrId;
+  _hoMgrName    = mgrName;
+  _hoMaxAmount  = holdingAmount;
+  const s = getSettings();
+  document.getElementById('ho-mgr-name').textContent        = mgrName;
+  document.getElementById('ho-holding-display').textContent = s.currency + ' ' + holdingAmount.toLocaleString();
+  document.getElementById('ho-amount').value                = holdingAmount; // default to full
+  document.getElementById('ho-note').value                  = '';
+  document.getElementById('m-handover').classList.add('open');
+  setTimeout(() => document.getElementById('ho-amount').focus(), 100);
+}
+
+function setFullHandover() {
+  document.getElementById('ho-amount').value = _hoMaxAmount;
+}
+
+function submitHandover() {
+  const amount = parseFloat(document.getElementById('ho-amount').value) || 0;
+  const note   = document.getElementById('ho-note').value.trim();
+  if (!amount || amount <= 0) { showToast('Enter a valid amount.', 'warning'); return; }
+  if (amount > _hoMaxAmount + 0.01) {
+    showToast('Amount cannot exceed what manager is holding.', 'warning'); return;
+  }
+  const s = getSettings();
+  recordHandover(_hoMgrId, _hoMgrName, amount, note);
+  closeM('m-handover');
+  showToast(`Collected ${s.currency} ${amount.toLocaleString()} from ${_hoMgrName}`, 'success');
+  renderMgrSummary();
+  renderProfit(); // refresh profit tab too
+}
+
+const GUIDANCE_PRICE = 300; // matches the manager form's guidance tick price
+let dSelectedMeds = [];  // [{ name, qty }]
+let dPendingMed  = null; // { name } — medicine chosen, waiting for its quantity
+
+function renderDoctorMeds() {
+  const el = document.getElementById('d-selected-meds');
+  if (!el) return;
+  const cur = getSettings().currency || 'Rs.';
+  el.innerHTML = dSelectedMeds.map((m,i) => {
+    const qty   = getMedQty(m);
+    const price = getMedicinePrice(m.name);
+    return `<span style="background:#eff6ff;color:#1a56db;border-radius:14px;padding:4px 8px;font-size:12px;font-weight:700;">${m.name}${qty>1?' ×'+qty:''} (${getMedicinePriceLabel(m.name)}${qty>1?' × '+qty+' = '+cur+' '+(price*qty).toLocaleString():''}) <button type="button" onclick="removeDoctorMedicine(${i})" style="border:0;background:transparent;color:#1a56db;cursor:pointer;font-weight:800;">×</button></span>`;
+  }).join('');
+  autoDoctorServicePrice();
+}
+
+// A medicine is chosen → ask for its quantity first (catalog price = per
+// tablet/unit). Only after the quantity is entered the medicine is added and
+// the user can pick the next one.
+function addDoctorMedicine() {
+  const input = document.getElementById('d-meds');
+  const name  = (input ? input.value : '').trim();
+  if (!name) return;
+  if (!Object.prototype.hasOwnProperty.call(MEDICINE_PRICES, name)) { showToast('Choose a medicine from the suggestions.', 'warning'); return; }
+  if (input) input.value = '';
+  requestDoctorMedQty(name);
+}
+
+function requestDoctorMedQty(name) {
+  dPendingMed = { name };
+  const prompt = document.getElementById('d-med-qty-prompt');
+  const nameEl = document.getElementById('d-med-qty-name');
+  if (nameEl) nameEl.textContent = name + ' (' + getMedicinePriceLabel(name) + ' each)';
+  const qtyIn = document.getElementById('d-med-qty');
+  if (qtyIn) qtyIn.value = '1';
+  if (prompt) prompt.style.display = 'flex';
+  setTimeout(() => { const q = document.getElementById('d-med-qty'); if (q) { q.focus(); q.select(); } }, 30);
+}
+
+function commitDoctorMedQty() {
+  if (!dPendingMed) return;
+  const qty = parseInt(document.getElementById('d-med-qty').value, 10);
+  if (!qty || qty < 1) { showToast('Enter a valid quantity (1 or more).', 'warning'); const q = document.getElementById('d-med-qty'); if (q) q.focus(); return; }
+  const existing = dSelectedMeds.find(m => m.name === dPendingMed.name);
+  if (existing) existing.qty += qty;
+  else dSelectedMeds.push({ name: dPendingMed.name, qty });
+  dPendingMed = null;
+  const prompt = document.getElementById('d-med-qty-prompt');
+  if (prompt) prompt.style.display = 'none';
+  renderDoctorMeds();
+  setTimeout(() => { const i = document.getElementById('d-meds'); if (i) i.focus(); }, 30);
+}
+
+function cancelDoctorMedQty() {
+  dPendingMed = null;
+  const prompt = document.getElementById('d-med-qty-prompt');
+  if (prompt) prompt.style.display = 'none';
+  setTimeout(() => { const i = document.getElementById('d-meds'); if (i) i.focus(); }, 30);
+}
+
+function removeDoctorMedicine(i) { dSelectedMeds.splice(i, 1); renderDoctorMeds(); }
+
+// Quantity prompt — Enter adds the medicine, Escape cancels
+const dMedQtyEl = document.getElementById('d-med-qty');
+if (dMedQtyEl) dMedQtyEl.addEventListener('keydown', e => {
+  if (e.key === 'Enter') { e.preventDefault(); commitDoctorMedQty(); }
+  else if (e.key === 'Escape') { e.preventDefault(); cancelDoctorMedQty(); }
+});
+// Typing a new name while the quantity box is open = choosing a different medicine
+const dMedsIn = document.getElementById('d-meds');
+if (dMedsIn) dMedsIn.addEventListener('input', () => {
+  if (dPendingMed) {
+    dPendingMed = null;
+    const prompt = document.getElementById('d-med-qty-prompt');
+    if (prompt) prompt.style.display = 'none';
+  }
+});
+
+function syncDoctorTicks() {
+  ['guidance','medicine'].forEach(k => {
+    const el   = document.getElementById('d-' + k);
+    const wrap = document.getElementById('tick-d-' + k);
+    if (el && wrap) wrap.classList.toggle('on', el.checked);
+  });
+  const medWrap = document.getElementById('d-meds-wrap');
+  const medTick = document.getElementById('d-medicine');
+  if (medWrap && medTick) medWrap.style.display = medTick.checked ? 'flex' : 'none';
+  autoDoctorServicePrice();
+}
+
+function openDetail(uid) {
+  const p = getAllPatients().find(x => getRecordKey(x) === uid);
+  if (!p) return;
+  currentUID = uid;
+  const s   = getSettings();
+  const due = Math.max(0, (p.amountAsked||0) - (p.amountPaid||0));
+  document.getElementById('d-title').textContent   = 'Patient #' + p.patientNo + ' — ' + p.name;
+  // Payment: single "Amount Received" field (this payment). Existing history
+  // is shown as a summary; a patient can pay at most 2 times total.
+  const pays   = getPayments(p);
+  const canPay = pays.length < 2;
+  document.getElementById('d-paid').value           = '';
+  const dWrap  = document.getElementById('d-method-wrap'); if (dWrap) dWrap.style.display = 'none';
+  const dms = document.getElementById('d-method'); if (dms) dms.value = 'cash';
+  const dPaidEl = document.getElementById('d-paid');
+  if (dPaidEl) { dPaidEl.disabled = !canPay; dPaidEl.placeholder = canPay ? '0 — no payment now' : 'Max 2 payments taken'; }
+  const sumEl = document.getElementById('d-paid-summary');
+  if (sumEl) {
+    sumEl.innerHTML =
+      (p.amountPaid||0)>0
+        ? `<strong>Already paid:</strong> ${s.currency} ${(p.amountPaid||0).toLocaleString()} <span style="color:var(--gray-500);">(${paymentDetailText(p, s.currency)})</span>` +
+          (due>0 ? ` &nbsp;·&nbsp; <strong style="color:var(--red);">Balance due: ${s.currency} ${due.toLocaleString()}</strong>` : '') +
+          (pays.length>=2 ? ` <span style="color:var(--gray-500);">· 2 payments done</span>` : ' <span style="color:var(--gray-500);">· 1 of 2 payments used</span>')
+        : `No payment taken yet — ${s.currency} ${(p.amountAsked||0).toLocaleString()} charged`;
+  }
+  document.getElementById('d-service').value        = p.xrayPart || '';
+  document.getElementById('d-ref').value            = p.referredBy || '';
+  document.getElementById('d-guidance').checked     = hasGuidance(p);
+  document.getElementById('d-medicine').checked     = hasMedicine(p);
+  // Show every medicine stored on the record (even ones no longer in the
+  // catalog) so they can always be seen and edited.
+  dSelectedMeds = parseMeds(p.medsPart || ''); dPendingMed = null; const dQp = document.getElementById('d-med-qty-prompt'); if (dQp) dQp.style.display = 'none';
+  const dMedsInput = document.getElementById('d-meds'); if (dMedsInput) dMedsInput.value = '';
+  renderDoctorMeds();
+  syncDoctorTicks();
+  document.getElementById('d-asked').value          = p.amountAsked || '';
+  document.getElementById('d-pstatus').value        = getPaymentStatus(p);
+  document.getElementById('d-notes').value          = p.notes || '';
+  document.getElementById('d-info').innerHTML = `
+    <div class="info-grid" style="margin-bottom:12px;">
+      <div class="info-item"><div class="lbl">Token No.</div><div class="val" style="font-size:18px;color:var(--blue);">#${p.patientNo}</div></div>
+      <div class="info-item"><div class="lbl">Name</div><div class="val">${p.name}</div></div>
+      <div class="info-item"><div class="lbl">Age / Gender</div><div class="val">${p.age} yrs / ${p.gender||'N/A'}</div></div>
+      <div class="info-item"><div class="lbl">Mobile</div><div class="val">${p.mobile||'N/A'}</div></div>
+      <div class="info-item"><div class="lbl">Father / Husband</div><div class="val">${p.fatherName||p.husbandName||'N/A'}</div></div>
+      <div class="info-item"><div class="lbl">Referred By</div><div class="val">${p.referredBy||'N/A'}</div></div>
+      <div class="info-item full"><div class="lbl">Address</div><div class="val">${p.address||'N/A'}</div></div>
+      <div class="info-item"><div class="lbl">Service / Test</div><div class="val" style="color:var(--blue);">${p.xrayPart}</div></div>
+      ${p.medsPart?`<div class="info-item"><div class="lbl">Medicine</div><div class="val" style="color:var(--blue);">${getMedsDisplay(p.medsPart)}</div></div>`:''}
+      ${hasGuidance(p)?`<div class="info-item"><div class="lbl">Guidance</div><div class="val" style="color:var(--green);">✓ Yes</div></div>`:''}
+      ${hasMedicine(p)?`<div class="info-item"><div class="lbl">Medicine</div><div class="val" style="color:var(--green);">✓ Yes</div></div>`:''}
+      <div class="info-item"><div class="lbl">Details</div><div class="val">${p.xrayViews||'N/A'}</div></div>
+      <div class="info-item"><div class="lbl">Amount Charged</div><div class="val" style="color:var(--amber);">${s.currency} ${(p.amountAsked||0).toLocaleString()}</div></div>
+      <div class="info-item"><div class="lbl">Balance Due</div><div class="val" style="color:${due>0?'var(--red)':'var(--green)'};">${s.currency} ${due.toLocaleString()}</div></div>
+      <div class="info-item"><div class="lbl">Payment</div><div class="val">${getPaymentStatus(p)}${(p.amountPaid||0)>0 ? ' · '+paymentDetailText(p, s.currency) : ''}</div></div>
+    </div>`;
+  document.getElementById('m-detail').classList.add('open');
+}
+
+// Single "Amount Received" field for THIS payment. The Cash/Online method
+// chooser shows only when an amount is entered; status reflects the total
+// (existing payments + this one).
+function onDocPaidInput() {
+  const total = parseFloat(document.getElementById('d-paid').value)||0;
+  const wrap  = document.getElementById('d-method-wrap');
+  if (!wrap) return;
+  if (total > 0) wrap.style.display = ''; else wrap.style.display = 'none';
+  autoDocPayStatus();
+}
+
+function getDocPayMethod() {
+  const sel = document.getElementById('d-method');
+  return sel ? sel.value : 'cash';
+}
+
+function autoDocPayStatus() {
+  const asked = parseFloat(document.getElementById('d-asked').value) || 0;
+  const newPaid = parseFloat(document.getElementById('d-paid').value) || 0;
+  const existing = Number(currentUID ? (getAllPatients().find(x=>getRecordKey(x)===currentUID)||{}).amountPaid : 0) || 0;
+  const total = existing + newPaid;
+  const sel   = document.getElementById('d-pstatus');
+  sel.value = total <= 0 ? 'Unpaid' : total >= asked ? 'Paid' : 'Partial';
+}
+
+function docPaidValues() {
+  // Returns the NEW payment being recorded now (this modal session) — the
+  // whole received amount goes to the chosen method (Cash or Online).
+  const amount = parseFloat(document.getElementById('d-paid').value) || 0;
+  const cash   = getDocPayMethod() === 'online' ? 0 : amount;
+  const online = getDocPayMethod() === 'online' ? amount : 0;
+  return { amount, cash, online };
+}
+
+function autoDoctorServicePrice() {
+  const service = getCatalogServiceName(document.getElementById('d-service').value);
+  document.getElementById('d-service').value = service;
+  const guidance = document.getElementById('d-guidance') ? document.getElementById('d-guidance').checked : false;
+  const medsTotal = dSelectedMeds.reduce((s,m) => s + getMedicinePrice(m.name)*getMedQty(m), 0);
+  if (typeof SERVICE_PRICES[service] === 'string') {
+    // MRP-based service — cannot auto-add, clear the field
+    document.getElementById('d-asked').value = '';
+    document.getElementById('d-asked').placeholder = SERVICE_PRICES[service];
+    return;
+  }
+  if (Object.prototype.hasOwnProperty.call(SERVICE_PRICES, service) || medsTotal > 0 || guidance) {
+    const total = getServicePrice(service) + medsTotal + (guidance ? GUIDANCE_PRICE : 0);
+    document.getElementById('d-asked').value = total || '';
+    autoDocPayStatus();
+  }
+}
+
+function saveUpdate() {
+  if (!currentUID) return;
+  const paymentStatus = document.getElementById('d-pstatus').value;
+  const pv = docPaidValues();
+  if (paymentStatus === 'Paid' && (Number(pv.amount)||0) <= 0 && (Number(currentPatient().amountPaid)||0) <= 0) { showToast('Enter the received amount before marking Paid.','warning'); return; }
+  const p   = currentPatient();
+  const res = pv.amount > 0 ? addPayment(p, { amount: pv.amount, cash: pv.cash, online: pv.online }) : { payments: getPayments(p), amountPaid: Number(p.amountPaid)||0, amountPaidCash: Number(p.amountPaidCash)||0, amountPaidOnline: Number(p.amountPaidOnline)||0 };
+  updatePatient(currentUID, {
+    xrayPart     : document.getElementById('d-service').value.trim(),
+    medsPart     : medsToPart(dSelectedMeds),
+    referredBy   : document.getElementById('d-ref').value.trim(),
+    guidance     : document.getElementById('d-guidance').checked,
+    medicine     : document.getElementById('d-medicine').checked,
+    amountAsked  : parseFloat(document.getElementById('d-asked').value) || 0,
+    payments     : res.payments,
+    amountPaidCash: res.amountPaidCash,
+    amountPaidOnline: res.amountPaidOnline,
+    amountPaid   : res.amountPaid,
+    paymentStatus,
+    notes        : document.getElementById('d-notes').value.trim()
+  });
+  showToast('Updated successfully.', 'success');
+  closeM('m-detail'); render();
+}
+
+function setStatus(status) {
+  if (!currentUID) return;
+  const paymentStatus = document.getElementById('d-pstatus').value;
+  const pv = docPaidValues();
+  if (paymentStatus === 'Paid' && (Number(pv.amount)||0) <= 0 && (Number(currentPatient().amountPaid)||0) <= 0) { showToast('Enter the received amount before marking Paid.','warning'); return; }
+  const p   = currentPatient();
+  const res = pv.amount > 0 ? addPayment(p, { amount: pv.amount, cash: pv.cash, online: pv.online }) : { payments: getPayments(p), amountPaid: Number(p.amountPaid)||0, amountPaidCash: Number(p.amountPaidCash)||0, amountPaidOnline: Number(p.amountPaidOnline)||0 };
+  updatePatient(currentUID, {
+    xrayPart     : document.getElementById('d-service').value.trim(),
+    medsPart     : medsToPart(dSelectedMeds),
+    referredBy   : document.getElementById('d-ref').value.trim(),
+    guidance     : document.getElementById('d-guidance').checked,
+    medicine     : document.getElementById('d-medicine').checked,
+    amountAsked  : parseFloat(document.getElementById('d-asked').value) || 0,
+    status,
+    payments     : res.payments,
+    amountPaidCash: res.amountPaidCash,
+    amountPaidOnline: res.amountPaidOnline,
+    amountPaid   : res.amountPaid,
+    paymentStatus,
+    notes        : document.getElementById('d-notes').value.trim()
+  });
+  showToast(status === 'Done' ? 'Patient marked Done.' : 'Visit cancelled.', status === 'Done' ? 'success' : 'warning');
+  closeM('m-detail'); render();
+}
+
+function currentPatient() { return currentUID ? (getAllPatients().find(x=>getRecordKey(x)===currentUID)||{}) : {}; }
+
+function confirmDoctorDelete(uid) {
+  if (!uid) return;
+  const all = getAllPatientsDeduped();
+  const p   = all.find(x => getRecordKey(x) === uid);
+  if (!p) { showToast('Patient not found.', 'error'); return; }
+  if (!confirm(
+    'DELETE this patient record permanently?\n\n' +
+    'Patient: ' + p.name + '\n' +
+    'ID: ' + p.uid + '\n' +
+    'Service: ' + (p.xrayPart||'—') + '\n' +
+    'Date: ' + p.date + '\n\n' +
+    'This will remove the record from the system and MongoDB. Cannot be undone.'
+  )) return;
+  doctorDeletePatient(uid);
+  closeM('m-detail');
+  render();
+  showToast('Patient record deleted: ' + p.name, 'success');
+}
+
+// ════════════════════════════════════════════════════════════
+// PRINT (doctor page — builds bill inline)
+// ════════════════════════════════════════════════════════════
+function doPrintDoctor(uid) {
+  const all = getAllPatientsDeduped();
+  const p   = all.find(x => getRecordKey(x) === uid);
+  if (!p) { showToast('Patient not found.', 'error'); return; }
+  const s         = getSettings();
+  const due       = Math.max(0, (p.amountAsked||0) - (p.amountPaid||0));
+  const isPaid    = getPaymentStatus(p) === 'Paid';
+  const isPartial = getPaymentStatus(p) === 'Partial';
+  const printedAt = new Date().toLocaleString('en-IN',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit',hour12:true});
+  const CNAME     = s.clinicName || 'Dr. RAMGOPAL AGARWAL DIAGNOSTIC CLINIC';
+  const DNAME     = 'Dr. Pravin Kumar Agarwal (M.D. Physician, PG in Ultrasonography)';
+  const testsTotal = getTestsTotal(p.xrayPart);
+  const medsTotal  = getMedsTotal(p.medsPart);
+  const totalAmt   = (p.amountAsked||0) || (testsTotal + medsTotal + (p.guidance ? 300 : 0));
+
+  // Payment info — ONE compact line: "Amount Paid Rs. X (Online)" / "(Cash)" /
+  // "(Rs. X Online + Rs. Y Cash)". Per-installment rows only when 2 payments.
+  const pays      = getPayments(p);
+  const paidTotal = Number(p.amountPaid)||0;
+  let paidLine = '';
+  if (paidTotal > 0) {
+    const pb = getPaymentBreakdown(p);
+    let note = '';
+    if (pb.cash > 0 && pb.online > 0) note = ` (${s.currency} ${pb.online.toLocaleString()} Online + ${s.currency} ${pb.cash.toLocaleString()} Cash)`;
+    else if (pb.online > 0) note = ' (Online)';
+    else if (pb.cash > 0) note = ' (Cash)';
+    paidLine = `<div class="bs-row"><span class="bl">Amount Paid</span><span class="bv grn">${s.currency} ${paidTotal.toLocaleString()}${note}</span></div>`;
+  }
+  const paysList = pays.length > 1 ? pays.map((pay,i)=>`<div class="bs-row"><span class="bl">Payment ${i+1}</span><span class="bv grn">${s.currency} ${(pay.amount||0).toLocaleString()}${pay.online>0?(pay.cash>0?' ('+s.currency+' '+pay.online.toLocaleString()+' online + '+s.currency+' '+pay.cash.toLocaleString()+' cash)':' ('+s.currency+' '+pay.online.toLocaleString()+' online)'):(pay.cash>0?' ('+s.currency+' '+pay.cash.toLocaleString()+' cash)':'')}${pay.time?' · '+pay.time:''}</span></div>`).join('') : '';
+
+  let payStamp = '';
+  if (isPaid)         payStamp = `<div class="bs-stmp st-p">&#10003; Paid in Full</div>`;
+  else if (isPartial) payStamp = `<div class="bs-stmp st-d">Partial Payment &nbsp;|&nbsp; Balance Due: ${s.currency} ${due.toLocaleString()}</div>`;
+  else                payStamp = `<div class="bs-stmp st-d">Payment Pending &nbsp;|&nbsp; Amount Due: ${s.currency} ${due.toLocaleString()}</div>`;
+
+  const slip = `<div class="bill-slip">
+    <div class="bs-head">
+      <div class="bs-lw"><img src="logo.png" class="bs-logo" onerror="this.style.display='none'"/>
+        <div class="bs-clinic-block"><div class="bs-clin">${CNAME}</div><div class="bs-doctor">${DNAME}</div></div>
+      </div>
+      <div class="bs-bill-label">BILL</div>
+    </div>
+    <div class="bs-sep"></div>
+    <div class="bs-info">
+      <div class="bs-row"><span class="bl">Date &amp; Time</span><span class="bv">${p.dateFormatted} &nbsp; ${p.time}</span></div>
+      <div class="bs-dash"></div>
+      <div class="bs-row"><span class="bl">Name</span><span class="bv" style="font-size:14pt;font-weight:800;">${p.name}</span></div>
+      <div class="bs-row"><span class="bl">Age / Gender</span><span class="bv">${p.age}${String(p.age).match(/[a-z]/i)?'':' yrs'}${p.gender?' / '+p.gender:''}</span></div>
+      ${(p.fatherName||p.husbandName)?`<div class="bs-row"><span class="bl">${p.fatherName?'Father':'Husband'}</span><span class="bv">${p.fatherName||p.husbandName}</span></div>`:''}
+      ${p.mobile?`<div class="bs-row"><span class="bl">Mobile</span><span class="bv mono">${p.mobile}</span></div>`:''}
+      ${p.referredBy&&p.referredBy!=='—'?`<div class="bs-row"><span class="bl">Ref. By</span><span class="bv">${p.referredBy}</span></div>`:''}
+    </div>
+    <div class="bs-dash"></div>
+    <div class="bs-mid">
+      <div class="bs-row"><span class="bl">Service / Test</span><span class="bv blue" style="font-weight:700;">${getServiceDisplay(p.xrayPart)}</span></div>
+      ${p.medsPart?`<div class="bs-row"><span class="bl">Medicine</span><span class="bv blue" style="font-weight:700;"><span class="bs-meds">${parseMeds(p.medsPart).map(m=>`<span class="bs-med-item">• ${m.qty>1?m.name+' ×'+m.qty:m.name}</span>`).join('')}</span></span></div>`:''}
+    ${hasGuidance(p)?`<div class="bs-row"><span class="bl">Guidance</span><span class="bv grn">&#10003;</span></div>`:''}
+    ${p.medicine&&!p.medsPart?`<div class="bs-row"><span class="bl">Medicine</span><span class="bv grn">&#10003;</span></div>`:''}
+      ${p.xrayViews?`<div class="bs-row"><span class="bl">Details</span><span class="bv">${p.xrayViews}</span></div>`:''}
+      ${p.notes?`<div class="bs-row"><span class="bl">Notes</span><span class="bv">${p.notes}</span></div>`:''}
+    </div>
+    <div class="bs-sep"></div>
+    <div class="bs-amt-block">
+      ${testsTotal>0?`<div class="bs-row"><span class="bl">Test</span><span class="bv">${s.currency} ${testsTotal.toLocaleString()}</span></div>`:''}
+      ${medsTotal>0?`<div class="bs-row"><span class="bl">Medicine</span><span class="bv">${s.currency} ${medsTotal.toLocaleString()}</span></div>`:''}
+      <div class="bs-tot"><span class="bt-l">Total Amount</span><span class="bt-v">${s.currency} ${totalAmt.toLocaleString()}</span></div>
+      ${paidLine}
+      ${paysList}
+      ${due>0?`<div class="bs-row"><span class="bl" style="color:#dc2626;">Balance Due</span><span class="bv red">${s.currency} ${due.toLocaleString()}</span></div>`:''}
+    </div>
+    ${payStamp}
+    <div class="bs-ft"><span class="bf-b">${CNAME}</span><span class="bf-t">Printed: ${printedAt}</span></div>
+  </div>`;
+  document.getElementById('print-area').innerHTML = `<div class="print-page">${slip}</div>`;
+  window.print();
+  setTimeout(() => { document.getElementById('print-area').innerHTML = ''; }, 2000);
+}
+
+// ════════════════════════════════════════════════════════════
+// MANAGER CONTROL PANEL
+// ════════════════════════════════════════════════════════════
+// Local draft of permission changes — saved when doctor clicks Save on each card
+const _permDraft = {};
+
+function renderManagerControl() {
+  const mgrs = getManagers();
+  document.getElementById('mgr-control-list').innerHTML = mgrs.map(m => buildMgrCard(m)).join('');
+}
+
+function buildMgrCard(m) {
+  const perms = Object.keys(PERM_LABELS);
+  const permHTML = perms.map(pk => `
+    <div class="perm-item ${m.perms[pk]?'on':'off'}" id="perm-${m.id}-${pk}" onclick="togglePerm('${m.id}','${pk}')">
+      <div class="perm-dot ${m.perms[pk]?'on':'off'}" id="dot-${m.id}-${pk}"></div>
+      ${PERM_LABELS[pk]}
+    </div>`).join('');
+
+  const info = m.info || {};
+
+  return `
+  <div class="mgr-card-big ${m.active?'':'inactive'}" id="mgrcard-${m.id}">
+    <div class="mgr-head">
+      <div class="mgr-avatar-big ${m.active?'':'inactive'}">${m.name.charAt(0).toUpperCase()}</div>
+      <div style="flex:1;">
+        <div class="mgr-full-name" id="mgr-name-display-${m.id}">${m.name}</div>
+        <div class="mgr-id-text">ID: ${m.id} &nbsp;·&nbsp; Joined: ${m.joinedDate||'—'}</div>
+      </div>
+      <span class="mgr-badge ${m.active?'on':'off'}" id="mgr-status-badge-${m.id}">${m.active?'Active':'Inactive'}</span>
+    </div>
+
+    <div class="divider" style="margin:0 0 12px;"></div>
+
+    <!-- Name edit -->
+    <div class="section-label">Display Name</div>
+    <div style="display:flex;gap:8px;margin-bottom:12px;">
+      <input class="form-control" id="mgr-name-inp-${m.id}" value="${m.name}" placeholder="Manager name" style="max-width:260px;"/>
+      <button class="btn btn-ghost btn-sm" onclick="saveMgrName('${m.id}')">Save</button>
+    </div>
+
+    <!-- PIN change -->
+    <div class="section-label">Login PIN</div>
+    <div class="pin-row" style="margin-bottom:12px;">
+      <input type="password" class="pin-field form-control" id="mgr-pin-${m.id}" value="${m.pin}" maxlength="10" style="max-width:130px;" placeholder="PIN"/>
+      <button class="btn btn-ghost btn-sm" onclick="togglePinVis('${m.id}')">👁</button>
+      <button class="btn btn-primary btn-sm" onclick="saveMgrPin('${m.id}')">Save PIN</button>
+      <span style="font-size:11px;color:var(--gray-400);">Current: <span id="mgr-pin-hint-${m.id}" style="font-family:monospace;font-weight:700;color:var(--blue);">****</span></span>
+    </div>
+
+    <!-- Extra Info (optional) -->
+    <div class="section-label">Profile Info <span style="font-weight:400;color:var(--gray-400);">(all optional)</span></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+      <div class="form-group" style="margin:0;">
+        <label class="form-label" style="font-size:11px;">Mobile No.</label>
+        <input class="form-control" id="mgr-mobile-${m.id}" value="${info.mobile||''}" placeholder="9XXXXXXXXX"/>
+      </div>
+      <div class="form-group" style="margin:0;">
+        <label class="form-label" style="font-size:11px;">Email</label>
+        <input class="form-control" id="mgr-email-${m.id}" value="${info.email||''}" placeholder="email@example.com"/>
+      </div>
+      <div class="form-group" style="margin:0;">
+        <label class="form-label" style="font-size:11px;">Address</label>
+        <input class="form-control" id="mgr-address-${m.id}" value="${info.address||''}" placeholder="Home address"/>
+      </div>
+      <div class="form-group" style="margin:0;">
+        <label class="form-label" style="font-size:11px;">Aadhaar / ID No.</label>
+        <input class="form-control" id="mgr-aadhaar-${m.id}" value="${info.aadhaar||''}" placeholder="XXXX XXXX XXXX"/>
+      </div>
+      <div class="form-group" style="margin:0;">
+        <label class="form-label" style="font-size:11px;">Date of Birth</label>
+        <input type="date" class="form-control" id="mgr-dob-${m.id}" value="${info.dob||''}"/>
+      </div>
+      <div class="form-group" style="margin:0;">
+        <label class="form-label" style="font-size:11px;">Emergency Contact</label>
+        <input class="form-control" id="mgr-emergency-${m.id}" value="${info.emergency||''}" placeholder="Name & mobile"/>
+      </div>
+      <div class="form-group" style="margin:0;">
+        <label class="form-label" style="font-size:11px;">Salary / Pay</label>
+        <input class="form-control" id="mgr-salary-${m.id}" value="${info.salary||''}" placeholder="Monthly amount"/>
+      </div>
+      <div class="form-group" style="margin:0;">
+        <label class="form-label" style="font-size:11px;">Shift</label>
+        <input class="form-control" id="mgr-shift-${m.id}" value="${info.shift||''}" placeholder="e.g. Morning 9–5"/>
+      </div>
+    </div>
+    <div class="form-group" style="margin-bottom:12px;">
+      <label class="form-label" style="font-size:11px;">Notes</label>
+      <input class="form-control" id="mgr-notes-${m.id}" value="${info.notes||''}" placeholder="Any additional notes…"/>
+    </div>
+    <div style="margin-bottom:14px;">
+      <button class="btn btn-ghost btn-sm" onclick="saveMgrInfo('${m.id}')">💾 Save Profile Info</button>
+    </div>
+
+    <!-- Permissions -->
+    <div class="section-label">Permissions</div>
+    <div class="perm-grid">${permHTML}</div>
+
+    <!-- Card actions -->
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-success btn-sm" onclick="savePerms('${m.id}')">💾 Save Permissions</button>
+      <button class="btn btn-sm ${m.active?'btn-amber':'btn-outline'}" onclick="toggleMgrActive('${m.id}')">
+        ${m.active?'🔒 Deactivate':'🔓 Activate'}
+      </button>
+      <button class="btn btn-danger btn-sm" onclick="openDeleteMgrModal('${m.id}')" style="margin-left:auto;">
+        🗑 Delete Manager
+      </button>
+    </div>
+  </div>`;
+}
+
+function togglePerm(mgrId, perm) {
+  // Toggle the visual state immediately (draft — not saved yet)
+  const mgrs = getManagers();
+  const m = mgrs.find(x => x.id === mgrId);
+  if (!m) return;
+  m.perms[perm] = !m.perms[perm];
+  // Update DOM
+  const item = document.getElementById('perm-' + mgrId + '-' + perm);
+  const dot  = document.getElementById('dot-' + mgrId + '-' + perm);
+  if (m.perms[perm]) { item.classList.add('on'); item.classList.remove('off'); dot.classList.add('on'); dot.classList.remove('off'); }
+  else               { item.classList.remove('on'); item.classList.add('off'); dot.classList.remove('on'); dot.classList.add('off'); }
+  // Save draft in memory
+  if (!_permDraft[mgrId]) _permDraft[mgrId] = {};
+  _permDraft[mgrId][perm] = m.perms[perm];
+}
+
+function savePerms(mgrId) {
+  if (!_permDraft[mgrId]) { showToast('No changes to save.', 'info'); return; }
+  const mgrs = getManagers();
+  const idx  = mgrs.findIndex(m => m.id === mgrId);
+  if (idx === -1) return;
+  mgrs[idx].perms = { ...mgrs[idx].perms, ..._permDraft[mgrId] };
+  saveManagers(mgrs);
+  delete _permDraft[mgrId];
+  const name = mgrs[idx].name;
+  showToast('Permissions saved for ' + name + '.', 'success');
+}
+
+function saveMgrName(mgrId) {
+  const inp  = document.getElementById('mgr-name-inp-' + mgrId);
+  const name = inp.value.trim();
+  if (!name) { showToast('Name cannot be empty.', 'warning'); return; }
+  const mgrs = getManagers();
+  const idx  = mgrs.findIndex(m => m.id === mgrId);
+  if (idx === -1) return;
+  mgrs[idx].name = name;
+  saveManagers(mgrs);
+  document.getElementById('mgr-name-display-' + mgrId).textContent = name;
+  showToast('Name updated to ' + name + '.', 'success');
+}
+
+function saveMgrPin(mgrId) {
+  const inp = document.getElementById('mgr-pin-' + mgrId);
+  const pin = inp.value.trim();
+  if (!pin || pin.length < 3) { showToast('PIN must be at least 3 characters.', 'warning'); return; }
+  const mgrs = getManagers();
+  const idx  = mgrs.findIndex(m => m.id === mgrId);
+  if (idx === -1) return;
+  mgrs[idx].pin = pin;
+  saveManagers(mgrs);
+  showToast('PIN updated for ' + mgrs[idx].name + '.', 'success');
+}
+
+function togglePinVis(mgrId) {
+  const inp  = document.getElementById('mgr-pin-' + mgrId);
+  const hint = document.getElementById('mgr-pin-hint-' + mgrId);
+  if (inp.type === 'password') {
+    inp.type = 'text';
+    // Show actual current saved PIN
+    const m = getManagerById(mgrId);
+    if (hint) hint.textContent = m ? m.pin : '****';
+  } else {
+    inp.type = 'password';
+    if (hint) hint.textContent = '****';
+  }
+}
+
+function toggleMgrActive(mgrId) {
+  const mgrs = getManagers();
+  const idx  = mgrs.findIndex(m => m.id === mgrId);
+  if (idx === -1) return;
+  mgrs[idx].active = !mgrs[idx].active;
+  saveManagers(mgrs);
+  showToast(mgrs[idx].name + ' is now ' + (mgrs[idx].active ? 'Active' : 'Inactive') + '.', mgrs[idx].active ? 'success' : 'warning');
+  renderManagerControl();
+  saveManagerInfoToB2();
+}
+
+// ── Save extra profile info ──
+function saveMgrInfo(mgrId) {
+  const mgrs = getManagers();
+  const idx  = mgrs.findIndex(m => m.id === mgrId);
+  if (idx === -1) return;
+  mgrs[idx].info = {
+    mobile    : document.getElementById('mgr-mobile-'+mgrId).value.trim(),
+    email     : document.getElementById('mgr-email-'+mgrId).value.trim(),
+    address   : document.getElementById('mgr-address-'+mgrId).value.trim(),
+    aadhaar   : document.getElementById('mgr-aadhaar-'+mgrId).value.trim(),
+    dob       : document.getElementById('mgr-dob-'+mgrId).value,
+    emergency : document.getElementById('mgr-emergency-'+mgrId).value.trim(),
+    salary    : document.getElementById('mgr-salary-'+mgrId).value.trim(),
+    shift     : document.getElementById('mgr-shift-'+mgrId).value.trim(),
+    notes     : document.getElementById('mgr-notes-'+mgrId).value.trim()
+  };
+  saveManagers(mgrs);
+  showToast('Profile info saved for ' + mgrs[idx].name + '.', 'success');
+  saveManagerInfoToB2();
+}
+
+// ── Save all manager info to B2 as CSV ──
+function saveManagerInfoToB2() {
+  if (!SERVER_URL) return;
+  const mgrs = getManagers();
+  fetch(SERVER_URL + '/api/save-manager-info', {
+    method  : 'POST',
+    headers : { 'Content-Type':'application/json', 'X-Site-Pass':'89238350030' },
+    body    : JSON.stringify({ managers: mgrs })
+  }).catch(() => {});
+}
+
+// ── Add Manager Modal ──
+function openAddManagerModal() {
+  document.getElementById('add-mgr-name').value  = '';
+  document.getElementById('add-mgr-pin').value   = '';
+  document.getElementById('add-mgr-mobile').value= '';
+  document.getElementById('add-mgr-email').value = '';
+  document.getElementById('add-mgr-address').value='';
+  document.getElementById('add-mgr-shift').value = '';
+  document.getElementById('add-mgr-salary').value= '';
+  document.getElementById('add-mgr-notes').value = '';
+  document.getElementById('m-addmgr').classList.add('open');
+  setTimeout(()=>document.getElementById('add-mgr-name').focus(),80);
+}
+
+function submitAddManager() {
+  const name = document.getElementById('add-mgr-name').value.trim();
+  const pin  = document.getElementById('add-mgr-pin').value.trim();
+  if (!name) { showToast('Manager name is required.','warning'); return; }
+  if (!pin || pin.length < 3) { showToast('PIN must be at least 3 characters.','warning'); return; }
+
+  const newId = generateManagerId();
+  const now   = new Date();
+  const newMgr = {
+    id: newId, name, pin, active: true,
+    joinedDate: now.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}),
+    perms: { addPatient:true, markPaid:true, printBill:true, editPatient:false, deletePatient:false, exportCSV:false, viewHistory:false, dayEnd:false },
+    info: {
+      mobile    : document.getElementById('add-mgr-mobile').value.trim(),
+      email     : document.getElementById('add-mgr-email').value.trim(),
+      address   : document.getElementById('add-mgr-address').value.trim(),
+      aadhaar   : '',
+      dob       : '',
+      emergency : '',
+      salary    : document.getElementById('add-mgr-salary').value.trim(),
+      shift     : document.getElementById('add-mgr-shift').value.trim(),
+      notes     : document.getElementById('add-mgr-notes').value.trim()
+    }
+  };
+  const mgrs = getManagers();
+  mgrs.push(newMgr);
+  saveManagers(mgrs);
+  closeM('m-addmgr');
+  showToast('Manager ' + name + ' added! ID: ' + newId, 'success');
+  renderManagerControl();
+  saveManagerInfoToB2();
+}
+
+// ── Delete Manager Modal ──
+let _deleteMgrId = '';
+function openDeleteMgrModal(mgrId) {
+  const m = getManagerById(mgrId);
+  if (!m) return;
+  _deleteMgrId = mgrId;
+  document.getElementById('del-mgr-info').innerHTML = `
+    <div style="background:var(--gray-50);border:1.5px solid var(--gray-200);border-radius:var(--radius);padding:12px 14px;margin-bottom:16px;">
+      <div style="font-size:15px;font-weight:800;color:var(--gray-900);">${m.name}</div>
+      <div style="font-size:12px;color:var(--gray-500);font-family:monospace;margin-top:2px;">ID: <strong style="color:var(--red);">${m.id}</strong> &nbsp;·&nbsp; PIN: ${m.pin} &nbsp;·&nbsp; Status: ${m.active?'Active':'Inactive'}</div>
+      ${(m.info&&m.info.mobile)?`<div style="font-size:12px;color:var(--gray-500);margin-top:2px;">📱 ${m.info.mobile}</div>`:''}
+    </div>
+    <div style="background:var(--red-lt);border:1.5px solid #fecaca;border-radius:var(--radius);padding:10px 12px;font-size:12.5px;color:#991b1b;margin-bottom:12px;">
+      ⚠️ This will <strong>permanently delete</strong> this manager account. Their patient records will remain. This cannot be undone.
+    </div>
+    <div class="form-group">
+      <label class="form-label">Type the Manager ID to confirm: <strong style="color:var(--red);font-family:monospace;">${m.id}</strong></label>
+      <input class="form-control" id="del-mgr-confirm" placeholder="Type ${m.id} to confirm"
+             style="font-family:monospace;font-size:15px;font-weight:700;letter-spacing:2px;"
+             oninput="checkDeleteConfirm()"/>
+    </div>`;
+  document.getElementById('del-mgr-btn').disabled = true;
+  document.getElementById('m-deletemgr').classList.add('open');
+  setTimeout(()=>document.getElementById('del-mgr-confirm').focus(),80);
+}
+
+function checkDeleteConfirm() {
+  const val = document.getElementById('del-mgr-confirm').value.trim();
+  document.getElementById('del-mgr-btn').disabled = (val !== _deleteMgrId);
+}
+
+function confirmDeleteManager() {
+  if (!_deleteMgrId) return;
+  const mgrs = getManagers();
+  const m    = mgrs.find(x=>x.id===_deleteMgrId);
+  const remaining = mgrs.filter(x=>x.id!==_deleteMgrId);
+  if (remaining.length < 1) { showToast('Cannot delete the last manager.','error'); return; }
+  saveManagers(remaining);
+  closeM('m-deletemgr');
+  showToast(m.name + ' has been deleted.', 'success');
+  renderManagerControl();
+  saveManagerInfoToB2();
+}
+
+// ════════════════════════════════════════════════════════════
+// DOCTOR SETTINGS TAB
+// ════════════════════════════════════════════════════════════
+function doctorApi(path, options = {}) {
+  const token = sessionStorage.getItem('mxray_doctor_auth');
+  return fetch((SERVER_URL || '') + path, {
+    ...options,
+    headers: { 'Content-Type':'application/json', 'Authorization':'Bearer ' + token, 'X-Site-Pass':'89238350030', ...(options.headers || {}) }
+  }).then(async response => ({ ok:response.ok, status:response.status, body:await response.json().catch(()=>({})) }));
+}
+function updateTotpStatus(enabled) {
+  document.getElementById('totp-status').textContent = enabled
+    ? '✓ Google Authenticator OTP is enabled. Doctor login requires the PIN and a rotating six-digit code.'
+    : 'OTP is not enabled yet. Enable it to require a Google Authenticator code after the doctor PIN.';
+  document.getElementById('totp-status').style.color = enabled ? 'var(--green)' : 'var(--gray-600)';
+  document.getElementById('totp-actions').style.display = enabled ? 'none' : 'block';
+  document.getElementById('totp-disable').style.display = enabled ? 'block' : 'none';
+  if (enabled) document.getElementById('totp-setup').style.display = 'none';
+}
+function loadTotpStatus() {
+  doctorApi('/api/doctor/totp').then(r => {
+    if (r.ok) updateTotpStatus(r.body.enabled);
+    else if (r.status === 401 && r.body && r.body.error === 'Doctor sign-in required') {
+      sessionStorage.removeItem('mxray_doctor_auth');
+      window.location.href = 'index.html';
+    }
+  }).catch(() => { document.getElementById('totp-status').textContent = 'Unable to check OTP status. Ensure the clinic server is running.'; });
+}
+function beginTotpSetup() {
+  doctorApi('/api/doctor/totp/setup', {method:'POST', body:'{}'}).then(r => {
+    if (!r.ok) { showToast('Could not start OTP setup.', 'error'); return; }
+    document.getElementById('totp-secret').textContent = r.body.secret;
+    document.getElementById('totp-confirm-code').value = '';
+    document.getElementById('totp-setup').style.display = 'block';
+    document.getElementById('totp-confirm-code').focus();
+  }).catch(() => showToast('Could not contact the clinic server.', 'error'));
+}
+function confirmTotpSetup() {
+  const otp = document.getElementById('totp-confirm-code').value.trim();
+  if (!/^\d{6}$/.test(otp)) { showToast('Enter the current six-digit code.', 'warning'); return; }
+  doctorApi('/api/doctor/totp/confirm', {method:'POST', body:JSON.stringify({otp})}).then(r => {
+    if (!r.ok) { showToast('That code is invalid or has expired. Try the newest code.', 'error'); return; }
+    showToast('Google Authenticator OTP is enabled.', 'success'); updateTotpStatus(true);
+  }).catch(() => showToast('Could not contact the clinic server.', 'error'));
+}
+function disableTotp() {
+  const pin = document.getElementById('totp-disable-pin').value.trim();
+  const otp = document.getElementById('totp-disable-code').value.trim();
+  if (!pin || !/^\d{6}$/.test(otp)) { showToast('Enter your PIN and current six-digit code.', 'warning'); return; }
+  doctorApi('/api/doctor/totp/disable', {method:'POST', body:JSON.stringify({pin, otp})}).then(r => {
+    if (!r.ok) { showToast('PIN or authenticator code is incorrect.', 'error'); return; }
+    document.getElementById('totp-disable-pin').value = ''; document.getElementById('totp-disable-code').value = '';
+    showToast('OTP has been disabled.', 'success'); updateTotpStatus(false);
+  }).catch(() => showToast('Could not contact the clinic server.', 'error'));
+}
+function showTelegramAlertStatus(data) {
+  const enabled = data && data.enabled;
+  document.getElementById('telegram-alert-status').textContent = enabled
+    ? '✓ Telegram alerts are connected. You will receive messages even when this Doctor panel is closed.'
+    : 'Connect a Telegram bot to receive alerts outside the clinic.';
+  document.getElementById('telegram-alert-status').style.color = enabled ? 'var(--green)' : 'var(--gray-600)';
+}
+function loadTelegramAlertStatus() {
+  doctorApi('/api/doctor/telegram').then(r => { if (r.ok) showTelegramAlertStatus(r.body); })
+    .catch(() => { document.getElementById('telegram-alert-status').textContent = 'Unable to check Telegram alerts.'; });
+}
+function enableTelegramAlerts() {
+  const botToken = document.getElementById('telegram-bot-token').value.trim();
+  if (!botToken) { showToast('Paste the bot token from @BotFather.','warning'); return; }
+  doctorApi('/api/doctor/telegram/setup', {method:'POST', body:JSON.stringify({botToken})}).then(r => {
+    if (!r.ok) { showToast(r.body.error || 'Could not connect Telegram.','error'); return; }
+    document.getElementById('telegram-bot-token').value = '';
+    showTelegramAlertStatus({enabled:true}); showToast('Telegram connected. Check the test message.','success');
+  }).catch(() => showToast('Could not contact the clinic server.', 'error'));
+}
+function testTelegramAlert() {
+  doctorApi('/api/doctor/telegram/test', {method:'POST', body:'{}'}).then(r => {
+    showToast(r.ok ? 'Test message sent. Check Telegram.' : 'Could not send the test message.', r.ok ? 'success' : 'error');
+  }).catch(() => showToast('Could not contact the clinic server.', 'error'));
+}
+function loadDoctorSettings() {
+  const s = getSettings();
+  document.getElementById('ds-clinic').value  = s.clinicName || '';
+  document.getElementById('ds-curr').value    = s.currency   || 'Rs.';
+  document.getElementById('ds-old-pin').value = '';
+  document.getElementById('ds-new-pin').value = '';
+  loadTotpStatus();
+  loadTelegramAlertStatus();
+  updateBrowserAlertStatus();
+}
+
+function saveDoctorSettings() {
+  const s       = getSettings();
+  const clinic  = document.getElementById('ds-clinic').value.trim();
+  const curr    = document.getElementById('ds-curr').value.trim();
+  const oldPin  = document.getElementById('ds-old-pin').value.trim();
+  const newPin  = document.getElementById('ds-new-pin').value.trim();
+
+  if (clinic) s.clinicName = clinic;
+  if (curr)   s.currency   = curr;
+
+  if (newPin) {
+    if (oldPin !== s.doctorPin) { showToast('Current PIN is incorrect.', 'error'); return; }
+    if (newPin.length < 3)      { showToast('New PIN must be at least 3 characters.', 'warning'); return; }
+    s.doctorPin = newPin;
+    showToast('Doctor PIN changed successfully.', 'success');
+  }
+
+  saveSettings(s);
+  showToast('Settings saved.', 'success');
+  document.getElementById('ds-old-pin').value = '';
+  document.getElementById('ds-new-pin').value = '';
+}
+
+// ════════════════════════════════════════════════════════════
+// CATALOG EDITOR
+// ════════════════════════════════════════════════════════════
+// Uses SERVICE_CATEGORIES from app.js — editable in place
+
+function renderCatalogEditor() {
+  const container = document.getElementById('catalog-editor');
+  if (!container) return;
+  container.innerHTML = SERVICE_CATEGORIES.map((cat, ci) => `
+    <div style="border:1.5px solid var(--gray-200);border-radius:var(--radius-lg);margin-bottom:12px;overflow:hidden;">
+      <!-- Category header -->
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--gray-50);border-bottom:1px solid var(--gray-200);">
+        <input class="form-control" value="${cat.label.replace(/"/g,'&quot;')}"
+               id="cat-name-${ci}" style="font-weight:700;font-size:13px;max-width:220px;"
+               placeholder="Category name"/>
+        <button class="btn btn-ghost btn-sm" onclick="addTestToCategory(${ci})">+ Add Test</button>
+        <button class="btn btn-danger btn-sm" style="margin-left:auto;" onclick="removeCategory(${ci})">✕ Remove Category</button>
+      </div>
+      <!-- Tests -->
+      <div style="padding:8px 14px;">
+        ${cat.items.map((item, ti) => {
+          const name  = item[0];
+          const price = item[1];
+          return `<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--gray-100);" id="test-row-${ci}-${ti}">
+            <input class="form-control" value="${name.replace(/"/g,'&quot;')}"
+                   id="test-name-${ci}-${ti}" placeholder="Test name" style="flex:2;font-size:12.5px;"/>
+            <div style="display:flex;align-items:center;gap:4px;flex:1;">
+              <span style="font-size:12px;color:var(--gray-500);">Rs.</span>
+              <input type="text" class="form-control" value="${price==='Based on MRP'?'MRP':price}"
+                     id="test-price-${ci}-${ti}" placeholder="Price or MRP"
+                     style="font-size:12.5px;"/>
+            </div>
+            <button class="btn btn-danger btn-sm" style="flex-shrink:0;padding:4px 8px;"
+                    onclick="removeTest(${ci},${ti})">✕</button>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`).join('');
+}
+
+function getCatalogFromEditor() {
+  // Read the catalog from the DOM — whatever the doctor sees on screen is what
+  // gets saved. (A background catalog sync may have replaced the in-memory
+  // arrays, so iterating SERVICE_CATEGORIES could silently drop a test that
+  // was just added. The DOM rows are the source of truth here.)
+  const cats = [];
+  document.querySelectorAll('#catalog-editor input[id^="cat-name-"]').forEach(labelEl => {
+    const ci = labelEl.id.replace('cat-name-', '');
+    const label = labelEl.value.trim();
+    if (!label) return;
+    const items = [];
+    document.querySelectorAll('#catalog-editor input[id^="test-name-' + ci + '-"]').forEach(nameEl => {
+      const ti = nameEl.id.replace('test-name-' + ci + '-', '');
+      const priceEl = document.getElementById('test-price-' + ci + '-' + ti);
+      if (!priceEl) return;
+      const name = nameEl.value.trim();
+      if (!name) return;
+      const priceRaw = priceEl.value.trim();
+      const price = priceRaw.toLowerCase() === 'mrp' ? 'Based on MRP' : (parseFloat(priceRaw) || 0);
+      items.push([name, price]);
+    });
+    if (items.length) cats.push({label, items});
+  });
+  return cats;
+}
+
+function addTestToCategory(ci) {
+  SERVICE_CATEGORIES[ci].items.push(['New Test', 0]);
+  renderCatalogEditor();
+  // Focus new test name
+  const ti = SERVICE_CATEGORIES[ci].items.length - 1;
+  setTimeout(() => { const el = document.getElementById('test-name-'+ci+'-'+ti); if(el) el.focus(); }, 50);
+}
+
+function removeTest(ci, ti) {
+  SERVICE_CATEGORIES[ci].items.splice(ti, 1);
+  renderCatalogEditor();
+}
+
+function addCategory() {
+  SERVICE_CATEGORIES.push({label:'New Category', items:[['New Test', 0]]});
+  renderCatalogEditor();
+  setTimeout(() => {
+    const ci = SERVICE_CATEGORIES.length - 1;
+    const el = document.getElementById('cat-name-'+ci);
+    if(el) { el.focus(); el.select(); }
+  }, 50);
+}
+
+function removeCategory(ci) {
+  if (!confirm('Remove category "'+SERVICE_CATEGORIES[ci].label+'" and all its tests?')) return;
+  SERVICE_CATEGORIES.splice(ci, 1);
+  renderCatalogEditor();
+}
+
+async function saveCatalog() {
+  // Read all values from editor inputs
+  const cats = getCatalogFromEditor();
+  if (!cats.length) { showToast('No categories to save.', 'warning'); return; }
+
+  // Update local SERVICE_CATEGORIES
+  applyServiceCatalog(cats);
+  refreshCatalogInputs();
+  renderCatalogEditor();
+
+  // Save to server
+  if (!SERVER_URL) { showToast('Catalog saved locally.', 'success'); return; }
+  try {
+    const token = sessionStorage.getItem('mxray_doctor_auth');
+    const r = await fetch(SERVER_URL + '/api/save-catalog', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Site-Pass': '89238350030',
+        'X-Gate-Token': getGateToken(),
+        'Authorization': 'Bearer ' + token
+      },
+      body: JSON.stringify({categories: cats})
+    });
+    if (r.ok) {
+      showToast('Catalog saved! Changes apply to all managers immediately.', 'success');
+    } else {
+      showToast('Saved locally. Server sync failed — retry later.', 'warning');
+    }
+  } catch(e) {
+    showToast('Saved locally. No server connection.', 'warning');
+  }
+}
+
+// ════════════════════════════════════════════════════════════
+// REFERRAL SOURCES EDITOR
+// ════════════════════════════════════════════════════════════
+// REFERRALS comes from app.js (default list, replaced by the server catalog).
+// Editing here is a master list — saved to the server via /api/save-referrals
+// so every panel's Referred By dropdown uses the same updated list.
+
+function renderReferralEditor() {
+  const container = document.getElementById('referral-editor');
+  if (!container) return;
+  if (!REFERRALS.length) {
+    container.innerHTML = '<div class="empty-state"><div class="empty-text">No referral sources yet. Add one below.</div></div>';
+    return;
+  }
+  container.innerHTML = REFERRALS.map((r, ri) => `
+    <div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--gray-100);">
+      <input class="form-control" value="${String(r).replace(/"/g,'&quot;')}" id="ref-name-${ri}" placeholder="Referral doctor / hospital / source" style="font-size:12.5px;"/>
+      <button class="btn btn-danger btn-sm" style="flex-shrink:0;padding:4px 8px;" onclick="removeReferral(${ri})" title="Remove this referral">✕</button>
+    </div>`).join('');
+}
+
+function addReferral() {
+  REFERRALS.push('New Referral');
+  renderReferralEditor();
+  setTimeout(() => {
+    const el = document.getElementById('ref-name-' + (REFERRALS.length - 1));
+    if (el) { el.focus(); el.select(); }
+  }, 50);
+}
+
+function removeReferral(ri) {
+  const name = REFERRALS[ri];
+  if (name === undefined) return;
+  if (!confirm('Remove "' + name + '" from the referral list?')) return;
+  REFERRALS.splice(ri, 1);
+  renderReferralEditor();
+}
+
+function getReferralsFromEditor() {
+  const out = [];
+  const max = Math.max(REFERRALS.length, document.querySelectorAll('#referral-editor input[id^="ref-name-"]').length);
+  for (let ri = 0; ri < max; ri++) {
+    const el = document.getElementById('ref-name-' + ri);
+    if (!el) continue;
+    const name = el.value.replace(/\s+/g, ' ').trim();
+    if (name && !out.includes(name)) out.push(name);
+  }
+  return out;
+}
+
+async function saveReferrals() {
+  const list = getReferralsFromEditor();
+  if (!list.length) { showToast('Add at least one referral source.', 'warning'); return; }
+  REFERRALS = list;
+  renderReferralEditor();
+  refreshCatalogInputs();
+  if (!SERVER_URL) { showToast('Referrals saved locally.', 'success'); return; }
+  try {
+    const token = sessionStorage.getItem('mxray_doctor_auth');
+    const r = await fetch(SERVER_URL + '/api/save-referrals', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Site-Pass': '89238350030',
+        'X-Gate-Token': getGateToken(),
+        'Authorization': 'Bearer ' + token
+      },
+      body: JSON.stringify({ referrals: list })
+    });
+    if (r.ok) showToast('Referrals saved! Changes apply to all panels immediately.', 'success');
+    else showToast('Saved locally. Server sync failed — retry later.', 'warning');
+  } catch(e) {
+    showToast('Saved locally. No server connection.', 'warning');
+  }
+}
+
+// ════════════════════════════════════════════════════════════
+// MEDICINE CATALOG EDITOR
+// ════════════════════════════════════════════════════════════
+// Uses MEDICINES from app.js — editable in place, saved to the server via
+// /api/save-medicines so every panel's medicine list/prices stay in sync.
+// Bulk CSV upload format: medicine,price (one per line).
+
+function renderMedicineEditor() {
+  const container = document.getElementById('medicine-editor');
+  if (!container) return;
+  if (!MEDICINES.length) {
+    container.innerHTML = '<div class="empty-state"><div class="empty-text">No medicines yet. Upload your medicine list via <strong>⬆ Bulk Upload CSV</strong> (format: <code>medicine,price</code>), or add one below.</div></div>';
+    return;
+  }
+  container.innerHTML = MEDICINES.map((m, ri) => {
+    const name  = String(m[0]||'');
+    const price = m[1];
+    return `<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--gray-100);">
+      <input class="form-control" value="${name.replace(/"/g,'&quot;')}" id="med-name-${ri}" placeholder="Medicine name" style="flex:2;font-size:12.5px;"/>
+      <div style="display:flex;align-items:center;gap:4px;flex:1;">
+        <span style="font-size:12px;color:var(--gray-500);">Rs.</span>
+        <input type="text" class="form-control" value="${price==='Based on MRP'?'MRP':price}" id="med-price-${ri}" placeholder="Price or MRP" style="font-size:12.5px;"/>
+      </div>
+      <button class="btn btn-danger btn-sm" style="flex-shrink:0;padding:4px 8px;" onclick="removeMedicine(${ri})" title="Remove this medicine">✕</button>
+    </div>`;
+  }).join('');
+}
+
+function getMedicinesFromEditor() {
+  const out = [];
+  const max = Math.max(MEDICINES.length, document.querySelectorAll('#medicine-editor input[id^="med-name-"]').length);
+  for (let ri = 0; ri < max; ri++) {
+    const nameEl  = document.getElementById('med-name-' + ri);
+    const priceEl = document.getElementById('med-price-' + ri);
+    if (!nameEl || !priceEl) continue;
+    const name  = nameEl.value.replace(/\s+/g, ' ').trim();
+    if (!name) continue;
+    if (out.some(([n]) => n.toLowerCase() === name.toLowerCase())) continue;
+    const priceRaw = priceEl.value.trim();
+    const price = /mrp/i.test(priceRaw) ? 'Based on MRP' : (parseFloat(priceRaw) || 0);
+    out.push([name, price]);
+  }
+  return out;
+}
+
+function addMedicine() {
+  MEDICINES.push(['New Medicine', 0]);
+  renderMedicineEditor();
+  setTimeout(() => {
+    const el = document.getElementById('med-name-' + (MEDICINES.length - 1));
+    if (el) { el.focus(); el.select(); }
+  }, 50);
+}
+
+function removeMedicine(ri) {
+  const name = MEDICINES[ri] ? MEDICINES[ri][0] : undefined;
+  if (name === undefined) return;
+  if (!confirm('Remove "' + name + '" from the medicine catalog?')) return;
+  MEDICINES.splice(ri, 1);
+  renderMedicineEditor();
+}
+
+// Parse a (medicine,price) CSV into [[name,price], ...] — skips the header row.
+function parseMedicinesCsv(text) {
+  const out = [];
+  String(text||'').split(/\r?\n/).forEach((line, i) => {
+    const ln = line.trim();
+    if (!ln) return;
+    const idx  = ln.indexOf(',');
+    let name  = (idx >= 0 ? ln.slice(0, idx) : ln).trim().replace(/^"|"$/g, '').replace(/""/g, '"');
+    let price = (idx >= 0 ? ln.slice(idx + 1) : '').trim().replace(/^"|"$/g, '');
+    if (!name) return;
+    if (i === 0 && /^(medicine|medicines|medicine name|name)$/i.test(name)) return; // header row
+    if (out.some(([n]) => n.toLowerCase() === name.toLowerCase())) return;
+    const priceRaw = /mrp/i.test(price) ? 'Based on MRP' : (parseFloat(price) || 0);
+    out.push([name, priceRaw]);
+  });
+  return out;
+}
+
+function uploadMedicinesCsv(input) {
+  const file = input && input.files && input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    const list = parseMedicinesCsv(String(reader.result || ''));
+    input.value = '';
+    if (!list.length) { showToast('No valid rows found. CSV format: medicine,price', 'error'); return; }
+    applyMedicineCatalog(list);
+    renderMedicineEditor();
+    showToast(list.length + ' medicines loaded from CSV — review and click 💾 Save Medicines.', 'success');
+  };
+  reader.readAsText(file);
+}
+
+async function saveMedicines() {
+  const list = getMedicinesFromEditor();
+  if (!list.length) { showToast('Add at least one medicine.', 'warning'); return; }
+  applyMedicineCatalog(list);
+  renderMedicineEditor();
+  refreshCatalogInputs();
+  if (!SERVER_URL) { showToast('Medicines saved locally.', 'success'); return; }
+  try {
+    const token = sessionStorage.getItem('mxray_doctor_auth');
+    const r = await fetch(SERVER_URL + '/api/save-medicines', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Site-Pass': '89238350030',
+        'X-Gate-Token': getGateToken(),
+        'Authorization': 'Bearer ' + token
+      },
+      body: JSON.stringify({ medicines: list })
+    });
+    if (r.ok) showToast('Medicines saved! Changes apply to all panels immediately.', 'success');
+    else showToast('Saved locally. Server sync failed — retry later.', 'warning');
+  } catch(e) {
+    showToast('Saved locally. No server connection.', 'warning');
+  }
+}
+
+// ════════════════════════════════════════════════════════════
+// MODAL & INIT
+// ════════════════════════════════════════════════════════════
+function closeM(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(o => {
+  o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); });
+});
+
+// Custom suggestion dropdowns in the patient detail modal — same explicit
+// Enter/click selection as the manager form (no auto-select on pause).
+if (document.getElementById('d-service')) attachAutocomplete(document.getElementById('d-service'), () => ALL_SERVICES.map(getServiceLabel), val => { document.getElementById('d-service').value = val; autoDoctorServicePrice(); });
+if (document.getElementById('d-ref'))    attachAutocomplete(document.getElementById('d-ref'),    () => REFERRALS,   val => { document.getElementById('d-ref').value = val; });
+if (document.getElementById('d-meds'))   attachAutocomplete(document.getElementById('d-meds'),   () => MEDICINES.map(m=>String(m[0])), val => { document.getElementById('d-meds').value = val; addDoctorMedicine(); }, () => { addDoctorMedicine(); });
+
+// Print styles live in the <style> block in <head> (shared with the manager panel).
+// ════════════════════════════════════════════════════════════
+// ACTIVITY LOG
+// ════════════════════════════════════════════════════════════
+const ACT_ICONS = {
+  [ACT.ADD_PATIENT]   : { icon:'➕', cls:'add' },
+  [ACT.EDIT_PATIENT]  : { icon:'✏️', cls:'edit' },
+  [ACT.DELETE_PATIENT]: { icon:'🗑', cls:'del' },
+  [ACT.MARK_PAID]     : { icon:'💰', cls:'paid' },
+  [ACT.MARK_DONE]     : { icon:'✓',  cls:'done' },
+  [ACT.MARK_CANCEL]   : { icon:'✕',  cls:'cancel' },
+  [ACT.PRINT_BILL]    : { icon:'🖨', cls:'print' },
+  [ACT.EXPORT_CSV]    : { icon:'📤', cls:'print' },
+  [ACT.CLOSE_DAY]     : { icon:'📅', cls:'done' },
+  [ACT.LOGIN]         : { icon:'🔑', cls:'login' },
+  [ACT.LOGOUT]        : { icon:'🚪', cls:'login' },
+  [ACT.CASH_HANDOVER] : { icon:'💵', cls:'paid' }
+};
+
+function initActivityLog() {
+  const dateEl = document.getElementById('act-date');
+  if (!dateEl.value) dateEl.value = new Date().toISOString().split('T')[0];
+
+  const sel  = document.getElementById('act-mgr-filter');
+  const mgrs = getManagers();
+  sel.innerHTML = '<option value="">All Managers</option>' +
+    mgrs.map(m => `<option value="${m.id}">${m.name}</option>`).join('');
+
+  // Fetch activity from server first, then render
+  fetchActivityFromServer(dateKeyFromInput(dateEl.value)).then(() => renderActivityLog());
+
+  window.addEventListener('storage', e => {
+    if (e.key === 'mxray_activity_sync') renderActivityLog();
+  });
+}
+
+// Fetch activity log entries from server for a date and merge into localStorage
+function fetchActivityFromServer(dateKey) {
+  if (!SERVER_URL) return Promise.resolve();
+  return fetch(SERVER_URL + '/api/activity?date=' + encodeURIComponent(dateKey), {
+    headers: { 'X-Site-Pass': '89238350030', 'X-Gate-Token': getGateToken() }
+  }).then(r => r.ok ? r.json() : null).then(result => {
+    if (!result || !Array.isArray(result.entries) || !result.entries.length) return;
+    const log     = getActivityLog();
+    const existIds = new Set(log.map(e => e.id));
+    let added = 0;
+    result.entries.forEach(e => {
+      if (!existIds.has(e.id)) { log.push(e); added++; }
+    });
+    if (added > 0) {
+      log.sort((a,b) => new Date(b.ts) - new Date(a.ts));
+      saveActivityLog(log);
+    }
+  }).catch(() => {});
+}
+
+function renderActivityLog() {
+  const dateVal = document.getElementById('act-date').value;
+  const mgrFilt = document.getElementById('act-mgr-filter').value;
+  const dateKey = dateVal ? dateKeyFromInput(dateVal) : getTodayDateKey();
+  const s       = getSettings();
+
+  document.getElementById('act-date-label').textContent = formatDateKey(dateKey);
+
+  // Fetch from server if date changes, then re-render
+  fetchActivityFromServer(dateKey).then(() => {
+    let entries = getLogByDate(dateKey);
+    if (mgrFilt) entries = entries.filter(e => e.mgrId === mgrFilt);
+    document.getElementById('act-total-count').textContent = entries.length + ' action(s)';
+
+  // ── Quick summary — only for selected manager or all ──
+  const summaries = getDailySummary(dateKey);
+  const filtered  = mgrFilt ? summaries.filter(s => s.manager.id === mgrFilt) : summaries;
+  const totalAdded  = filtered.reduce((s,x)=>s+x.added,  0);
+  const totalPaid   = filtered.reduce((s,x)=>s+x.paid,   0);
+  const totalEdits  = filtered.reduce((s,x)=>s+x.edits,  0);
+  const totalPrints = filtered.reduce((s,x)=>s+x.prints, 0);
+  const totalDels   = filtered.reduce((s,x)=>s+x.dels,   0);
+  const totalActs   = filtered.reduce((s,x)=>s+x.total,  0);
+  document.getElementById('act-summary-grid').innerHTML = totalActs > 0 ? `
+    <div style="display:flex;flex-wrap:wrap;gap:8px;padding:10px 14px;background:var(--blue-lt);border:1.5px solid var(--blue-md);border-radius:var(--radius);font-size:12.5px;">
+      <span style="font-weight:700;color:var(--blue-dk);">📊 Summary:</span>
+      <span>Patients Added: <strong>${totalAdded}</strong></span>
+      <span style="color:var(--gray-300);">|</span>
+      <span>Marked Paid: <strong>${totalPaid}</strong></span>
+      <span style="color:var(--gray-300);">|</span>
+      <span>Edits: <strong>${totalEdits}</strong></span>
+      <span style="color:var(--gray-300);">|</span>
+      <span>Bills Printed: <strong>${totalPrints}</strong></span>
+      ${totalDels ? `<span style="color:var(--gray-300);">|</span><span style="color:var(--red);">Deleted: <strong>${totalDels}</strong></span>` : ''}
+      <span style="color:var(--gray-300);">|</span>
+      <span style="font-weight:700;color:var(--blue);">Total: ${totalActs}</span>
+    </div>` : '';
+
+  // ── Detailed rows ──
+  if (!entries.length) {
+    document.getElementById('act-log-body').innerHTML = '';
+    document.getElementById('act-empty').style.display = 'block';
+    return;
+  }
+  document.getElementById('act-empty').style.display = 'none';
+  document.getElementById('act-log-body').innerHTML = entries.map(e => {
+    const ic  = ACT_ICONS[e.action] || { icon:'•', cls:'edit' };
+    const amt = e.amount ? `<span class="act-amt">${s.currency} ${parseFloat(e.amount).toLocaleString()}</span>` : '';
+    const pat = e.patientName ? `<span style="color:var(--gray-500);font-size:12px;"> — ${e.patientName}${e.patientUid?' ('+e.patientUid+')':''}</span>` : '';
+    const det = e.detail && !e.patientName ? `<span style="color:var(--gray-400);font-size:12px;"> — ${e.detail}</span>` : '';
+    return `<div class="act-row">
+      <div class="act-icon ${ic.cls}">${ic.icon}</div>
+      <div class="act-who">${e.mgrName}</div>
+      <div class="act-what">${e.action}${pat}${det}</div>
+      ${amt}
+      <div class="act-time">${e.time}</div>
+    </div>`;
+  }).join('');
+  }); // end fetchActivityFromServer.then
+}
+
+function filterByMgr(mgrId) {
+  document.getElementById('act-mgr-filter').value = mgrId;
+  renderActivityLog();
+}
+
+function exportActivityCSV() {
+  const dateVal = document.getElementById('act-date').value;
+  const dateKey = dateVal ? dateKeyFromInput(dateVal) : getTodayDateKey();
+  const entries = getLogByDate(dateKey);
+  if (!entries.length) { showToast('No activity to export.', 'warning'); return; }
+  const headers = ['Manager','Action','Patient Name','Patient ID','Amount','Detail','Time','Date'];
+  const rows = entries.map(e => [
+    '"'+e.mgrName+'"', '"'+e.action+'"',
+    '"'+(e.patientName||'')+'"', e.patientUid||'',
+    e.amount||0, '"'+(e.detail||'')+'"',
+    e.time, e.dateKey
+  ]);
+  const csv = [headers.join(','), ...rows.map(r=>r.join(','))].join('\n');
+  _triggerDownload(csv, 'ACTIVITY_'+dateKey+'.csv');
+  showToast('Activity log exported.', 'success');
+}
+
+// ── Settings → Activity Logs ─────────────────────────────────
+function renderLogInfo() {
+  const dateEl = document.getElementById('lg-date');
+  if (!dateEl) return;
+  if (!dateEl.value) dateEl.value = new Date().toISOString().split('T')[0];
+  const dateKey = dateKeyFromInput(dateEl.value);
+  const localAll = getActivityLog();
+  const localDate = localAll.filter(e => e.dateKey === dateKey);
+  const out = document.getElementById('lg-info');
+  out.textContent = 'Checking server logs for ' + formatDateKey(dateKey) + '…';
+  // Server-side count for the date (this is the CSV-backed source of truth)
+  fetchActivityFromServer(dateKey).then(() => {
+    const after = getLogByDate(dateKey);
+    out.innerHTML = `📊 <strong>${after.length}</strong> log entr${after.length===1?'y':'ies'} for ${formatDateKey(dateKey)}` +
+      (localDate.length!==after.length ? ` <span style="color:var(--gray-400);">(${localDate.length} locally cached before sync)</span>` : '') +
+      ` · <span style="color:var(--gray-500);">${localAll.length} total entries stored</span>` +
+      ` · <span style="color:var(--gray-500);">CSV backups for this date are rebuilt on next backup cycle.</span>`;
+  });
+}
+
+function doubleConfirmLogClear(what, countText) {
+  if (!confirm(`🗑 Clear ${what}? ${countText} This will delete them from the app AND the server logs/CSV backups.`)) return false;
+  if (!confirm(`⚠️ ARE YOU ABSOLUTELY SURE? ${what.toUpperCase()} WILL BE PERMANENTLY DELETED — ${countText}This cannot be undone. Press OK to delete.`)) return false;
+  return true;
+}
+
+function clearLogsForDate() {
+  const dateEl = document.getElementById('lg-date');
+  if (!dateEl || !dateEl.value) { showToast('Select a date from the calendar first.','warning'); return; }
+  const dateKey = dateKeyFromInput(dateEl.value);
+  const count = getLogByDate(dateKey).length;
+  if (!doubleConfirmLogClear('the activity logs for ' + formatDateKey(dateKey), (count ? count+' entr'+(count===1?'y':'ies')+' will be removed. ' : 'No entries found locally, but server entries for this date will still be cleared. '))) return;
+  // Server first (source of truth / CSV backups), then clear local cache
+  const clearServer = SERVER_URL
+    ? doctorApi('/api/activity/clear', { method:'POST', body: JSON.stringify({ date: dateKey }) })
+        .then(r => { if (!r.ok) showToast('Server could not clear the logs ('+r.body.error+').','error'); return r.ok; })
+        .catch(() => { showToast('Server unreachable — logs cleared locally only.','warning'); return false; })
+    : Promise.resolve(true);
+  clearServer.finally(() => {
+    saveActivityLog(getActivityLog().filter(e => e.dateKey !== dateKey));
+    localStorage.setItem('mxray_activity_sync', Date.now().toString());
+    renderLogInfo();
+    showToast('Activity logs cleared for '+formatDateKey(dateKey)+'.','success');
+  });
+}
+
+function clearAllLogs() {
+  const count = getActivityLog().length;
+  if (!doubleConfirmLogClear('ALL activity logs (every date)', count ? count+' entr'+(count===1?'y':'ies')+' will be deleted. ' : 'The entire log will be deleted. ')) return;
+  const clearServer = SERVER_URL
+    ? doctorApi('/api/activity/clear', { method:'POST', body: JSON.stringify({ scope:'all' }) })
+        .then(r => { if (!r.ok) showToast('Server could not clear the logs ('+r.body.error+').','error'); return r.ok; })
+        .catch(() => { showToast('Server unreachable — logs cleared locally only.','warning'); return false; })
+    : Promise.resolve(true);
+  clearServer.finally(() => {
+    clearActivityLog();
+    localStorage.setItem('mxray_activity_sync', Date.now().toString());
+    renderLogInfo();
+    showToast('All activity logs cleared.','success');
+  });
+}
+
+render();
+setInterval(render, 12000);
+
+// Server status ping
+function checkServerStatus() {
+  const dot = document.getElementById('srv-dot');
+  if (!dot) return;
+  if (!SERVER_URL) {
+    dot.textContent = '⬤ local file'; dot.style.background='var(--amber-lt)'; dot.style.color='var(--amber)'; return;
+  }
+  fetch(SERVER_URL + '/api/status').then(r => r.json()).then(() => {
+    dot.textContent = '⬤ server on'; dot.style.background='var(--green-lt)'; dot.style.color='var(--green)';
+  }).catch(() => {
+    dot.textContent = '⬤ offline'; dot.style.background='var(--red-lt)'; dot.style.color='var(--red)';
+  });
+}
+checkServerStatus();
+setInterval(checkServerStatus, 30000);
+</script>
+</body>
+</html>

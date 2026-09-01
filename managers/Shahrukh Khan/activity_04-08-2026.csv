@@ -1,0 +1,7 @@
+﻿Manager,Action,Patient Name,Patient ID,Amount,Detail,Time,Date
+"Shahrukh Khan","Logged In","",,0,"Logged in",11:22:26 AM,04-08-2026
+"Shahrukh Khan","Printed Bill","BABY Shubham Pathak",RA-P0001,1100,"",10:12:06 AM,04-08-2026
+"Shahrukh Khan","Logged In","",,0,"Logged in",10:12:04 AM,04-08-2026
+"Shahrukh Khan","Printed Bill","BABY Shubham Pathak",RA-P0001,1100,"",10:10:58 AM,04-08-2026
+"Shahrukh Khan","Added Patient","BABY Shubham Pathak",RA-P0001,1100,"Vit D3 + SGPT",10:10:47 AM,04-08-2026
+"Shahrukh Khan","Logged In","",,0,"Logged in",10:09:48 AM,04-08-2026

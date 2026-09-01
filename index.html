@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script src="gate.js?v=8"></script>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Dr. RAMGOPAL AGARWAL Diagnostic Clinic — Login</title>
+  <link rel="icon" type="image/png" href="logo.png"/>
+  <link rel="shortcut icon" type="image/png" href="logo.png"/>
+  <link rel="stylesheet" href="style.css?v=8"/>
+  <style>
+    /* ── Page layout ── */
+    .login-page {
+      min-height:100vh;
+      display:flex; align-items:center; justify-content:center;
+      background:linear-gradient(135deg,#eff6ff 0%,#f9fafb 55%,#f0fdf4 100%);
+      padding:20px;
+    }
+    .login-box {
+      background:#fff;
+      border:1.5px solid var(--gray-200);
+      border-radius:20px;
+      padding:38px 36px 32px;
+      width:100%; max-width:400px;
+      box-shadow:var(--shadow-lg);
+    }
+    .login-logo  { width:64px; height:auto; border-radius:10px; display:block; margin:0 auto 10px; }
+    .login-title { font-size:22px; font-weight:800; color:var(--blue); text-align:center; letter-spacing:.5px; }
+    .login-sub   { font-size:12px; color:var(--gray-500); text-align:center; margin-bottom:28px; }
+
+    /* ── Role tabs ── */
+    .role-tabs   { display:grid; grid-template-columns:1fr 1fr; gap:0; border:1.5px solid var(--gray-200); border-radius:var(--radius); overflow:hidden; margin-bottom:22px; }
+    .role-tab    { padding:11px 10px; text-align:center; cursor:pointer; font-size:13px; font-weight:600; color:var(--gray-500); background:#fff; transition:all .15s; border:none; outline:none; }
+    .role-tab:hover { background:var(--gray-50); }
+    .role-tab.active.mgr { background:var(--blue); color:#fff; }
+    .role-tab.active.doc { background:var(--green); color:#fff; }
+    .role-tab-icon { font-size:18px; display:block; margin-bottom:3px; }
+
+    /* ── Name input + autocomplete ── */
+    .name-wrap    { position:relative; }
+    .name-input   { width:100%; }
+    .ac-dropdown  {
+      position:absolute; top:calc(100% + 4px); left:0; right:0;
+      background:#fff; border:1.5px solid var(--blue);
+      border-radius:var(--radius); box-shadow:var(--shadow);
+      z-index:200; overflow:hidden; max-height:220px; overflow-y:auto;
+    }
+    .ac-item {
+      display:flex; align-items:center; gap:11px;
+      padding:10px 14px; cursor:pointer; transition:background .1s;
+      border-bottom:1px solid var(--gray-100);
+    }
+    .ac-item:last-child  { border-bottom:none; }
+    .ac-item:hover, .ac-item.active { background:var(--blue-lt); }
+    .ac-item.inactive    { opacity:.45; cursor:not-allowed; }
+    .ac-avatar {
+      width:32px; height:32px; border-radius:50%;
+      background:var(--blue-md); color:var(--blue);
+      display:flex; align-items:center; justify-content:center;
+      font-size:13px; font-weight:800; flex-shrink:0;
+    }
+    .ac-avatar.off { background:var(--gray-100); color:var(--gray-400); }
+    .ac-label   { font-size:13.5px; font-weight:700; color:var(--gray-800); }
+    .ac-sub     { font-size:11px; color:var(--gray-400); margin-top:1px; }
+    mark        { background:none; color:var(--blue); font-weight:800; padding:0; }
+
+    /* ── Selected user pill ── */
+    .selected-user {
+      display:none; align-items:center; gap:10px;
+      background:var(--blue-lt); border:1.5px solid var(--blue-md);
+      border-radius:var(--radius); padding:10px 14px; margin-bottom:14px;
+    }
+    .selected-user.show { display:flex; }
+    .su-avatar {
+      width:36px; height:36px; border-radius:50%;
+      background:var(--blue); color:#fff;
+      display:flex; align-items:center; justify-content:center;
+      font-size:15px; font-weight:800; flex-shrink:0;
+    }
+    .su-name  { font-size:14px; font-weight:700; color:var(--blue-dk); }
+    .su-role  { font-size:11px; color:var(--blue); margin-top:1px; }
+    .su-clear { margin-left:auto; background:none; border:none; cursor:pointer; color:var(--gray-400); font-size:16px; padding:2px 5px; border-radius:4px; }
+    .su-clear:hover { color:var(--red); background:var(--red-lt); }
+
+    /* ── PIN field ── */
+    .pin-section { display:none; }
+    .pin-section.show { display:block; }
+    .pin-wrap .form-control {
+      letter-spacing:8px; font-size:22px; font-weight:700;
+      text-align:center; padding:10px;
+    }
+    .pin-toggle {
+      position:absolute; right:10px; top:50%; transform:translateY(-50%);
+      cursor:pointer; font-size:16px; color:var(--gray-400); user-select:none;
+    }
+    .pin-toggle:hover { color:var(--blue); }
+    .pin-rel { position:relative; }
+    .pin-err { color:var(--red); font-size:12px; margin-top:6px; display:none; text-align:center; }
+
+    /* ── Footer ── */
+    .login-footer { margin-top:20px; text-align:center; font-size:11px; color:var(--gray-400); }
+
+    /* ── Shake animation on error ── */
+    @keyframes shake {
+      0%,100%{transform:translateX(0);}
+      20%{transform:translateX(-6px);}
+      40%{transform:translateX(6px);}
+      60%{transform:translateX(-4px);}
+      80%{transform:translateX(4px);}
+    }
+    .shake { animation:shake .35s ease; }
+  </style>
+</head>
+<body>
+<div class="login-page">
+  <div class="login-box">
+
+    <img src="logo.png" alt="Clinic Logo" class="login-logo" onerror="this.style.display='none'"/>
+    <div class="login-title">Dr. RAMGOPAL AGARWAL</div>
+    <div class="login-sub">Diagnostic Clinic — Management System</div>
+
+    <!-- Role selector -->
+    <div class="role-tabs">
+      <button class="role-tab mgr active" id="rtab-mgr" onclick="setRole('manager')">
+        <span class="role-tab-icon">🖥️</span>Manager
+      </button>
+      <button class="role-tab doc" id="rtab-doc" onclick="setRole('doctor')">
+        <span class="role-tab-icon">🔬</span>Doctor
+      </button>
+    </div>
+
+    <!-- Manager: name input with autocomplete -->
+    <div id="mgr-name-section">
+      <div class="form-group" style="margin-bottom:10px;">
+        <label class="form-label">Your Name</label>
+        <div class="name-wrap">
+          <input
+            class="form-control name-input"
+            id="name-input"
+            autocomplete="off"
+            spellcheck="false"
+            placeholder="Type your name…"
+            oninput="onNameInput()"
+            onkeydown="onNameKey(event)"
+            onfocus="onNameInput()"
+          />
+          <div class="ac-dropdown" id="ac-dropdown" style="display:none;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Selected user display -->
+    <div class="selected-user" id="selected-user">
+      <div class="su-avatar" id="su-avatar">?</div>
+      <div>
+        <div class="su-name"  id="su-name">—</div>
+        <div class="su-role"  id="su-role">Manager</div>
+      </div>
+      <button class="su-clear" onclick="clearSelection()" title="Change">✕</button>
+    </div>
+
+    <!-- PIN entry -->
+    <div class="pin-section" id="pin-section">
+      <div class="form-group">
+        <label class="form-label" id="pin-label">Enter PIN</label>
+        <div class="pin-rel">
+          <input
+            type="password" id="pin-in"
+            class="form-control"
+            maxlength="10"
+            placeholder="••••"
+            autocomplete="off"
+            oninput="clearErr()"
+            onkeydown="if(event.key==='Enter') doLogin()"
+          />
+          <span class="pin-toggle" id="pin-eye" onclick="togglePinEye()">👁</span>
+        </div>
+        <div class="pin-err" id="pin-err">Incorrect PIN. Try again.</div>
+      </div>
+      <div class="form-group" id="otp-section" style="display:none;">
+        <label class="form-label">Google Authenticator code</label>
+        <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6" id="otp-in"
+               class="form-control" placeholder="6-digit code" autocomplete="one-time-code"
+               style="letter-spacing:5px;font-weight:700;text-align:center;"
+               oninput="this.value=this.value.replace(/\D/g,'');clearErr()"
+               onkeydown="if(event.key==='Enter') doLogin()"/>
+      </div>
+      <button class="btn btn-primary btn-full btn-lg" onclick="doLogin()" id="login-btn">
+        Login →
+      </button>
+    </div>
+
+    <div class="login-footer">
+      Dr. RAMGOPAL AGARWAL Diagnostic Clinic &nbsp;·&nbsp;
+      <span id="mini-clock"></span>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container"></div>
+<script src="app.js?v=8"></script>
+<script>
+// ── State ──────────────────────────────────────────────────
+let currentRole     = 'manager';
+let selectedMgrId   = null;
+let acActiveIndex   = -1;
+let acItems         = [];   // filtered manager list
+let configReady     = false;
+
+// Wait for the shared clinic configuration before checking a password.
+// This makes localhost and the ngrok link use the same doctor/manager PINs.
+sharedConfigReady.finally(() => {
+  configReady = true;
+  const button = document.getElementById('login-btn');
+  if (button && button.textContent === 'Loading…') button.textContent = 'Login →';
+});
+
+// ── Clock ──────────────────────────────────────────────────
+setInterval(() => {
+  const e = document.getElementById('mini-clock');
+  if (e) e.textContent = new Date().toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit', hour12:true});
+}, 1000);
+
+// ── Role switch ────────────────────────────────────────────
+function setRole(role) {
+  currentRole = role;
+  clearSelection();
+
+  document.getElementById('rtab-mgr').classList.toggle('active', role === 'manager');
+  document.getElementById('rtab-doc').classList.toggle('active', role === 'doctor');
+
+  const mgrSection = document.getElementById('mgr-name-section');
+  const pinSection = document.getElementById('pin-section');
+  const pinLabel   = document.getElementById('pin-label');
+  const loginBtn   = document.getElementById('login-btn');
+
+  if (role === 'manager') {
+    mgrSection.style.display = 'block';
+    pinSection.classList.remove('show');   // hide until name picked
+    document.getElementById('name-input').value = '';
+    document.getElementById('ac-dropdown').style.display = 'none';
+    setTimeout(() => document.getElementById('name-input').focus(), 80);
+  } else {
+    // Doctor — show PIN immediately, no name step
+    mgrSection.style.display = 'none';
+    document.getElementById('selected-user').classList.remove('show');
+    pinLabel.textContent = '🔬  Doctor PIN';
+    loginBtn.textContent = 'Login as Doctor →';
+    pinSection.classList.add('show');
+    document.getElementById('pin-in').value = '';
+    clearErr();
+    setTimeout(() => document.getElementById('pin-in').focus(), 80);
+  }
+}
+
+// ── Autocomplete ───────────────────────────────────────────
+function onNameInput() {
+  if (currentRole !== 'manager') return;
+  const q   = document.getElementById('name-input').value.trim().toLowerCase();
+  const all = getManagers();
+  acItems   = q ? all.filter(m => m.name.toLowerCase().includes(q)) : all;
+  acActiveIndex = -1;
+  renderDropdown(q);
+}
+
+function renderDropdown(q) {
+  const dd = document.getElementById('ac-dropdown');
+  if (!acItems.length) { dd.style.display = 'none'; return; }
+
+  dd.innerHTML = acItems.map((m, i) => {
+    const name    = m.name;
+    const lower   = name.toLowerCase();
+    const qi      = q ? lower.indexOf(q) : -1;
+    let   display = name;
+    if (qi >= 0) {
+      display = name.slice(0,qi) + '<mark>' + name.slice(qi, qi+q.length) + '</mark>' + name.slice(qi+q.length);
+    }
+    return `<div
+      class="ac-item${m.active?'':' inactive'}"
+      data-id="${m.id}"
+      data-index="${i}"
+      onmousedown="${m.active ? `selectManager('${m.id}')` : 'event.preventDefault()'}"
+      onmouseover="acHover(${i})"
+    >
+      <div class="ac-avatar${m.active?'':' off'}">${name.charAt(0).toUpperCase()}</div>
+      <div>
+        <div class="ac-label">${display}</div>
+        <div class="ac-sub">${m.active ? 'Manager' : 'Inactive — contact doctor'}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  dd.style.display = 'block';
+}
+
+function acHover(i) {
+  acActiveIndex = i;
+  highlightAcItem();
+}
+
+function highlightAcItem() {
+  document.querySelectorAll('.ac-item').forEach((el, i) => {
+    el.classList.toggle('active', i === acActiveIndex);
+  });
+}
+
+function onNameKey(e) {
+  const dd = document.getElementById('ac-dropdown');
+  if (dd.style.display === 'none') return;
+
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    acActiveIndex = Math.min(acActiveIndex + 1, acItems.length - 1);
+    highlightAcItem();
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    acActiveIndex = Math.max(acActiveIndex - 1, 0);
+    highlightAcItem();
+  } else if (e.key === 'Enter') {
+    e.preventDefault();
+    if (acActiveIndex >= 0 && acItems[acActiveIndex]) {
+      const m = acItems[acActiveIndex];
+      if (m.active) selectManager(m.id);
+    }
+  } else if (e.key === 'Escape') {
+    dd.style.display = 'none';
+  }
+}
+
+function selectManager(id) {
+  const mgrs = getManagers();
+  const m    = mgrs.find(x => x.id === id);
+  if (!m || !m.active) return;
+
+  selectedMgrId = id;
+
+  // hide dropdown + name input
+  document.getElementById('ac-dropdown').style.display = 'none';
+  document.getElementById('mgr-name-section').style.display = 'none';
+
+  // show selected user pill
+  const su = document.getElementById('selected-user');
+  document.getElementById('su-avatar').textContent = m.name.charAt(0).toUpperCase();
+  document.getElementById('su-name').textContent   = m.name;
+  document.getElementById('su-role').textContent   = 'Manager';
+  su.classList.add('show');
+
+  // show PIN section
+  document.getElementById('pin-label').textContent  = 'Enter your PIN';
+  document.getElementById('login-btn').textContent  = 'Login →';
+  document.getElementById('pin-in').value = '';
+  clearErr();
+  document.getElementById('pin-section').classList.add('show');
+  setTimeout(() => document.getElementById('pin-in').focus(), 80);
+}
+
+function clearSelection() {
+  selectedMgrId = null;
+  document.getElementById('selected-user').classList.remove('show');
+  document.getElementById('pin-section').classList.remove('show');
+  document.getElementById('pin-in').value = '';
+  document.getElementById('otp-in').value = '';
+  document.getElementById('otp-section').style.display = 'none';
+  clearErr();
+
+  if (currentRole === 'manager') {
+    document.getElementById('mgr-name-section').style.display = 'block';
+    document.getElementById('name-input').value = '';
+    document.getElementById('ac-dropdown').style.display = 'none';
+    setTimeout(() => document.getElementById('name-input').focus(), 80);
+  }
+}
+
+// hide dropdown when clicking outside
+document.addEventListener('mousedown', e => {
+  const dd   = document.getElementById('ac-dropdown');
+  const inp  = document.getElementById('name-input');
+  if (!dd.contains(e.target) && e.target !== inp) dd.style.display = 'none';
+});
+
+// ── PIN eye toggle ─────────────────────────────────────────
+function togglePinEye() {
+  const inp = document.getElementById('pin-in');
+  inp.type  = inp.type === 'password' ? 'text' : 'password';
+  document.getElementById('pin-eye').textContent = inp.type === 'password' ? '👁' : '🙈';
+  inp.focus();
+}
+
+// ── Error handling ─────────────────────────────────────────
+function clearErr() {
+  const err = document.getElementById('pin-err');
+  if (err) {
+    err.textContent = 'Incorrect PIN. Try again.';
+    err.style.display = 'none';
+  }
+}
+
+function showPinErr(keepPin = false, msg = 'Incorrect PIN. Try again.') {
+  const err = document.getElementById('pin-err');
+  if (err) {
+    err.textContent = msg;
+    err.style.display = 'block';
+  }
+  const pinSection = document.getElementById('pin-section');
+  pinSection.classList.add('shake');
+  setTimeout(() => pinSection.classList.remove('shake'), 400);
+  const inp = document.getElementById('pin-in');
+  if (!keepPin && inp) inp.value = '';
+  (keepPin ? document.getElementById('otp-in') : (inp || document.getElementById('otp-in'))).focus();
+}
+
+// ── Login ──────────────────────────────────────────────────
+async function doLogin() {
+  if (!configReady) { showToast('Loading clinic settings… please try again in a moment.','info'); return; }
+  const pin = document.getElementById('pin-in').value.trim();
+  if (!pin) { document.getElementById('pin-in').focus(); return; }
+
+  if (currentRole === 'doctor') {
+    const otp = document.getElementById('otp-in').value.trim();
+    const otpRequired = document.getElementById('otp-section').style.display === 'block';
+    if (otpRequired && !/^\d{6}$/.test(otp)) { document.getElementById('otp-in').focus(); return; }
+    const response = await fetch((SERVER_URL || '') + '/api/doctor/login', {
+      method: 'POST', headers: {'Content-Type':'application/json','X-Site-Pass':'89238350030','X-Gate-Token':localStorage.getItem('clinic_gate')||''}, body: JSON.stringify({pin, otp})
+    }).then(async r => ({ ok:r.ok, body:await r.json().catch(()=>({})) })).catch(() => null);
+    if (response && response.ok && response.body.token) {
+      sessionStorage.setItem('mxray_doctor_auth', response.body.token);
+      showToast('Welcome, Doctor!', 'success');
+      document.getElementById('login-btn').textContent = 'Loading…';
+      setTimeout(() => { window.location.href = 'doctor.html'; }, 380);
+    } else if (!response) {
+      showPinErr(true, 'Server unreachable. Run "node server.js" and use http://localhost:3000');
+      showToast('Cannot connect to server. Please open via http://localhost:3000', 'error');
+    } else {
+      if (response && response.body && response.body.requiresOtp) {
+        if (otpRequired) {
+          document.getElementById('otp-in').value = '';
+          showToast('Incorrect authenticator code. Try the latest code.','error');
+          document.getElementById('otp-in').focus();
+          return;
+        }
+        document.getElementById('otp-section').style.display = 'block';
+        document.getElementById('login-btn').textContent = 'Verify OTP & Login →';
+        showToast('PIN verified. Enter the current Google Authenticator code.','info');
+        document.getElementById('otp-in').focus();
+        return;
+      }
+      showPinErr(false, 'Incorrect PIN. Try again.');
+    }
+    return;
+  }
+
+  // manager
+  if (!selectedMgrId) {
+    showToast('Please select your name first.', 'warning');
+    return;
+  }
+  const mgrs = getManagers();
+  const m    = mgrs.find(x => x.id === selectedMgrId);
+  if (!m) return;
+
+  if (pin === m.pin) {
+    sessionStorage.setItem('mxray_manager_id',   m.id);
+    sessionStorage.setItem('mxray_manager_name', m.name);
+    logActivity(ACT.LOGIN, { detail: 'Logged in' });
+    showToast('Welcome, ' + m.name + '!', 'success');
+    document.getElementById('login-btn').textContent = 'Loading…';
+    setTimeout(() => { window.location.href = 'manager.html'; }, 380);
+  } else {
+    showPinErr();
+  }
+}
+
+// ── Init ───────────────────────────────────────────────────
+setRole('manager');
+</script>
+</body>
+</html>

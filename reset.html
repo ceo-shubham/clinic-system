@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script src="gate.js"></script>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Clinic — First Time Setup</title>
+  <link rel="icon" type="image/png" href="logo.png"/>
+  <link rel="shortcut icon" type="image/png" href="logo.png"/>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+<div class="login-page">
+  <div class="login-box" style="max-width:460px;">
+    <img src="logo.png" alt="Logo" class="login-logo" onerror="this.style.display='none'"/>
+    <div class="login-title" style="font-size:20px;">First Time Setup</div>
+    <div class="login-sub">Dr. RAMGOPAL AGARWAL Diagnostic Clinic</div>
+
+    <div id="step-confirm">
+      <div style="background:#fff7ed;border:1.5px solid #fed7aa;border-radius:10px;padding:16px;margin:18px 0 20px;font-size:13px;color:#92400e;">
+        <strong>⚠ This will clear all existing data</strong><br/>
+        Run this <em>only once</em> before the clinic starts using the system.<br/>
+        All test/demo data will be removed permanently.
+      </div>
+      <div style="font-size:13px;color:#374151;margin-bottom:16px;line-height:1.7;">
+        This will reset:<br/>
+        ✓ All patient records<br/>
+        ✓ All activity logs<br/>
+        ✓ Patient ID counter (starts from RGA0001)<br/>
+        ✓ Daily CSV backups<br/><br/>
+        This will <strong>keep</strong>:<br/>
+        ✓ Manager names &amp; PINs<br/>
+        ✓ Manager permissions<br/>
+        ✓ Clinic settings (name, currency)<br/>
+        ✓ Doctor PIN and authenticator code (when OTP is enabled)
+      </div>
+      <button class="btn btn-danger btn-full btn-lg" onclick="showConfirm()">
+        🗑 Clear All Demo Data
+      </button>
+    </div>
+
+    <div id="step-pin" style="display:none;">
+      <div style="font-size:14px;font-weight:700;color:#374151;margin-bottom:14px;text-align:center;">
+        Enter Doctor PIN to confirm
+      </div>
+      <div class="form-group pin-wrap">
+        <input type="password" id="pin-in" class="form-control" maxlength="10"
+               placeholder="••••" onkeydown="if(event.key==='Enter')doReset()"
+               style="letter-spacing:8px;font-size:22px;font-weight:700;text-align:center;"/>
+        <div id="pin-err" class="pin-err" style="display:none;text-align:center;margin-top:6px;font-size:12px;color:#dc2626;">
+          Wrong PIN. Try again.
+        </div>
+      </div>
+      <div class="form-group" id="otp-section" style="display:none;">
+        <label class="form-label">Google Authenticator code</label>
+        <input type="text" id="otp-in" class="form-control" maxlength="6" inputmode="numeric" autocomplete="one-time-code"
+               placeholder="6-digit code" style="letter-spacing:6px;font-size:18px;font-weight:700;text-align:center;"
+               oninput="this.value=this.value.replace(/\D/g,'')" onkeydown="if(event.key==='Enter')doReset()"/>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-ghost btn-full" onclick="showConfirm(false)">Cancel</button>
+        <button class="btn btn-danger btn-full btn-lg" onclick="doReset()">Confirm Reset</button>
+      </div>
+    </div>
+
+    <div id="step-done" style="display:none;">
+      <div style="text-align:center;padding:20px 0;">
+        <div style="font-size:48px;margin-bottom:12px;">✅</div>
+        <div style="font-size:16px;font-weight:800;color:#16a34a;margin-bottom:6px;">System is clean & ready!</div>
+        <div style="font-size:13px;color:#6b7280;margin-bottom:20px;">All demo data removed. Patient IDs will start from RGA0001.</div>
+        <a href="index.html" class="btn btn-primary btn-lg" style="text-decoration:none;">
+          → Go to Login
+        </a>
+      </div>
+    </div>
+
+  </div>
+</div>
+<div class="toast-container"></div>
+<script src="app.js"></script>
+<script>
+function showConfirm(show = true) {
+  document.getElementById('step-confirm').style.display = show ? 'none' : 'block';
+  document.getElementById('step-pin').style.display     = show ? 'block' : 'none';
+  if (show) setTimeout(() => document.getElementById('pin-in').focus(), 80);
+}
+
+async function doReset() {
+  const pin = document.getElementById('pin-in').value.trim();
+  const otp = document.getElementById('otp-in').value.trim();
+  const response = await fetch((SERVER_URL || '') + '/api/doctor/login', {
+    method:'POST', headers:{'Content-Type':'application/json','X-Site-Pass':'89238350030'}, body:JSON.stringify({pin, otp})
+  }).then(async r => ({ok:r.ok, body:await r.json().catch(()=>({}))})).catch(() => null);
+  if (!response || !response.ok) {
+    if (response && response.body && response.body.requiresOtp) {
+      document.getElementById('otp-section').style.display = 'block';
+      document.getElementById('otp-in').focus();
+      return;
+    }
+    document.getElementById('pin-err').style.display = 'block';
+    document.getElementById('pin-in').value = '';
+    document.getElementById('pin-in').focus();
+    return;
+  }
+
+  // ── Save what we want to keep ──
+  const managers  = localStorage.getItem('mxray_managers');
+  const settings  = localStorage.getItem('mxray_settings');
+
+  // ── Wipe everything ──
+  localStorage.clear();
+
+  // ── Restore keepers ──
+  if (managers) localStorage.setItem('mxray_managers', managers);
+  if (settings) localStorage.setItem('mxray_settings', settings);
+  // Reset patient counter to 0 so first real patient gets RA-P0001
+  localStorage.setItem('mxray_uid_counter', '0');
+  // Manager counter stays at 7 (7 default managers already exist)
+
+  // ── Show done screen ──
+  document.getElementById('step-pin').style.display  = 'none';
+  document.getElementById('step-done').style.display = 'block';
+}
+</script>
+</body>
+</html>

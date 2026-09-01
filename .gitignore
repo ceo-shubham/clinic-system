@@ -1,0 +1,16 @@
+# ── Secrets — NEVER commit these ──
+# Contains MongoDB password, Backblaze B2 keys, site password.
+# Railway/backends set these via environment variables instead.
+.env
+.env.*
+
+# ── Patient data / runtime state ──
+# Real patient records, config with TOTP/Telegram secrets, local backups.
+data/
+logs/
+
+# ── Dependencies & local artifacts ──
+node_modules/
+*.log
+.DS_Store
+Thumbs.db

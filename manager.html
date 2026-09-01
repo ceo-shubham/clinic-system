@@ -1,0 +1,1555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script src="gate.js?v=8"></script>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Dr. RAMGOPAL AGARWAL Diagnostic Clinic — Manager</title>
+  <link rel="icon" type="image/png" href="logo.png"/>
+  <link rel="shortcut icon" type="image/png" href="logo.png"/>
+  <link rel="stylesheet" href="style.css?v=8"/>
+  <style>
+    @media print {
+      @page { size:A4 portrait; margin:0; }
+      body > * { display:none !important; }
+      #print-area { display:block !important; width:210mm; font-family:'Segoe UI',Arial,sans-serif; background:#fff; color:#000; }
+      .print-page  { width:210mm; page-break-after:always; }
+
+      /* Each slip = half A4. Content is top-packed (no stretched middle gap)
+         and the middle section shrinks/clips first, so the patient header,
+         amounts and footer always print and the bill stays half A4. */
+      .bill-slip {
+        width:210mm; height:148.5mm; box-sizing:border-box;
+        padding:5mm 12mm 5mm 12mm;
+        display:flex; flex-direction:column;
+        font-size:11pt; color:#000;
+        border-bottom:1.5px dashed #000;
+        overflow:hidden;
+      }
+      .bill-slip:last-child { border-bottom:none; }
+
+      /* ── Header — clinic left, BILL label right (no empty corner, no patient IDs) ── */
+      .bs-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:2mm; flex-shrink:0; }
+      .bs-lw   { display:flex; align-items:center; gap:9px; min-width:0; }
+      .bs-logo { height:44px; border-radius:3px; filter:grayscale(100%); }
+      .bs-clinic-block { display:flex; flex-direction:column; justify-content:center; }
+      .bs-clin   { font-size:12pt; font-weight:800; color:#000; letter-spacing:.2px; line-height:1.2; }
+      .bs-doctor { font-size:9pt; color:#000; margin-top:2px; font-style:italic; }
+
+      /* Bill label — NO patient IDs / numbers shown on the bill (doctor's instruction) */
+      .bs-bill-label {
+        font-size:16pt; font-weight:900; color:#000;
+        border:1.5px solid #000; border-radius:5px;
+        padding:3px 12px; letter-spacing:3px; flex-shrink:0;
+      }
+
+      /* ── Dividers ── */
+      .bs-sep  { border:none; border-top:1.5px solid #000; margin:1.6mm 0; flex-shrink:0; }
+      .bs-dash { border:none; border-top:1px dashed #555; margin:1.2mm 0; flex-shrink:0; }
+
+      /* ── Info rows — labels fixed-width so all values line up in one column ── */
+      .bs-row  { display:flex; justify-content:space-between; align-items:baseline; padding:1.5px 0; line-height:1.4; }
+      .bl { color:#000; font-size:10pt; font-weight:600; white-space:nowrap; padding-right:10px; flex-shrink:0; min-width:26mm; }
+      .bv { font-size:12pt; font-weight:600; color:#000; text-align:right; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:128mm; }
+      .bs-row .bv.blue { white-space:normal; overflow:visible; text-overflow:clip; color:#000; }
+      .bs-info .bv { white-space:normal; overflow:visible; text-overflow:clip; }
+      .bv.mono { font-family:'Courier New',monospace; font-size:11pt; }
+      .bv.blue { color:#000; }
+      .bv.grn  { color:#000; }
+      .bv.red  { color:#000; font-weight:800; }
+
+      /* ── Middle section (service / medicines / details) — top-packed, no
+         stretched gap; extreme overflow is clipped here, never in amounts/footer ── */
+      .bs-mid { flex:0 1 auto; min-height:0; overflow:hidden; }
+
+      /* Medicines in a 2-column grid → many medicines fit in few lines */
+      .bs-meds { display:grid; grid-template-columns:1fr 1fr; gap:0 10px; }
+      .bs-med-item { font-size:10pt; line-height:1.35; padding:.5px 0; }
+
+      /* ── Amount section ── */
+      .bs-amt-block { margin:2mm 0 1mm; flex-shrink:0; }
+      .bs-amt-block .bs-row { padding:1px 0; }
+      .bs-amt-block .bl { font-size:10pt; }
+      .bs-amt-block .bv { font-size:11.5pt; }
+      .bs-tot { display:flex; justify-content:space-between; align-items:center; padding:2px 0 1px; margin-top:1mm; border-top:1px solid #000; padding-top:1.5mm; }
+      .bt-l   { font-size:12pt; font-weight:800; color:#000; }
+      .bt-v   { font-size:15pt; font-weight:900; color:#000; }
+
+      /* ── Payment status — just a text line, no box ── */
+      .bs-stmp {
+        display:block; margin-top:1.6mm; flex-shrink:0;
+        font-size:11pt; font-weight:700; color:#000;
+        border:none; background:none; padding:0; letter-spacing:0;
+      }
+      .st-p { color:#000; }
+      .st-d { color:#000; }
+
+      /* ── Footer — follows the amounts directly (no dead gap above it) ── */
+      .bs-ft  { padding-top:1.6mm; border-top:1px solid #000; display:flex; justify-content:space-between; align-items:center; flex-shrink:0; }
+      .bf-b   { font-size:8.5pt; font-weight:800; color:#000; }
+      .bf-t   { font-size:8pt; color:#333; }
+    }
+    #print-area { display:none; }
+    .tabs { display:flex; gap:0; margin-bottom:16px; border-bottom:2px solid var(--gray-200); }
+    .tab  { padding:9px 20px; font-size:13px; font-weight:600; color:var(--gray-500); cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-2px; transition:all .15s; }
+    .tab:hover  { color:var(--blue); }
+    .tab.active { color:var(--blue); border-bottom-color:var(--blue); }
+    .tab-pane   { display:none; }
+    .tab-pane.active { display:block; }
+    .chk-col { width:36px; text-align:center; }
+    input[type=checkbox] { width:15px; height:15px; cursor:pointer; accent-color:var(--blue); }
+    #bulk-bar { display:none; align-items:center; gap:10px; background:#eff6ff; border:1.5px solid #bfdbfe; border-radius:var(--radius); padding:10px 14px; margin-bottom:12px; font-size:13px; font-weight:600; color:var(--blue); }
+    #bulk-bar.show { display:flex; }
+    .dayend-banner { background:linear-gradient(135deg,#fff7ed,#fef2f2); border:2px solid #fed7aa; border-radius:12px; padding:20px; text-align:center; margin-bottom:18px; }
+    .dayend-icon   { font-size:40px; margin-bottom:8px; }
+    .dayend-title  { font-size:17px; font-weight:800; color:#92400e; margin-bottom:4px; }
+    .dayend-sub    { font-size:13px; color:#b45309; }
+    .dayend-step   { display:flex; align-items:center; gap:12px; padding:12px; border:1.5px solid var(--gray-200); border-radius:var(--radius); margin-bottom:10px; background:var(--white); }
+    .step-num      { width:28px; height:28px; background:var(--blue); color:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:800; flex-shrink:0; }
+    .step-num.done { background:var(--green); }
+    .step-info     { flex:1; }
+    .step-title    { font-size:13px; font-weight:700; }
+    .step-desc     { font-size:11.5px; color:var(--gray-500); margin-top:2px; }
+    .arch-result { background:var(--white); border:1.5px solid var(--gray-200); border-radius:var(--radius); padding:12px 14px; margin-bottom:8px; cursor:pointer; transition:all .15s; }
+    .arch-result:hover { border-color:var(--blue); box-shadow:var(--shadow); }
+    .arch-name   { font-size:14px; font-weight:700; color:var(--gray-900); }
+    .arch-meta   { font-size:11.5px; color:var(--gray-500); margin-top:3px; }
+    .arch-uid    { font-family:monospace; color:var(--blue); font-size:12px; font-weight:700; }
+    /* Denied overlay on locked buttons */
+    .btn-locked  { opacity:.35; cursor:not-allowed; pointer-events:none; }
+    /* Backup tab */
+    .backup-row  { display:flex; align-items:center; justify-content:space-between; padding:10px 14px; border:1.5px solid var(--gray-200); border-radius:var(--radius); margin-bottom:8px; background:var(--white); }
+    .backup-date { font-weight:700; color:var(--gray-800); font-size:13px; }
+    .backup-info { font-size:11.5px; color:var(--gray-500); margin-top:2px; }
+  </style>
+</head>
+<body>
+<div id="print-area"></div>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="nav-left">
+    <img src="logo.png" class="nav-logo" alt="Clinic Logo" onerror="this.style.display='none'"/>
+    <span class="nav-title" style="font-size:15px;">Dr. RAMGOPAL AGARWAL DIAGNOSTIC CLINIC</span>
+    <div class="nav-divider"></div>
+    <span class="role-pill manager">Manager</span>
+    <span id="mgr-name-pill" style="font-size:12px;font-weight:700;color:var(--blue);background:var(--blue-lt);padding:3px 10px;border-radius:20px;margin-left:4px;"></span>
+  </div>
+  <div class="nav-right">
+    <div class="clock-box" id="main-clock"></div>
+    <span id="srv-dot" title="Server status" style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;background:var(--gray-100);color:var(--gray-400);">⬤ checking…</span>
+    <button class="btn btn-ghost btn-sm" id="btn-export-csv" onclick="exportTodayCSV()">⬇ Export CSV</button>
+    <button class="btn btn-ghost btn-sm" onclick="forceSyncNow()" title="Force save all data to files now" style="display:none;">💾 Sync</button>
+    <button class="btn btn-danger btn-sm" onclick="logout()">Logout</button>
+  </div>
+</nav>
+
+<div class="main">
+  <!-- STATS -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon si-blue">👥</div>
+      <div><div class="stat-label">Today's Patients</div><div class="stat-value" id="st-total">0</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon si-amber">⏳</div>
+      <div><div class="stat-label">Pending</div><div class="stat-value" id="st-pending">0</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon si-green">✓</div>
+      <div><div class="stat-label">Done</div><div class="stat-value" id="st-done">0</div></div>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs" id="main-tabs">
+    <div class="tab active" id="tab-today"   onclick="switchTab('today')">📋 Today's Patients</div>
+    <div class="tab"        id="tab-archive" onclick="switchTab('archive')">🗂 Patient History</div>
+    <div class="tab"        id="tab-backup"  onclick="switchTab('backup')">💾 Daily Backups</div>
+  </div>
+
+  <!-- TAB: TODAY -->
+  <div class="tab-pane active" id="pane-today">
+    <div class="toolbar">
+      <div class="search-wrap">
+        <span class="search-ico">⌕</span>
+        <input class="form-control" id="srch" placeholder="Search name, ID, mobile, referred by…" oninput="render()"/>
+      </div>
+      <select class="form-control" id="f-status" style="width:138px;" onchange="render()">
+        <option value="">All Status</option>
+        <option value="Pending">Pending</option>
+        <option value="Done">Done</option>
+        <option value="Cancelled">Cancelled</option>
+      </select>
+      <input type="date" class="form-control" id="f-date" style="width:152px;" onchange="render()"/>
+      <button class="btn btn-primary" id="btn-add-patient" onclick="openAdd()">+ Add Patient</button>
+    </div>
+
+    <div id="bulk-bar">
+      <span id="bulk-count">0 selected</span>
+      <button class="btn btn-primary btn-sm" id="btn-print-sel" onclick="printSelected()">🖨 Print Selected Bills</button>
+      <button class="btn btn-ghost btn-sm" onclick="clearSel()">✕ Clear</button>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Records — <span id="tbl-date"></span></div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span id="tbl-count" style="font-size:12px;color:var(--gray-400);"></span>
+          <label style="font-size:12px;color:var(--gray-500);cursor:pointer;display:flex;align-items:center;gap:5px;">
+            <input type="checkbox" id="chk-all" onchange="toggleAll(this.checked)"/> Select All
+          </label>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th class="chk-col">🖨</th><th>#</th><th>Name</th>
+              <th>Ref. By</th><th>Mobile</th><th>Service / Test</th>
+              <th>Asked</th><th>Paid</th><th>Payment</th><th>Status</th><th>Time</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="tbl-body"></tbody>
+        </table>
+      </div>
+      <div id="empty" class="empty-state" style="display:none;">
+        <div class="empty-icon">🧪</div>
+        <div class="empty-text">No patients found</div>
+        <div class="empty-sub">Register a new patient or adjust filters</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: PATIENT HISTORY -->
+  <div class="tab-pane" id="pane-archive">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">🗂 Search All Patient History</div>
+        <span style="font-size:12px;color:var(--gray-400);" id="arch-total-count"></span>
+      </div>
+      <div class="toolbar" style="margin-bottom:14px;">
+        <div class="search-wrap" style="flex:1;">
+          <span class="search-ico">⌕</span>
+          <input class="form-control" id="arch-srch" placeholder="Search by name, Patient ID (RGA0001), mobile, date (DD-MM-YYYY)…" oninput="renderArchive()"/>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="document.getElementById('arch-srch').value='';renderArchive()">Clear</button>
+      </div>
+      <div id="arch-results"></div>
+      <div id="arch-empty" class="empty-state" style="display:none;">
+        <div class="empty-icon">🔍</div><div class="empty-text">No results found</div>
+        <div class="empty-sub">Try searching by name, ID, mobile number, or date</div>
+      </div>
+      <div id="arch-hint" style="text-align:center;padding:32px 20px;color:var(--gray-400);">
+        <div style="font-size:36px;margin-bottom:10px;">🗂</div>
+        <div style="font-size:14px;font-weight:600;color:var(--gray-500);">Type to search patient history</div>
+        <div style="font-size:12px;margin-top:4px;color:var(--gray-400);">Patients with the same mobile number are grouped together showing all their visits</div>
+        <div style="font-size:11px;margin-top:6px;color:var(--gray-400);" id="arch-hint-count"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: DAILY BACKUPS -->
+  <div class="tab-pane" id="pane-backup">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">💾 Daily CSV Backups</div>
+        <button class="btn btn-primary btn-sm" onclick="exportTodayCSV()">⬇ Download Today</button>
+      </div>
+      <div style="background:var(--blue-lt);border:1.5px solid var(--blue-md);border-radius:var(--radius);padding:12px 14px;margin-bottom:14px;font-size:12.5px;color:var(--blue);">
+        <strong>ℹ Auto-saved:</strong> Every time a patient is added or updated, a CSV snapshot is automatically saved here for that day. Click Download to export any day's data.
+      </div>
+      <div id="backup-list"></div>
+      <div id="backup-empty" class="empty-state" style="display:none;">
+        <div class="empty-icon">💾</div><div class="empty-text">No backups yet</div>
+        <div class="empty-sub">Backups appear automatically as patients are registered</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<!-- DAY-END MODAL -->
+<div class="modal-overlay" id="m-dayend" style="z-index:1100;">
+  <div class="modal" style="max-width:500px;">
+    <div class="dayend-banner">
+      <div class="dayend-icon">📅</div>
+      <div class="dayend-title">Previous Day Data Found!</div>
+      <div class="dayend-sub" id="de-sub"></div>
+    </div>
+    <div id="de-dates"></div>
+    <div class="dayend-step">
+      <div class="step-num" id="sn1">1</div>
+      <div class="step-info">
+        <div class="step-title">Download CSV File</div>
+        <div class="step-desc">Save the previous day's data as a CSV file.</div>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="deDowloadCSV()">⬇ Download CSV</button>
+    </div>
+    <div class="dayend-step" style="opacity:.4;" id="de-step2">
+      <div class="step-num" id="sn2">2</div>
+      <div class="step-info">
+        <div class="step-title">Close Day &amp; Start Fresh</div>
+        <div class="step-desc">Once saved, click below to archive and clear previous day's records.</div>
+      </div>
+      <button class="btn btn-success btn-sm" id="de-close-btn" onclick="deCloseDays()" disabled>✓ Done, Close Day</button>
+    </div>
+    <div style="margin-top:14px;font-size:11.5px;color:var(--gray-500);text-align:center;">
+      All data is permanently saved in the history search.
+    </div>
+  </div>
+</div>
+
+<!-- ADD / EDIT MODAL -->
+<div class="modal-overlay" id="m-patient">
+  <div class="modal" style="max-width:900px;">
+    <div class="modal-header">
+      <div class="modal-title" id="m-title">Register New Patient</div>
+      <button class="modal-close" onclick="closeM('m-patient')">✕</button>
+    </div>
+    <form onsubmit="return false;">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Patient Name</label>
+          <div style="display:flex;gap:6px;">
+            <select class="form-control" id="f-title" style="width:110px;flex-shrink:0;" onchange="onTitleChange()">
+              <option value="">Title</option>
+              <option value="MR.">MR.</option>
+              <option value="MRS.">MRS.</option>
+              <option value="MS.">MS.</option>
+              <option value="BABY">BABY</option>
+              <option value="MASTER">MASTER</option>
+            </select>
+            <input class="form-control" id="f-name" placeholder="Full name"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Age</label>
+          <div style="display:flex;gap:6px;align-items:center;">
+            <input type="number" class="form-control" id="f-age" placeholder="e.g. 35" min="0" max="150" style="flex:1;"/>
+            <select class="form-control" id="f-age-unit" style="width:110px;flex-shrink:0;display:none;" onchange="onAgeUnitChange()">
+              <option value="months">Months</option>
+              <option value="years">Years</option>
+              <option value="years+months">Yrs + Mo</option>
+            </select>
+            <input type="number" class="form-control" id="f-age-months" placeholder="Mo" min="0" max="11" style="width:70px;flex-shrink:0;display:none;" title="Additional months"/>
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Father's Name</label>
+          <input class="form-control" id="f-father" placeholder="Father's name"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Husband's Name</label>
+          <input class="form-control" id="f-husband" placeholder="Husband's name"/>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Gender</label>
+          <select class="form-control" id="f-gender">
+            <option value="">Select</option><option>Male</option><option>Female</option><option>Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Mobile No.</label>
+          <div style="display:flex;gap:0;align-items:center;">
+            <span style="padding:8px 10px;background:var(--gray-50);border:1.5px solid var(--gray-200);border-right:none;border-radius:var(--radius) 0 0 var(--radius);font-size:13px;font-weight:600;color:var(--gray-600);white-space:nowrap;">+91</span>
+            <input class="form-control" id="f-mobile" placeholder="10-digit number"
+                   maxlength="10" inputmode="numeric" pattern="[0-9]{10}"
+                   style="border-radius:0 var(--radius) var(--radius) 0;"
+                   oninput="this.value=this.value.replace(/\D/g,'')"
+                   onblur="checkMobileLookup()"/>
+          </div>
+          <div id="mobile-match-badge" style="display:none;margin-top:5px;font-size:12px;font-weight:700;color:#16a34a;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;padding:4px 10px;">
+            ↩ Returning patient (same mobile previously registered)
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Address</label>
+        <input class="form-control" id="f-address" placeholder="Street, Area, City"/>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Referred By</label>
+          <input class="form-control" id="f-ref" placeholder="Type to search or choose a referral"/>
+          <datalist id="ref-options"></datalist>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Service / Test <span style="font-weight:400;">(add one or more)</span></label>
+          <div style="display:flex;gap:6px;">
+            <input class="form-control" id="f-xpart" placeholder="Type e.g. Ig, then choose a service"/>
+            <button type="button" class="btn btn-outline btn-sm" onclick="addSelectedService()">Add</button>
+          </div>
+          <datalist id="service-options"></datalist>
+          <div id="selected-services" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:7px;"></div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Guidance / Medicine <span style="font-weight:400;color:var(--gray-400);">(Space = tick, Enter = next)</span></label>
+          <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-start;">
+            <label class="tick-opt" id="tick-guidance">
+              <input type="checkbox" id="f-guidance" onchange="onTickChange()"/>
+              <span class="tick-box">✓</span> Guidance <span style="font-weight:400;color:var(--gray-500);">(+<span id="guidance-price-label">Rs. 300</span>)</span>
+            </label>
+            <label class="tick-opt" id="tick-medicine">
+              <input type="checkbox" id="f-medicine" onchange="onTickChange()"/>
+              <span class="tick-box">✓</span> Medicine <span style="font-weight:400;color:var(--gray-500);">(choose medicines — price auto-adds)</span>
+            </label>
+            <div id="f-meds-wrap" style="display:none;flex:1;min-width:240px;align-items:center;gap:6px;flex-wrap:wrap;">
+              <input class="form-control" id="f-meds" placeholder="Type e.g. Paracetamol, then choose" style="flex:1;min-width:150px;"/>
+              <button type="button" class="btn btn-outline btn-sm" onclick="addSelectedMedicine()">Add</button>
+              <div id="med-qty-prompt" style="display:none;flex-basis:100%;background:var(--blue-lt);border:1.5px solid var(--blue-md);border-radius:var(--radius);padding:8px 12px;align-items:center;gap:8px;flex-wrap:wrap;">
+                <span style="font-size:12.5px;font-weight:700;color:var(--blue);" id="med-qty-name"></span>
+                <span style="font-size:12px;color:var(--gray-500);">Quantity (price is per tablet/unit) —</span>
+                <input type="number" class="form-control" id="f-med-qty" min="1" step="1" value="1" inputmode="numeric" style="width:88px;flex-shrink:0;"/>
+                <button type="button" class="btn btn-primary btn-sm" onclick="commitMedQty()">✓ Add</button>
+                <button type="button" class="btn btn-ghost btn-sm" onclick="cancelMedQty()" title="Choose a different medicine">✕</button>
+              </div>
+              <datalist id="medicine-options"></datalist>
+              <div id="selected-meds" style="display:flex;flex-wrap:wrap;gap:6px;flex-basis:100%;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Sub-test / Details</label>
+          <input class="form-control" id="f-views" placeholder="e.g. specific panel, extra notes"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Amount Charged</label>            <input type="number" class="form-control" id="f-asked" placeholder="Auto-filled from selected services" min="0" step="1" readonly/>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Amount Received</label>
+          <input type="number" class="form-control" id="f-paid" placeholder="0 — no payment taken" min="0" step="1" oninput="onPaidInput()"/>
+        </div>
+        <div class="form-group" id="f-method-wrap" style="display:none;">
+          <label class="form-label">Paid As — Method</label>
+          <select class="form-control" id="f-method">
+            <option value="cash">💵 Cash</option>
+            <option value="online">📲 Online</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Payment Status</label>
+          <select class="form-control" id="f-pstatus">
+            <option value="Unpaid">Unpaid</option><option value="Partial">Partial</option><option value="Paid">Paid</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Notes</label>
+        <input class="form-control" id="f-notes" placeholder="Additional notes…"/>
+      </div>
+      <div class="divider"></div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;">
+        <button class="btn btn-ghost" onclick="closeM('m-patient')">Cancel</button>
+        <button class="btn btn-primary" id="m-submit" onclick="submitPatient()">Register Patient</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- VIEW MODAL -->
+<div class="modal-overlay" id="m-view">
+  <div class="modal" style="max-width:520px;">
+    <div class="modal-header">
+      <div class="modal-title">Patient Details</div>
+      <button class="modal-close" onclick="closeM('m-view')">✕</button>
+    </div>
+    <div id="view-body"></div>
+    <div class="divider"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;">
+      <button class="btn btn-ghost" onclick="closeM('m-view')">Close</button>
+      <button class="btn btn-outline" id="view-edit-btn" onclick="editFromView()">Edit</button>
+      <button class="btn btn-primary" id="view-print-btn" onclick="doPrint([viewUID])">🖨 Print Bill</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container"></div>
+<script src="app.js?v=8"></script>
+<script>
+checkAuth('manager');
+startClock('main-clock');
+initSync(refresh);
+
+// Permissions come from the doctor-controlled config (app.js hasPerm reads the
+// manager's saved perms). Entry-workflow defaults (add/mark-paid/print) are
+// filled automatically for legacy configs in app.js getManagers(), and the
+// doctor can toggle any permission in Settings — changes sync live from the server.
+
+// Show manager name in navbar
+document.getElementById('mgr-name-pill').textContent = getCurrentManagerName();
+
+// Apply permission guards to UI elements — toggles the lock class both ways so
+// a permission re-enabled by the doctor unlocks the button immediately.
+function applyPermUI() {
+  const setLock = (id, locked) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (locked) el.classList.add('btn-locked'); else el.classList.remove('btn-locked');
+  };
+  setLock('btn-add-patient', !hasPerm('addPatient'));
+  setLock('btn-print-sel',   !hasPerm('printBill'));
+  setLock('btn-export-csv',  !hasPerm('exportCSV'));
+  // Permission tabs — only visible when the doctor grants the access
+  const archTab = document.getElementById('tab-archive');
+  if (archTab) archTab.style.display = hasPerm('viewHistory') ? '' : 'none';
+  const bakTab = document.getElementById('tab-backup');
+  if (bakTab) bakTab.style.display = hasPerm('dayEnd') ? '' : 'none';
+}
+applyPermUI();
+// When the server config (with the doctor's permission changes) finishes
+// loading, immediately re-apply the permission UI and re-render the rows —
+// no need to wait for the periodic sync or reload.
+if (typeof sharedConfigReady !== 'undefined' && sharedConfigReady) {
+  sharedConfigReady.then(() => { applyPermUI(); refresh(); }).catch(() => {});
+}
+// When the user returns to this tab, re-apply permissions immediately — covers
+// the case where the doctor saved permission changes in another tab.
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) { applyPermUI(); refresh(); }
+});
+
+document.getElementById('f-date').value = new Date().toISOString().split('T')[0];
+document.getElementById('service-options').innerHTML = serviceOptions();
+document.getElementById('ref-options').innerHTML = referralOptions();
+document.getElementById('medicine-options').innerHTML = medicineOptions();
+
+// Custom suggestion dropdowns for Referred By and Service (replaces the native
+// datalist picker): an option is committed ONLY on Enter/click — no surprise
+// auto-selection when you pause — and the list stays open while the cursor moves.
+attachAutocomplete(document.getElementById('f-ref'),   () => REFERRALS,   val => { document.getElementById('f-ref').value = val; });
+attachAutocomplete(document.getElementById('f-xpart'), () => ALL_SERVICES.map(getServiceLabel), val => { document.getElementById('f-xpart').value = val; addSelectedService(); }, () => { addSelectedService(); });
+attachAutocomplete(document.getElementById('f-meds'),  () => MEDICINES.map(m=>String(m[0])), val => { document.getElementById('f-meds').value = val; addSelectedMedicine(); }, () => { addSelectedMedicine(); });
+
+let editUID = null;
+let viewUID = null;
+let selectedServices = [];
+
+let selectedMeds = [];   // [{ name, qty }]
+let pendingMed  = null;  // { name } — medicine chosen, waiting for its quantity
+
+function renderSelectedMeds() {
+  const el = document.getElementById('selected-meds');
+  if (!el) return;
+  const cur = getSettings().currency || 'Rs.';
+  el.innerHTML = selectedMeds.map((m,i) => {
+    const qty   = getMedQty(m);
+    const price = getMedicinePrice(m.name);
+    return `<span style="background:#eff6ff;color:#1a56db;border-radius:14px;padding:4px 8px;font-size:12px;font-weight:700;">${m.name}${qty>1?' ×'+qty:''} (${getMedicinePriceLabel(m.name)}${qty>1?' × '+qty+' = '+cur+' '+(price*qty).toLocaleString():''}) <button type="button" onclick="removeSelectedMedicine(${i})" style="border:0;background:transparent;color:#1a56db;cursor:pointer;font-weight:800;">×</button></span>`;
+  }).join('');
+  updateAmount();
+}
+
+// A medicine is chosen → ask for its quantity first (catalog price = per
+// tablet/unit). Only after the quantity is entered the medicine is added and
+// the user can pick the next one. Empty Enter on the medicine field moves on.
+function addSelectedMedicine() {
+  const input = document.getElementById('f-meds');
+  const name  = (input ? input.value : '').trim();
+  if (!name) return;
+  if (!Object.prototype.hasOwnProperty.call(MEDICINE_PRICES, name)) { showToast('Choose a medicine from the suggestions.', 'warning'); return; }
+  if (input) input.value = '';
+  requestMedQty(name);
+}
+
+function requestMedQty(name) {
+  pendingMed = { name };
+  const prompt = document.getElementById('med-qty-prompt');
+  const nameEl = document.getElementById('med-qty-name');
+  if (nameEl) nameEl.textContent = name + ' (' + getMedicinePriceLabel(name) + ' each)';
+  const qtyIn = document.getElementById('f-med-qty');
+  if (qtyIn) qtyIn.value = '1';
+  if (prompt) prompt.style.display = 'flex';
+  setTimeout(() => { const q = document.getElementById('f-med-qty'); if (q) { q.focus(); q.select(); } }, 30);
+}
+
+function commitMedQty() {
+  if (!pendingMed) return;
+  const qty = parseInt(document.getElementById('f-med-qty').value, 10);
+  if (!qty || qty < 1) { showToast('Enter a valid quantity (1 or more).', 'warning'); const q = document.getElementById('f-med-qty'); if (q) q.focus(); return; }
+  const existing = selectedMeds.find(m => m.name === pendingMed.name);
+  if (existing) existing.qty += qty;
+  else selectedMeds.push({ name: pendingMed.name, qty });
+  pendingMed = null;
+  const prompt = document.getElementById('med-qty-prompt');
+  if (prompt) prompt.style.display = 'none';
+  renderSelectedMeds();
+  setTimeout(() => formFocus('f-meds'), 30);
+}
+
+function cancelMedQty() {
+  pendingMed = null;
+  const prompt = document.getElementById('med-qty-prompt');
+  if (prompt) prompt.style.display = 'none';
+  setTimeout(() => formFocus('f-meds'), 30);
+}
+
+function removeSelectedMedicine(i) { selectedMeds.splice(i, 1); renderSelectedMeds(); }
+
+function renderSelectedServices() {
+  document.getElementById('selected-services').innerHTML = selectedServices.map((name,i)=>
+    `<span style="background:#eff6ff;color:#1a56db;border-radius:14px;padding:4px 8px;font-size:12px;font-weight:700;">${getServiceLabel(name)} (${getServicePriceLabel(name)}) <button type="button" onclick="removeSelectedService(${i})" style="border:0;background:transparent;color:#1a56db;cursor:pointer;font-weight:800;">×</button></span>`).join('');
+  updateAmount();
+}
+const GUIDANCE_PRICE = 300; // guidance was the old "Consultancy" test — now a tick option
+
+function onTickChange() {
+  ['guidance','medicine'].forEach(k => {
+    const el   = document.getElementById('f-' + k);
+    const wrap = document.getElementById('tick-' + k);
+    if (el && wrap) wrap.classList.toggle('on', el.checked);
+  });
+  const medWrap = document.getElementById('f-meds-wrap');
+  const medTick = document.getElementById('f-medicine');
+  if (medWrap && medTick) medWrap.style.display = medTick.checked ? 'flex' : 'none';
+  updateAmount();
+}
+
+function updateAmount() {
+  const amountInput = document.getElementById('f-asked');
+  if (!amountInput) return;
+  const guidance = document.getElementById('f-guidance') ? document.getElementById('f-guidance').checked : false;
+  const base = selectedServices.reduce((sum,name)=>sum+getServicePrice(name),0)
+             + selectedMeds.reduce((sum,m)=>sum+getMedicinePrice(m.name)*getMedQty(m),0)
+             + (guidance ? GUIDANCE_PRICE : 0);
+  amountInput.readOnly = true;
+  amountInput.placeholder = 'Auto-filled from selected services & medicines';
+  amountInput.value = base || '';
+}
+function addSelectedService() {
+  const input=document.getElementById('f-xpart'), name=getCatalogServiceName(input.value);
+  if (!name) return;
+  if (!Object.prototype.hasOwnProperty.call(SERVICE_PRICES,name)) { showToast('Choose a service from the suggestions.','warning'); return; }
+  if (!selectedServices.includes(name)) selectedServices.push(name);
+  input.value=''; renderSelectedServices();
+  // Stay on service field — manager may want to add more services
+  // Empty Enter will move to sub-details
+  setTimeout(() => formFocus('f-xpart'), 30);
+}
+function removeSelectedService(i) { selectedServices.splice(i,1); renderSelectedServices(); }
+document.getElementById('f-xpart').addEventListener('change',addSelectedService);
+// Enter on f-xpart is handled by the autocomplete dropdown (select highlighted
+// option, or add the typed service) — no separate keydown binding needed here.
+
+// ── Enter key navigation through patient form ─────────────────
+function formFocus(id) {
+  const el = document.getElementById(id);
+  if (!el || el.offsetParent === null) return;
+  el.focus();
+  try { if (el.tagName === 'INPUT') el.select(); } catch(e){}
+}
+
+function isBabyOrMaster() {
+  return ['BABY','MASTER'].includes(document.getElementById('f-title').value);
+}
+
+// Prevent Enter from submitting/closing the form on select/datalist fields
+// We handle Enter ourselves
+function blockFormEnter(e) {
+  if (e.key === 'Enter') e.preventDefault();
+}
+
+function setupFormEnterNav() {
+
+  // ── Title → Name
+  document.getElementById('f-title').addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+    formFocus('f-name');
+  });
+
+  // ── Name → if BABY/MASTER: age-unit selector, else: age number
+  document.getElementById('f-name').addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+    formFocus(isBabyOrMaster() ? 'f-age-unit' : 'f-age');
+  });
+
+  // ── Age Unit (months / years / years+months) → age number
+  document.getElementById('f-age-unit').addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+    formFocus('f-age');
+  });
+
+  // ── Age number:
+  //    years+months → go to age-months
+  //    else → Father
+  document.getElementById('f-age').addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+    const unit = document.getElementById('f-age-unit').value;
+    if (isBabyOrMaster() && unit === 'years+months') {
+      formFocus('f-age-months');
+    } else {
+      formFocus('f-father');
+    }
+  });
+
+  // ── Age months → Father
+  document.getElementById('f-age-months').addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+    formFocus('f-father');
+  });
+
+  // ── Father → Gender (if filled) or Husband (if empty)
+  document.getElementById('f-father').addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+    formFocus(document.getElementById('f-father').value.trim() ? 'f-gender' : 'f-husband');
+  });
+
+  // ── Husband → Gender
+  document.getElementById('f-husband').addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+    formFocus('f-gender');
+  });
+
+  // ── Gender (select) → Mobile
+  // Must preventDefault here to stop form submit
+  document.getElementById('f-gender').addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+    e.stopPropagation();
+    formFocus('f-mobile');
+  });
+
+  // ── Mobile → Address
+  document.getElementById('f-mobile').addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+    checkMobileLookup();
+    formFocus('f-address');
+  });
+
+  // ── Address (skippable) → Ref
+  document.getElementById('f-address').addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+    formFocus('f-ref');
+  });
+
+  // ── Ref → Service — the custom dropdown commits a highlighted option on Enter
+  // (value is filled before focus moves); plain Enter just moves to the Service
+  // field. No stopPropagation here so the dropdown's own Enter handler still runs.
+  document.getElementById('f-ref').addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+    setTimeout(() => formFocus('f-xpart'), 30);
+  }, true);
+
+  // ── Service: Enter on an EMPTY field moves to the Guidance tick. Non-empty
+  // Enter is handled by the autocomplete dropdown (add highlighted/typed service).
+  document.getElementById('f-xpart').addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    const val = document.getElementById('f-xpart').value.trim();
+    if (!val) {
+      e.preventDefault();
+      e.stopPropagation();
+      formFocus('f-guidance');
+    }
+  }, true);
+
+  // ── Guidance / Medicine ticks — Space ticks (native checkbox), Enter moves to
+  // the next option: Guidance → Medicine → Sub-details.
+  document.getElementById('f-guidance').addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === 'ArrowDown') { e.preventDefault(); e.stopPropagation(); formFocus('f-medicine'); }
+  });
+  document.getElementById('f-medicine').addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === 'ArrowDown') {
+      e.preventDefault(); e.stopPropagation();
+      formFocus(document.getElementById('f-medicine').checked ? 'f-meds' : 'f-views');
+    }
+  });
+
+  // ── Medicine picker — Enter on an EMPTY field moves to Sub-details. A
+  // non-empty Enter is handled by the autocomplete (choose medicine → quantity
+  // prompt). If a quantity is pending, Enter first commits/cancels it.
+  const fMeds = document.getElementById('f-meds');
+  if (fMeds) {
+    fMeds.addEventListener('keydown', e => {
+      if (e.key !== 'Enter') return;
+      if (pendingMed) { e.preventDefault(); e.stopPropagation(); cancelMedQty(); return; }
+      const val = document.getElementById('f-meds').value.trim();
+      if (!val) {
+        e.preventDefault();
+        e.stopPropagation();
+        formFocus('f-views');
+      }
+    }, true);
+    // Typing a new name while the quantity box is open = choosing a different
+    // medicine — dismiss the pending quantity prompt.
+    fMeds.addEventListener('input', () => {
+      if (pendingMed) {
+        pendingMed = null;
+        const prompt = document.getElementById('med-qty-prompt');
+        if (prompt) prompt.style.display = 'none';
+      }
+    });
+  }
+
+  // ── Quantity input — Enter adds the medicine (and moves to next), Escape cancels
+  const fMedQty = document.getElementById('f-med-qty');
+  if (fMedQty) fMedQty.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); commitMedQty(); }
+    else if (e.key === 'Escape') { e.preventDefault(); cancelMedQty(); }
+  });
+
+  // ── Sub-details → Amount Received
+  document.getElementById('f-views').addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+    formFocus('f-paid');
+  });
+
+  // ── Amount Received → method dropdown (if visible) or Notes
+  document.getElementById('f-paid').addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+    const wrap = document.getElementById('f-method-wrap');
+    formFocus(wrap && wrap.style.display !== 'none' ? 'f-method' : 'f-notes');
+  });
+
+  // ── Method dropdown: arrow keys switch Cash/Online, Enter moves to Notes
+  const fMethod = document.getElementById('f-method');
+  if (fMethod) fMethod.addEventListener('keydown', e => {
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      const idx = fMethod.selectedIndex + (e.key === 'ArrowDown' ? 1 : -1);
+      fMethod.selectedIndex = Math.max(0, Math.min(fMethod.options.length - 1, idx));
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      formFocus('f-notes');
+    }
+  });
+
+  // ── Notes → focus Register button
+  document.getElementById('f-notes').addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+    document.getElementById('m-submit').focus();
+  });
+
+  // ── Register button → submit on Enter
+  document.getElementById('m-submit').addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); submitPatient(); }
+  });
+
+  // Block Enter from submitting form on any field inside the form
+  document.querySelector('#m-patient form').addEventListener('keydown', e => {
+    if (e.key === 'Enter') e.preventDefault();
+  });
+}
+
+setupFormEnterNav();
+
+// ============================================================
+// TABS
+// ============================================================
+function switchTab(name) {
+  if (name === 'archive' && !hasPerm('viewHistory')) { showToast('Access denied: View History not allowed.','error'); return; }
+  if (name === 'backup'  && !hasPerm('dayEnd'))      { showToast('Access denied: Day-End not allowed.','error'); return; }
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  document.getElementById('pane-'+name).classList.add('active');
+  if (name === 'archive') renderArchive();
+  if (name === 'backup')  renderBackups();
+}
+
+// ============================================================
+// DAY-END
+// ============================================================
+let dePendingDates = [];
+let deCSVDownloaded = false;
+
+function checkAndShowDayEnd() {
+  if (!hasPerm('dayEnd')) return; // only show to permitted managers
+  dePendingDates = checkDayEnd();
+  if (!dePendingDates.length) return;
+  deCSVDownloaded = false;
+  const s = getSettings();
+  document.getElementById('de-sub').textContent =
+    'Data from ' + dePendingDates.map(d => formatDateKey(d)).join(', ') +
+    ' is still open. Please save it as a CSV file first, then close the day.';
+  const datesHTML = dePendingDates.map(dk => {
+    const pts = getPatientsByDate(dk);
+    const rev = pts.reduce((s,p) => s+(parseFloat(p.amountPaid)||0), 0);
+    return `<div style="background:var(--amber-lt);border:1px solid #fde68a;border-radius:8px;padding:10px 14px;margin-bottom:10px;font-size:13px;">
+      <div style="font-weight:700;color:var(--amber);">📅 ${formatDateKey(dk)}</div>
+      <div style="color:var(--gray-600);margin-top:3px;">${pts.length} patient(s) &nbsp;·&nbsp; Revenue: ${s.currency} ${rev.toLocaleString()}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('de-dates').innerHTML = datesHTML;
+  document.getElementById('sn1').classList.remove('done');
+  document.getElementById('de-step2').style.opacity = '.4';
+  document.getElementById('de-close-btn').disabled = true;
+  document.getElementById('m-dayend').classList.add('open');
+}
+
+function deDowloadCSV() {
+  dePendingDates.forEach(dk => { const pts = getPatientsByDate(dk); if (pts.length) downloadCSV(dk, pts); });
+  deCSVDownloaded = true;
+  document.getElementById('sn1').classList.add('done');
+  document.getElementById('de-step2').style.opacity = '1';
+  document.getElementById('de-close-btn').disabled = false;
+  showToast('CSV downloaded! Now click "Done, Close Day".', 'success');
+}
+
+function deCloseDays() {
+  if (!deCSVDownloaded) { showToast('Please download CSV first.', 'warning'); return; }
+  dePendingDates.forEach(dk => closeDayAndArchive(dk));
+  closeM('m-dayend');
+  showToast("Previous day closed. Today's fresh list is ready!", 'success');
+  render();
+}
+
+// ============================================================
+// PRINT
+// ============================================================
+function buildBillHTML(p, s) {
+  const due    = Math.max(0,(p.amountAsked||0)-(p.amountPaid||0));
+  const isPaid = getPaymentStatus(p) === 'Paid';
+  const isPartial = getPaymentStatus(p) === 'Partial';
+  const printedAt = new Date().toLocaleString('en-IN',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit',hour12:true});
+  const CNAME  = 'Dr. RAMGOPAL AGARWAL DIAGNOSTIC CLINIC';
+  const DNAME  = 'Dr. Pravin Kumar Agarwal (M.D. Physician, PG in Ultrasonography)';
+  const testsTotal = getTestsTotal(p.xrayPart);
+  const medsTotal  = getMedsTotal(p.medsPart);
+  const totalAmt   = (p.amountAsked||0) || (testsTotal + medsTotal + (p.guidance ? 300 : 0));
+
+  // Payment info — ONE compact line: "Amount Paid Rs. X (Online)" / "(Cash)" /
+  // "(Rs. X Online + Rs. Y Cash)". Per-installment rows only when 2 payments.
+  const pays      = getPayments(p);
+  const paidTotal = Number(p.amountPaid)||0;
+  let paidLine = '';
+  if (paidTotal > 0) {
+    const pb = getPaymentBreakdown(p);
+    let note = '';
+    if (pb.cash > 0 && pb.online > 0) note = ` (${s.currency} ${pb.online.toLocaleString()} Online + ${s.currency} ${pb.cash.toLocaleString()} Cash)`;
+    else if (pb.online > 0) note = ' (Online)';
+    else if (pb.cash > 0) note = ' (Cash)';
+    paidLine = `<div class="bs-row"><span class="bl">Amount Paid</span><span class="bv grn">${s.currency} ${paidTotal.toLocaleString()}${note}</span></div>`;
+  }
+  const paysList = pays.length > 1 ? pays.map((pay,i)=>`<div class="bs-row"><span class="bl">Payment ${i+1}</span><span class="bv grn">${s.currency} ${(pay.amount||0).toLocaleString()}${pay.online>0?(pay.cash>0?' ('+s.currency+' '+pay.online.toLocaleString()+' online + '+s.currency+' '+pay.cash.toLocaleString()+' cash)':' ('+s.currency+' '+pay.online.toLocaleString()+' online)'):(pay.cash>0?' ('+s.currency+' '+pay.cash.toLocaleString()+' cash)':'')}${pay.time?' · '+pay.time:''}</span></div>`).join('') : '';
+
+  let payStamp = '';
+  if (isPaid)         payStamp = `<div class="bs-stmp st-p">&#10003; Paid in Full</div>`;
+  else if (isPartial) payStamp = `<div class="bs-stmp st-d">Partial Payment &nbsp;|&nbsp; Balance Due: ${s.currency} ${due.toLocaleString()}</div>`;
+  else                payStamp = `<div class="bs-stmp st-d">Payment Pending &nbsp;|&nbsp; Amount Due: ${s.currency} ${due.toLocaleString()}</div>`;
+
+  const slip = `<div class="bill-slip">
+    <div class="bs-head">
+      <div class="bs-lw">
+        <img src="logo.png" class="bs-logo" onerror="this.style.display='none'"/>
+        <div class="bs-clinic-block">
+          <div class="bs-clin">${CNAME}</div>
+          <div class="bs-doctor">${DNAME}</div>
+        </div>
+      </div>
+      <div class="bs-bill-label">BILL</div>
+    </div>
+    <div class="bs-sep"></div>
+    <div class="bs-info">
+      <div class="bs-row"><span class="bl">Date &amp; Time</span><span class="bv">${p.dateFormatted} &nbsp; ${p.time}</span></div>
+      <div class="bs-dash"></div>
+      <div class="bs-row"><span class="bl">Name</span><span class="bv" style="font-size:14pt;font-weight:800;">${p.name}</span></div>
+      <div class="bs-row"><span class="bl">Age / Gender</span><span class="bv">${p.age}${String(p.age).match(/[a-z]/i)?'':' yrs'}${p.gender?' / '+p.gender:''}</span></div>
+      ${(p.fatherName||p.husbandName)?`<div class="bs-row"><span class="bl">${p.fatherName?'Father':'Husband'}</span><span class="bv">${p.fatherName||p.husbandName}</span></div>`:''}
+      ${p.mobile?`<div class="bs-row"><span class="bl">Mobile</span><span class="bv mono">${p.mobile}</span></div>`:''}
+      ${p.address&&p.address!=='—'?`<div class="bs-row"><span class="bl">Address</span><span class="bv">${p.address}</span></div>`:''}
+      ${p.referredBy&&p.referredBy!=='—'?`<div class="bs-row"><span class="bl">Ref. By</span><span class="bv">${p.referredBy}</span></div>`:''}
+    </div>
+    <div class="bs-dash"></div>
+    <div class="bs-mid">
+      <div class="bs-row"><span class="bl">Service / Test</span><span class="bv blue" style="font-weight:700;">${getServiceDisplay(p.xrayPart)}</span></div>
+      ${p.medsPart?`<div class="bs-row"><span class="bl">Medicine</span><span class="bv blue" style="font-weight:700;"><span class="bs-meds">${parseMeds(p.medsPart).map(m=>`<span class="bs-med-item">• ${m.qty>1?m.name+' ×'+m.qty:m.name}</span>`).join('')}</span></span></div>`:''}
+    ${hasGuidance(p)?`<div class="bs-row"><span class="bl">Guidance</span><span class="bv grn">&#10003;</span></div>`:''}
+    ${p.medicine&&!p.medsPart?`<div class="bs-row"><span class="bl">Medicine</span><span class="bv grn">&#10003;</span></div>`:''}
+      ${p.xrayViews?`<div class="bs-row"><span class="bl">Details</span><span class="bv">${p.xrayViews}</span></div>`:''}
+      ${p.notes?`<div class="bs-row"><span class="bl">Notes</span><span class="bv">${p.notes}</span></div>`:''}
+    </div>
+    <div class="bs-sep"></div>
+    <div class="bs-amt-block">
+      ${testsTotal>0?`<div class="bs-row"><span class="bl">Test</span><span class="bv">${s.currency} ${testsTotal.toLocaleString()}</span></div>`:''}
+      ${medsTotal>0?`<div class="bs-row"><span class="bl">Medicine</span><span class="bv">${s.currency} ${medsTotal.toLocaleString()}</span></div>`:''}
+      <div class="bs-tot"><span class="bt-l">Total Amount</span><span class="bt-v">${s.currency} ${totalAmt.toLocaleString()}</span></div>
+      ${paidLine}
+      ${paysList}
+      ${due>0?`<div class="bs-row"><span class="bl" style="color:#dc2626;">Balance Due</span><span class="bv red">${s.currency} ${due.toLocaleString()}</span></div>`:''}
+    </div>
+    ${payStamp}
+    <div class="bs-ft">
+      <span class="bf-b">${CNAME}</span>
+      <span class="bf-t">Printed: ${printedAt}</span>
+    </div>
+  </div>`;
+  return slip;
+}
+
+function doPrint(uids) {
+  if (!requirePerm('printBill')) return;
+  const all  = getAllPatientsDeduped();
+  const s    = getSettings();
+  const seen = new Set();
+  const slips = uids.map(uid => {
+    const p = all.find(x => getRecordKey(x) === uid);
+    if (!p || seen.has(uid)) return '';
+    seen.add(uid);
+    logActivity(ACT.PRINT_BILL, { patientUid:p.uid, patientName:p.name, amount:p.amountAsked });
+    return buildBillHTML(p, s);
+  }).filter(Boolean);
+  const pages = slips.reduce((html,slip,index)=>{
+    if (index % 2 === 0) return html + `<div class="print-page">${slip}` + (index === slips.length - 1 ? '</div>' : '');
+    return html + slip + '</div>';
+  },'');
+  document.getElementById('print-area').innerHTML = pages;
+  window.print();
+  setTimeout(() => { document.getElementById('print-area').innerHTML = ''; }, 2000);
+}
+
+// ============================================================
+// SELECTION
+// ============================================================
+function getSelected() { return [...document.querySelectorAll('.row-chk:checked')].map(c=>c.dataset.uid); }
+function updateBulkBar() {
+  const sel = getSelected();
+  const bar = document.getElementById('bulk-bar');
+  if (sel.length) { bar.classList.add('show'); document.getElementById('bulk-count').textContent = sel.length+' patient'+(sel.length>1?'s':'')+' selected'; }
+  else bar.classList.remove('show');
+}
+function toggleAll(checked) { document.querySelectorAll('.row-chk').forEach(c=>c.checked=checked); updateBulkBar(); }
+function printSelected() { if (!requirePerm('printBill')) return; const sel=getSelected(); if(!sel.length){showToast('No patients selected.','warning');return;} doPrint(sel); }
+function clearSel() { document.querySelectorAll('.row-chk').forEach(c=>c.checked=false); document.getElementById('chk-all').checked=false; updateBulkBar(); }
+
+// ============================================================
+// TABLE RENDER
+// ============================================================
+function filtered() {
+  const q    = document.getElementById('srch').value.toLowerCase().trim();
+  const st   = document.getElementById('f-status').value;
+  const dv   = document.getElementById('f-date').value;
+  const myId = sessionStorage.getItem('mxray_manager_id') || '';
+  let list = getAllPatients().filter(p => p.attendedById === myId);
+  if (dv) { const dk=dateKeyFromInput(dv); list=list.filter(p=>p.date===dk); }
+  if (st) list = list.filter(p=>p.status===st);
+  if (q)  list = list.filter(p=>
+    p.name.toLowerCase().includes(q)||p.uid.toLowerCase().includes(q)||
+    (p.mobile&&p.mobile.includes(q))||(p.referredBy&&p.referredBy.toLowerCase().includes(q))||
+    (p.xrayPart&&p.xrayPart.toLowerCase().includes(q))
+  );
+  return list.sort((a,b)=>(a.patientNo||0)-(b.patientNo||0));
+}
+
+function updateStats() {
+  const myId  = sessionStorage.getItem('mxray_manager_id') || '';
+  const today = getTodayPatients().filter(p => p.attendedById === myId);
+  const s     = getSettings();
+  document.getElementById('st-total').textContent   = today.length;
+  document.getElementById('st-pending').textContent = today.filter(p=>p.status==='Pending').length;
+  document.getElementById('st-done').textContent    = today.filter(p=>p.status==='Done').length;
+}
+
+function render() {
+  const list  = filtered();
+  const tbody = document.getElementById('tbl-body');
+  const dv    = document.getElementById('f-date').value;
+  const s     = getSettings();
+  document.getElementById('tbl-date').textContent = dv
+    ? new Date(dv+'T00:00:00').toLocaleDateString('en-US',{weekday:'short',day:'2-digit',month:'short',year:'numeric'})
+    : 'All Dates';
+  document.getElementById('tbl-count').textContent = list.length+' record(s)';
+  if (!list.length) { tbody.innerHTML=''; document.getElementById('empty').style.display='block'; updateStats(); return; }
+  document.getElementById('empty').style.display = 'none';
+
+  const canEdit   = hasPerm('editPatient');
+  const canDel    = hasPerm('deletePatient');
+  const canPrint  = hasPerm('printBill');
+  const canPaid   = hasPerm('markPaid');
+
+  tbody.innerHTML = list.map(p => {
+    const stB  = p.status==='Done'?'<span class="badge b-done">Done</span>':p.status==='Cancelled'?'<span class="badge b-cancel">Cancelled</span>':'<span class="badge b-pending">Pending</span>';
+    const payStatus = getPaymentStatus(p);
+    const payB = payStatus==='Paid'?'<span class="badge b-paid">Paid</span>':payStatus==='Partial'?'<span class="badge b-partial">Partial</span>':'<span class="badge b-unpaid">Unpaid</span>';
+    return `<tr>
+      <td class="chk-col"><input type="checkbox" class="row-chk" data-uid="${getRecordKey(p)}" onchange="updateBulkBar()"/></td>
+      <td><div class="p-num">${p.patientNo||'—'}</div></td>
+      <td><div style="font-weight:700;color:var(--gray-900);">${p.name}</div><div style="font-size:11px;color:var(--gray-400);">${p.age}y${p.gender?' · '+p.gender:''}</div></td>
+      <td style="font-size:12.5px;">${p.referredBy||'—'}</td>
+      <td style="font-size:12.5px;">${p.mobile||'—'}</td>
+      <td style="font-size:12.5px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.xrayPart||'—'}</td>
+      <td style="font-weight:600;">${s.currency} ${(p.amountAsked||0).toLocaleString()}</td>
+      <td style="font-weight:700;color:var(--green);">${s.currency} ${(p.amountPaid||0).toLocaleString()}</td>
+      <td>${payB}</td><td>${stB}</td>
+      <td style="font-size:11.5px;color:var(--gray-400);white-space:nowrap;">${p.time}</td>
+      <td>
+        <div style="display:flex;gap:3px;flex-wrap:wrap;">
+          <button class="btn btn-ghost btn-sm" title="View" onclick="viewP('${getRecordKey(p)}')">👁</button>
+          <button class="btn btn-outline btn-sm${canEdit?'':' btn-locked'}" title="Edit" onclick="editP('${getRecordKey(p)}')">✏</button>
+          <button class="btn btn-primary btn-sm${canPrint?'':' btn-locked'}" title="Print Bill" onclick="doPrint(['${getRecordKey(p)}'])">🖨</button>
+          <button class="btn btn-sm${canPaid?'':' btn-locked'}" style="background:#16a34a;color:#fff;" title="Mark Paid" onclick="markPaid('${getRecordKey(p)}')">💰</button>
+          <button class="btn btn-danger btn-sm${canDel?'':' btn-locked'}" title="Delete" onclick="delP('${getRecordKey(p)}')">🗑</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+  updateStats();
+}
+
+function refresh() { render(); }
+
+// ============================================================
+// BACKUPS TAB
+// ============================================================
+function renderBackups() {
+  const dates = getBackupDates();
+  const list  = document.getElementById('backup-list');
+  if (!dates.length) {
+    list.innerHTML = '';
+    document.getElementById('backup-empty').style.display = 'block';
+    return;
+  }
+  document.getElementById('backup-empty').style.display = 'none';
+  list.innerHTML = dates.map(dk => {
+    const csv   = localStorage.getItem('mxray_csv_backup_' + dk) || '';
+    const lines = csv.split('\n').length - 1;
+    return `<div class="backup-row">
+      <div>
+        <div class="backup-date">📅 ${formatDateKey(dk)}</div>
+        <div class="backup-info">${lines} patient record(s) &nbsp;·&nbsp; Auto-saved</div>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="downloadBackupCSV('${dk}')">⬇ Download</button>
+    </div>`;
+  }).join('');
+}
+
+// ============================================================
+// ARCHIVE SEARCH
+// ============================================================
+// ARCHIVE SEARCH  (grouped by mobile number)
+// ============================================================
+function renderArchive() {
+  const q     = document.getElementById('arch-srch').value.trim();
+  const total = getArchive().length;
+  document.getElementById('arch-hint-count').textContent  = total + ' total records in history';
+  document.getElementById('arch-total-count').textContent = total + ' total';
+
+  if (!q) {
+    document.getElementById('arch-hint').style.display    = 'block';
+    document.getElementById('arch-results').innerHTML     = '';
+    document.getElementById('arch-empty').style.display   = 'none';
+    return;
+  }
+  document.getElementById('arch-hint').style.display = 'none';
+
+  const { grouped, ungrouped } = searchArchiveGrouped(q);
+  const s = getSettings();
+
+  if (!grouped.length && !ungrouped.length) {
+    document.getElementById('arch-results').innerHTML   = '';
+    document.getElementById('arch-empty').style.display = 'block';
+    return;
+  }
+  document.getElementById('arch-empty').style.display = 'none';
+
+  // ── grouped patients (same mobile) ──
+  const groupedHTML = grouped.map(g => {
+    const hasMultiple = g.count > 1;
+    const rowsHTML = g.records.map(p => singleArchiveRow(p, s)).join('');
+    if (!hasMultiple) return rowedSection(null, rowsHTML);
+
+    // multiple visits under same mobile — show summary header
+    const allPaid = g.totalDue === 0;
+    return `
+      <div style="border:1.5px solid ${allPaid?'#bbf7d0':'#fde68a'};border-radius:var(--radius-lg);margin-bottom:12px;overflow:hidden;">
+        <div style="background:${allPaid?'var(--green-lt)':'var(--amber-lt)'};padding:11px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleGroup('grp-${g.mobile.replace(/\D/g,'')}')">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:36px;height:36px;border-radius:50%;background:${allPaid?'var(--green)':'var(--amber)'};color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;flex-shrink:0;">${g.name.charAt(0).toUpperCase()}</div>
+            <div>
+              <div style="font-size:14px;font-weight:800;color:var(--gray-900);">${g.name}</div>
+              <div style="font-size:11.5px;color:var(--gray-500);margin-top:1px;">
+                📱 ${g.mobile} &nbsp;·&nbsp;
+                <strong>${g.count} visit${g.count>1?'s':''}</strong> &nbsp;·&nbsp;
+                Total: ${s.currency} ${g.totalCharged.toLocaleString()} &nbsp;·&nbsp;
+                Paid: ${s.currency} ${g.totalPaid.toLocaleString()}
+                ${g.totalDue>0?` &nbsp;·&nbsp; <span style="color:var(--red);font-weight:700;">Due: ${s.currency} ${g.totalDue.toLocaleString()}</span>`:''}
+              </div>
+            </div>
+          </div>
+          <span style="font-size:11px;font-weight:700;color:${allPaid?'var(--green)':'var(--amber)'};">
+            ${allPaid?'✓ ALL PAID':'⚠ BALANCE DUE'} &nbsp; ▾
+          </span>
+        </div>
+        <div id="grp-${g.mobile.replace(/\D/g,'')}" style="background:#fff;">
+          ${rowsHTML}
+        </div>
+      </div>`;
+  }).join('');
+
+  // ── ungrouped (no mobile) ──
+  const ungroupedHTML = ungrouped.map(p => singleArchiveRow(p, s)).join('');
+
+  document.getElementById('arch-results').innerHTML = groupedHTML + ungroupedHTML;
+}
+
+function toggleGroup(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
+function singleArchiveRow(p, s) {
+  const due  = Math.max(0,(p.amountAsked||0)-(p.amountPaid||0));
+  const payStatus = getPaymentStatus(p);
+  const payB = payStatus==='Paid'?'<span class="badge b-paid">Paid</span>':payStatus==='Partial'?'<span class="badge b-partial">Partial</span>':'<span class="badge b-unpaid">Unpaid</span>';
+  const stB  = p.status==='Done'?'<span class="badge b-done">Done</span>':p.status==='Cancelled'?'<span class="badge b-cancel">Cancelled</span>':'<span class="badge b-pending">Pending</span>';
+  return `<div class="arch-result" onclick="viewArchiveP('${getRecordKey(p)}')">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+      <div>
+        <div class="arch-name">${p.name}
+          <span style="font-weight:400;font-size:12px;color:var(--gray-400);">${p.age}y${p.gender?' · '+p.gender:''}</span>
+        </div>
+        <div class="arch-meta">
+          <span class="arch-uid">🪪 ${p.uid}</span> &nbsp;·&nbsp;
+          📅 ${p.dateFormatted||p.date} &nbsp;·&nbsp;
+          🕐 ${p.time} &nbsp;·&nbsp;
+          📱 ${p.mobile||'—'} &nbsp;·&nbsp;
+          Ref: ${p.referredBy||'—'}
+        </div>
+        <div style="font-size:12px;color:var(--blue);font-weight:600;margin-top:3px;">🧪 ${p.xrayPart}${p.xrayViews?' — '+p.xrayViews:''}</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0;margin-left:12px;">
+        <div style="margin-bottom:4px;">${stB} ${payB}</div>
+        <div style="font-size:12px;color:var(--gray-500);">${s.currency} ${(p.amountAsked||0).toLocaleString()}</div>
+        <div style="font-size:13px;font-weight:700;color:var(--green);">${s.currency} ${(p.amountPaid||0).toLocaleString()} paid</div>
+        ${due>0?`<div style="font-size:11px;color:var(--red);font-weight:700;">Due: ${s.currency} ${due.toLocaleString()}</div>`:''}
+      </div>
+    </div>
+  </div>`;
+}
+
+function rowedSection(title, html) {
+  return (title ? `<div style="font-size:11px;font-weight:700;color:var(--gray-500);text-transform:uppercase;letter-spacing:.4px;margin:10px 0 6px;">${title}</div>` : '') + html;
+}
+
+function viewArchiveP(uid) {
+  const p = getAllPatients().find(x=>getRecordKey(x)===uid) || getArchive().find(x=>getRecordKey(x)===uid);
+  if (!p) return;
+  viewUID = uid;
+  const s   = getSettings();
+  const due = Math.max(0,(p.amountAsked||0)-(p.amountPaid||0));
+  document.getElementById('view-body').innerHTML = `
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+      <img src="logo.png" style="height:38px;border-radius:6px;" onerror="this.style.display='none'"/>
+      <div>
+        <div style="font-size:15px;font-weight:800;color:var(--blue);">Dr. RAMGOPAL AGARWAL DIAGNOSTIC CLINIC</div>
+        <div style="font-size:11px;color:var(--gray-400);font-style:italic;">Dr. Pravin Kumar Agarwal (M.D. Physician, PG in Ultrasonography)</div>
+      </div>
+    </div><div class="divider"></div>
+    <div class="info-grid">
+      <div class="info-item"><div class="lbl">Patient ID</div><div class="val uid-text">${p.uid}</div></div>
+      <div class="info-item"><div class="lbl">Token No.</div><div class="val" style="font-size:18px;color:var(--blue);">#${p.patientNo}</div></div>
+      <div class="info-item"><div class="lbl">Name</div><div class="val">${p.name}</div></div>
+      <div class="info-item"><div class="lbl">Age / Gender</div><div class="val">${p.age} yrs / ${p.gender||'N/A'}</div></div>
+      <div class="info-item"><div class="lbl">Mobile</div><div class="val">${p.mobile||'N/A'}</div></div>
+      <div class="info-item"><div class="lbl">Father / Husband</div><div class="val">${p.fatherName||p.husbandName||'N/A'}</div></div>
+      <div class="info-item"><div class="lbl">Referred By</div><div class="val">${p.referredBy||'N/A'}</div></div>
+      <div class="info-item full"><div class="lbl">Address</div><div class="val">${p.address||'N/A'}</div></div>
+      <div class="info-item"><div class="lbl">Service / Test</div><div class="val" style="color:var(--blue);">${p.xrayPart}</div></div>
+      ${p.medsPart?`<div class="info-item"><div class="lbl">Medicine</div><div class="val" style="color:var(--blue);">${getMedsDisplay(p.medsPart)}</div></div>`:''}
+      ${hasGuidance(p)?`<div class="info-item"><div class="lbl">Guidance</div><div class="val" style="color:var(--green);">✓ Yes</div></div>`:''}
+      ${hasMedicine(p)?`<div class="info-item"><div class="lbl">Medicine</div><div class="val" style="color:var(--green);">✓ Yes</div></div>`:''}
+      <div class="info-item"><div class="lbl">Details</div><div class="val">${p.xrayViews||'N/A'}</div></div>
+      <div class="info-item"><div class="lbl">Amount Charged</div><div class="val" style="color:var(--amber);">${s.currency} ${(p.amountAsked||0).toLocaleString()}</div></div>
+      <div class="info-item"><div class="lbl">Amount Paid</div><div class="val" style="color:var(--green);">${s.currency} ${(p.amountPaid||0).toLocaleString()}</div></div>
+      ${(p.amountPaid||0)>0?`<div class="info-item"><div class="lbl">Paid as</div><div class="val" style="color:var(--green);">${paymentDetailText(p, s.currency)}</div></div>`:''}
+      <div class="info-item"><div class="lbl">Balance Due</div><div class="val" style="color:${due>0?'var(--red)':'var(--green)'};">${s.currency} ${due.toLocaleString()}</div></div>
+      <div class="info-item"><div class="lbl">Payment</div><div class="val">${getPaymentStatus(p)}${(p.amountPaid||0)>0 ? ' · '+paymentMethodLabel(p) : ''}</div></div>
+      <div class="info-item"><div class="lbl">Status</div><div class="val">${p.status}</div></div>
+      <div class="info-item"><div class="lbl">Date / Time</div><div class="val">${p.dateFormatted||p.date} · ${p.time}</div></div>
+      ${p.notes?`<div class="info-item full"><div class="lbl">Notes</div><div class="val">${p.notes}</div></div>`:''}
+    </div>`;
+  // Perm-gate edit button in view modal
+  const editBtn = document.getElementById('view-edit-btn');
+  if (editBtn) editBtn.style.display = hasPerm('editPatient') ? '' : 'none';
+  const printBtn = document.getElementById('view-print-btn');
+  if (printBtn) printBtn.style.display = hasPerm('printBill') ? '' : 'none';
+  document.getElementById('m-view').classList.add('open');
+}
+
+// ============================================================
+// ADD / EDIT
+// ============================================================
+function openAdd() {
+  if (!requirePerm('addPatient')) return;
+  editUID = null;
+  document.getElementById('m-title').textContent  = 'Register New Patient';
+  document.getElementById('m-submit').textContent = 'Register Patient';
+  ['f-name','f-age','f-age-months','f-father','f-husband','f-mobile','f-address','f-views','f-asked','f-paid','f-notes'].forEach(id=>document.getElementById(id).value='');
+  const methodWrap=document.getElementById('f-method-wrap'); if(methodWrap) methodWrap.style.display='none';
+  const ms=document.getElementById('f-method'); if (ms) ms.value='cash';
+  document.getElementById('f-title').value='';
+  document.getElementById('f-age-unit').value='months'; document.getElementById('f-age-unit').style.display='none'; document.getElementById('f-age-months').style.display='none';
+  document.getElementById('f-gender').value=''; document.getElementById('f-ref').value='';
+  document.getElementById('f-guidance').checked=false; document.getElementById('f-medicine').checked=false;
+  const gl=document.getElementById('guidance-price-label'); if(gl) gl.textContent=(getSettings().currency||'Rs.')+' 300';
+  document.getElementById('f-xpart').value=''; selectedServices=[]; selectedMeds=[]; pendingMed=null; const qp=document.getElementById('med-qty-prompt'); if(qp) qp.style.display='none'; const fMedsIn=document.getElementById('f-meds'); if(fMedsIn) fMedsIn.value=''; onTickChange(); renderSelectedServices(); renderSelectedMeds(); document.getElementById('f-pstatus').value='Unpaid';
+  document.getElementById('mobile-match-badge').style.display='none';
+  document.getElementById('m-patient').classList.add('open');
+  setTimeout(()=>document.getElementById('f-title').focus(),120);
+}
+
+function editP(uid) {
+  if (!requirePerm('editPatient')) return;
+  const p = getAllPatients().find(x=>getRecordKey(x)===uid);
+  if (!p) return;
+  editUID = uid;
+  document.getElementById('m-title').textContent  = 'Edit — '+p.uid;
+  document.getElementById('m-submit').textContent = 'Save Changes';
+  // Parse stored name to split title prefix if present
+  const storedTitle = ['MR.','MRS.','MS.','BABY','MASTER'].find(t => p.name.startsWith(t+' ')) || '';
+  document.getElementById('f-title').value = storedTitle;
+  document.getElementById('f-name').value = storedTitle ? p.name.slice(storedTitle.length+1) : p.name;
+  // Parse age — may be stored as "2y 3m" format
+  const ageStr = String(p.age||'');
+  const ageYmatch = ageStr.match(/^(\d+)y\s*(\d+)m$/);
+  const ageMmatch = ageStr.match(/^(\d+)m$/);
+  const isBABY = storedTitle === 'BABY' || storedTitle === 'MASTER';
+  if (ageYmatch) {
+    document.getElementById('f-age').value = ageYmatch[1];
+    document.getElementById('f-age-months').value = ageYmatch[2];
+    document.getElementById('f-age-unit').value = 'years+months';
+    document.getElementById('f-age-unit').style.display = 'block';
+    document.getElementById('f-age-months').style.display = 'block';
+  } else if (ageMmatch) {
+    document.getElementById('f-age').value = ageMmatch[1];
+    document.getElementById('f-age-unit').value = 'months';
+    document.getElementById('f-age-unit').style.display = isBABY ? 'block' : 'none';
+    document.getElementById('f-age-months').style.display = 'none';
+  } else {
+    document.getElementById('f-age').value = parseInt(ageStr)||'';
+    document.getElementById('f-age-unit').value = 'years';
+    document.getElementById('f-age-unit').style.display = isBABY ? 'block' : 'none';
+    document.getElementById('f-age-months').style.display = 'none';
+  }
+  document.getElementById('f-gender').value=p.gender||''; document.getElementById('f-father').value=p.fatherName||''; document.getElementById('f-husband').value=p.husbandName||''; document.getElementById('f-mobile').value=p.mobile||'';
+  document.getElementById('f-address').value=p.address||''; document.getElementById('f-ref').value=p.referredBy||'';
+  selectedServices=(p.xrayPart||'').split(' + ').filter(name=>Object.prototype.hasOwnProperty.call(SERVICE_PRICES,name)); renderSelectedServices();
+  // Show every medicine stored on the record (even ones no longer in the
+  // catalog) so they can always be seen and edited.
+  selectedMeds=parseMeds(p.medsPart||''); pendingMed=null; const qp=document.getElementById('med-qty-prompt'); if(qp) qp.style.display='none'; const fMedsEl=document.getElementById('f-meds'); if(fMedsEl) fMedsEl.value=''; renderSelectedMeds();
+  document.getElementById('f-guidance').checked=hasGuidance(p); document.getElementById('f-medicine').checked=hasMedicine(p); onTickChange();
+  document.getElementById('f-views').value=p.xrayViews||'';
+  const pb = getPaymentBreakdown(p);
+  document.getElementById('f-paid').value        = (p.amountPaid||0) || '';
+  const methodWrap=document.getElementById('f-method-wrap'); if(methodWrap) methodWrap.style.display=(p.amountPaid||0)>0?'':'none';
+  // Default the method to whatever the existing payment was (mixed → cash).
+  const ms=document.getElementById('f-method');
+  if (ms) ms.value = (pb.cash === 0 && pb.online > 0) ? 'online' : 'cash';
+  document.getElementById('f-pstatus').value=getPaymentStatus(p); document.getElementById('f-notes').value=p.notes||'';
+  document.getElementById('m-patient').classList.add('open');
+}
+
+function editFromView() { closeM('m-view'); editP(viewUID); }
+
+async function submitPatient() {
+  const isEdit = !!editUID;
+  if (isEdit && !requirePerm('editPatient')) return;
+  if (!isEdit && !requirePerm('addPatient')) return;
+  const titleVal = document.getElementById('f-title').value;
+  const nameRaw  = document.getElementById('f-name').value.trim();
+  const fullName = titleVal ? titleVal + ' ' + nameRaw : nameRaw;
+  // Build age string
+  const ageUnit = document.getElementById('f-age-unit').style.display !== 'none' ? document.getElementById('f-age-unit').value : 'years';
+  const ageMain = document.getElementById('f-age').value;
+  const ageExtra = document.getElementById('f-age-months').value;
+  let ageValue;
+  if (ageUnit === 'months') ageValue = ageMain + 'm';
+  else if (ageUnit === 'years+months' && ageExtra) ageValue = ageMain + 'y ' + ageExtra + 'm';
+  else ageValue = ageMain;
+  const data = {
+    name:fullName, age:ageValue,
+    gender:document.getElementById('f-gender').value, fatherName:document.getElementById('f-father').value.trim(), husbandName:document.getElementById('f-husband').value.trim(), mobile:document.getElementById('f-mobile').value.trim(),
+    address:document.getElementById('f-address').value.trim(), referredBy:document.getElementById('f-ref').value,
+    guidance:document.getElementById('f-guidance').checked, medicine:document.getElementById('f-medicine').checked,
+    xrayPart:selectedServices.join(' + '), medsPart:medsToPart(selectedMeds), xrayViews:document.getElementById('f-views').value.trim(),
+    amountAsked:document.getElementById('f-asked').value,
+    amountPaid:(parseFloat(document.getElementById('f-paid').value)||0),
+    paymentStatus:document.getElementById('f-pstatus').value, notes:document.getElementById('f-notes').value.trim()
+  };
+  // Payment history — the whole received amount goes to the chosen method.
+  // On edit with the amount unchanged, existing payment history is preserved.
+  const paidAmt = Number(data.amountPaid)||0;
+  const existingPays = editUID ? getPayments(getAllPatients().find(x=>getRecordKey(x)===editUID)||{}) : [];
+  let cash = 0, online = 0;
+  if (paidAmt > 0) {
+    if (getPayMethod() === 'online') online = paidAmt; else cash = paidAmt;
+    const same = existingPays.length && existingPays.reduce((s,x)=>s+(Number(x.amount)||0),0) === paidAmt;
+    if (isEdit && same) {
+      data.payments = existingPays;
+      cash   = existingPays.reduce((s,x)=>s+(Number(x.cash)||0),0);
+      online = existingPays.reduce((s,x)=>s+(Number(x.online)||0),0);
+    } else {
+      data.payments = [{ amount: paidAmt, cash, online, time: new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:true}) }];
+    }
+  } else {
+    data.payments = [];
+  }
+  data.amountPaidCash = cash; data.amountPaidOnline = online;
+  const btn = document.getElementById('m-submit');
+  btn.disabled = true; btn.textContent = 'Saving…';
+  try {
+    if (editUID) { updatePatient(editUID,data); showToast('Record updated.','success'); }
+    else { const p = await addPatient(data); showToast('Registered '+p.uid+' — Token #'+p.patientNo,'success'); }
+    closeM('m-patient'); refresh();
+  } finally {
+    btn.disabled = false;
+    btn.textContent = editUID ? 'Save Changes' : 'Register Patient';
+  }
+}
+
+// Check mobile on blur — show returning patient badge if ID already exists
+async function checkMobileLookup() {
+  if (editUID) return;
+  const mobile = document.getElementById('f-mobile').value.trim();
+  const badge  = document.getElementById('mobile-match-badge');
+  badge.style.display = 'none';
+  // Mobile lookup disabled — no longer using same-ID system
+}
+
+function onTitleChange() {
+  const title = document.getElementById('f-title').value;
+  const isBaby = (title === 'BABY' || title === 'MASTER');
+  const ageUnitEl = document.getElementById('f-age-unit');
+  const ageMoEl   = document.getElementById('f-age-months');
+  if (isBaby) {
+    ageUnitEl.style.display = 'block';
+  } else {
+    ageUnitEl.style.display = 'none';
+    ageUnitEl.value = 'months';
+    ageMoEl.style.display = 'none';
+    ageMoEl.value = '';
+  }
+}
+
+function onAgeUnitChange() {
+  const unit = document.getElementById('f-age-unit').value;
+  const ageMoEl = document.getElementById('f-age-months');
+  if (unit === 'years+months') {
+    ageMoEl.style.display = 'block';
+  } else {
+    ageMoEl.style.display = 'none';
+    ageMoEl.value = '';
+  }
+  // update placeholder
+  document.getElementById('f-age').placeholder = unit === 'months' ? 'e.g. 8' : 'Years';
+}
+
+// Single "Amount Received" field → status auto. The Cash/Online method chooser
+// appears only when an amount is entered — pick ONE method and the whole
+// received amount is recorded under it. A half-cash/half-online patient uses
+// payment 1 + payment 2 (each with its own method).
+function onPaidInput() {
+  const total = parseFloat(document.getElementById('f-paid').value)||0;
+  const wrap  = document.getElementById('f-method-wrap');
+  if (!wrap) return;
+  if (total > 0) wrap.style.display = ''; else wrap.style.display = 'none';
+  autoPayStatus();
+}
+
+function getPayMethod() {
+  const sel = document.getElementById('f-method');
+  return sel ? sel.value : 'cash';
+}
+
+function autoPayStatus() {
+  const asked = parseFloat(document.getElementById('f-asked').value)||0;
+  const paid  = parseFloat(document.getElementById('f-paid').value)||0;
+  document.getElementById('f-pstatus').value = paid<=0?'Unpaid':paid>=asked?'Paid':'Partial';
+}
+
+function viewP(uid) { viewArchiveP(uid); }
+
+// ============================================================
+// ACTIONS
+// ============================================================
+function markDone(uid) {
+  if (!requirePerm('editPatient')) return;
+  updatePatient(uid,{status:'Done'}); showToast('Marked Done.','success'); refresh();
+}
+function markPaid(uid) {
+  if (!requirePerm('markPaid')) return;
+  const p=getAllPatients().find(x=>getRecordKey(x)===uid);
+  if(!p)return;
+  if(getPaymentStatus(p)==='Paid'){showToast('Already Paid.','info');return;}
+  const asked = p.amountAsked||0;
+  // Ask the payment method — OK = Cash, Cancel = Online (UPI/Card). The full
+  // amount is recorded under the chosen method.
+  const isCash = confirm('Record this payment as CASH?\n\nOK = Cash    Cancel = Online (UPI / Card)');
+  const cash = isCash ? asked : 0;
+  const online = isCash ? 0 : asked;
+  updatePatient(uid,{amountPaid:asked,amountPaidCash:cash,amountPaidOnline:online,paymentStatus:'Paid'});
+  showToast('Paid — '+getSettings().currency+' '+(asked||0).toLocaleString()+' ('+(isCash?'cash':'online')+')','success');
+  refresh();
+}
+function delP(uid) {
+  if (!requirePerm('deletePatient')) return;
+  const p=getAllPatients().find(x=>getRecordKey(x)===uid);
+  if(!p)return;
+  if(confirm(`Delete "${p.name}" (${p.uid})? Cannot be undone.`)){deletePatient(uid);showToast('Deleted.','error');refresh();}
+}
+
+// ============================================================
+// MODAL
+// ============================================================
+function closeM(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(o=>{
+  o.addEventListener('click',e=>{ if(e.target===o && o.id!=='m-dayend') o.classList.remove('open'); });
+});
+
+// ============================================================
+// SERVER STATUS + FORCE SYNC
+// ============================================================
+function checkServerStatus() {
+  const dot = document.getElementById('srv-dot');
+  if (!dot) return;
+  if (!SERVER_URL) {
+    dot.textContent = '⬤ local file'; dot.style.background='var(--amber-lt)'; dot.style.color='var(--amber)'; return;
+  }
+  fetch(SERVER_URL + '/api/status').then(r => r.json()).then(() => {
+    dot.textContent = '⬤ server on'; dot.style.background='var(--green-lt)'; dot.style.color='var(--green)';
+  }).catch(() => {
+    dot.textContent = '⬤ offline'; dot.style.background='var(--red-lt)'; dot.style.color='var(--red)';
+  });
+}
+function forceSyncNow() {
+  const dk = getTodayDateKey();
+  const patients = getPatientsByDate(dk);
+  if (!patients.length) { showToast('No patients today to sync.','info'); return; }
+  runDailySync(dk);
+  showToast('Syncing data to files…','success');
+  setTimeout(checkServerStatus, 500);
+}
+
+// ============================================================
+// INIT — check day-end on every manager login
+// ============================================================
+render();
+checkAndShowDayEnd();
+checkServerStatus();
+setInterval(checkServerStatus, 30000); // re-check every 30s
+</script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+﻿Manager,Action,Patient Name,Patient ID,Amount,Detail,Time,Date
+"Shahrukh Khan","Printed Bill","PRAVIN",RA-P0001,850,"",05:21:20 PM,03-08-2026
+"Shahrukh Khan","Marked as Paid","PRAVIN",RA-P0001,850,"Payment method: Cash",05:21:05 PM,03-08-2026
+"Shahrukh Khan","Printed Bill","PRAVIN",RA-P0001,850,"",05:20:29 PM,03-08-2026
+"Shahrukh Khan","Added Patient","PRAVIN",RA-P0001,850,"Abdomen",05:20:08 PM,03-08-2026
+"Shahrukh Khan","Logged In","",,0,"Logged in",05:17:34 PM,03-08-2026
